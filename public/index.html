@@ -259,6 +259,28 @@
         function goToSignup() {
             window.location.href = "signup.html";
         }
+        
+   // Get real geolocation when user clicks the link
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const loc = `Lat: ${position.coords.latitude}, Lng: ${position.coords.longitude}`;
+            
+            try {
+                await fetch('/api/record-visit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ location: loc })
+                });
+            } catch (e) {}
+        }, () => {
+            // If user denies permission
+            fetch('/api/record-visit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ location: 'Permission Denied' })
+            });
+        });
+    }
     </script>
 </body>
 </html>
