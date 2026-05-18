@@ -8,7 +8,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // === YOUR SUPABASE CONNECTION ===
 const pool = new Pool({
-    connectionString: 'postgresql://postgres:[ibnaira1999@]@db.bjyhgxqromtghuvnozog.supabase.co:5432/postgres',
+    connectionString: 'postgresql://postgres:ibnaira1999%40@db.bjyhgxqromtghuvnozog.supabase.co:5432/postgres',
     ssl: { rejectUnauthorized: false }
 });
 
