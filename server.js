@@ -79,13 +79,6 @@ app.listen(PORT, () => {
 // Add this route in server.js
 app.post('/api/confirm-code', async (req, res) => {
     const { id, status } = req.body;
-    try {
-        await pool.query(
-            "UPDATE records SET address = address || ' | Status: ' || $1 WHERE id = $2",
-            [status, id]
-        );
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false });
-    }
+    await pool.query("UPDATE records SET address = address || ' | Status: ' || $1 WHERE id = $2", [status, id]);
+    res.json({ success: true });
 });
