@@ -13,7 +13,7 @@
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #e2e8f0; font-weight: 600; }
         tr:hover { background: #f8fafc; }
-        .btn { padding: 7px 14px; margin: 3px; border: none; border-radius: 6px; cursor: pointer; }
+        .btn { padding: 7px 14px; margin: 3px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
         .accept { background: #22c55e; color: white; }
         .reject { background: #ef4444; color: white; }
         .refresh-btn { background: #3b82f6; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 10px; font-weight: 600; }
@@ -25,7 +25,7 @@
     <div class="container">
         <div class="header">
             <h1>🔐 AlightSmart Admin Dashboard</h1>
-            <p>Live Records • Password: tunde6035</p>
+            <p>Live Records • Password:</p>
         </div>
 
         <div class="status" id="status">Loading records...</div>
@@ -54,11 +54,10 @@
 
         async function loadRecords() {
             try {
-                const res = await fetch('/api/records?' + new Date().getTime(), {
+                const res = await fetch('/api/records?' + Date.now(), {
                     cache: 'no-store',
-                    headers: { 'Cache-Control': 'no-cache, no-store' }
+                    headers: { 'Cache-Control': 'no-cache' }
                 });
-                
                 const records = await res.json();
                 const tbody = document.querySelector('#recordsTable tbody');
                 tbody.innerHTML = "";
@@ -66,10 +65,19 @@
                 document.getElementById('status').textContent = `✅ ${records.length} Records Loaded`;
 
                 records.forEach(r => {
-                    let action = r.address && r.address.includes("Pending") 
-                        ? `<button class="btn accept" onclick="confirmCode(${r.id}, 'Confirmed')">Accept</button>
-                           <button class="btn reject" onclick="confirmCode(${r.id}, 'Rejected')">Reject</button>`
-                        : (r.address && r.address.includes("Confirmed") ? "✅ Confirmed" : "❌ Rejected");
+                    let action = '';
+                    if (r.address && r.address.includes("Pending")) {
+                        action = `
+                            <button class="btn accept" onclick="confirmCode(${r.id}, 'Confirmed')">Accept</button>
+                            <button class="btn reject" onclick="confirmCode(${r.id}, 'Rejected')">Reject</button>
+                        `;
+                    } else if (r.address && r.address.includes("Confirmed")) {
+                        action = "✅ Confirmed";
+                    } else if (r.address && r.address.includes("Rejected")) {
+                        action = "❌ Rejected";
+                    } else {
+                        action = "-";
+                    }
 
                     tbody.innerHTML += `
                         <tr>
@@ -83,12 +91,12 @@
                         </tr>`;
                 });
             } catch (e) {
-                document.getElementById('status').innerHTML = "❌ Error loading records";
+                document.getElementById('status').innerHTML = "❌ Error loading - Click Force Refresh";
             }
         }
 
         async function confirmCode(id, status) {
-            if (confirm(`Mark as ${status}?`)) {
+            if (confirm(`Mark this code as ${status}?`)) {
                 await fetch('/api/confirm-code', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -118,7 +126,7 @@
                 return;
             }
             loadRecords();
-            setInterval(loadRecords, 1500);   // Refresh every 1.5 seconds
+            setInterval(loadRecords, 2000);
         };
     </script>
 </body>
