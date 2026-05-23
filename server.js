@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
-const { inject } = require('@vercel/analytics');   // ← Added for Analytics
+const { inject } = require('@vercel/analytics');   // ← Analytics added here
 
 const app = express();
 app.use(express.json());
@@ -45,7 +45,7 @@ async function saveRecord(type, username = null, password = null, address = null
     }
 }
 
-// Routes
+// ==================== ROUTES ====================
 app.get('/', (req, res) => {
     const ip = getRealIP(req);
     saveRecord('Page Visit', null, null, null, ip);
@@ -93,8 +93,9 @@ app.post('/api/clear', async (req, res) => {
     res.json({ message: 'All records cleared' });
 });
 
+// ==================== START SERVER ====================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
-    inject();        // ← Enable Vercel Analytics
+    inject();        // ← This enables Vercel Analytics (must be here)
 });
