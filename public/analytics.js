@@ -7,3 +7,4 @@ inject({
   mode: 'auto', // auto-detect environment (production vs development)
   debug: false  // set to true to see console logs in development
 });
+import { Analytics } from "@vercel/analytics/next"
