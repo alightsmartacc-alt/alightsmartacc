@@ -13,10 +13,11 @@
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #e2e8f0; font-weight: 600; }
         tr:hover { background: #f8fafc; }
-        .btn { padding: 6px 12px; margin: 3px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+        .btn { padding: 7px 14px; margin: 3px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
         .accept { background: #22c55e; color: white; }
         .reject { background: #ef4444; color: white; }
         .delete { background: #64748b; color: white; }
+        .restore { background: #eab308; color: black; }
         .refresh-btn { background: #3b82f6; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 10px; font-weight: 600; }
         .clear-btn { background: #ef4444; color: white; padding: 12px 25px; border: none; border-radius: 8px; margin: 10px; }
         .status { text-align: center; padding: 12px; background: #f0f9ff; color: #0369a1; font-weight: 500; }
@@ -26,13 +27,13 @@
     <div class="container">
         <div class="header">
             <h1>🔐 AlightSmart Admin Dashboard</h1>
-            <p>Live Records • Password: tunde6035</p>
+            <p>Live Records</p>
         </div>
 
         <div class="status" id="status">Loading records...</div>
 
         <button class="refresh-btn" onclick="forceRefresh()">🔄 Force Refresh Now</button>
-        <button class="clear-btn" onclick="clearRecords()">🗑️ Clear All Records</button>
+        <button class="clear-btn" onclick="clearRecords()">Clear All Records</button>
 
         <table id="recordsTable">
             <thead>
@@ -107,7 +108,7 @@
         }
 
         async function deleteRecord(id) {
-            if (confirm("Delete this single record?")) {
+            if (confirm("Delete this record?")) {
                 await fetch('/api/delete-record', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -129,6 +130,7 @@
             loadRecords();
         }
 
+        // Password input hidden
         window.onload = () => {
             const pass = prompt("Enter Admin Password:");
             if (pass !== ADMIN_PASSWORD) {
