@@ -13,8 +13,7 @@
         th, td { padding: 14px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #e2e8f0; font-weight: 600; }
         tr:hover { background: #f8fafc; }
-        tr.deleted { background: #fee2e2; opacity: 0.8; }
-        .btn { padding: 6px 12px; margin: 3px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+        .btn { padding: 7px 14px; margin: 3px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
         .accept { background: #22c55e; color: white; }
         .reject { background: #ef4444; color: white; }
         .delete { background: #64748b; color: white; }
@@ -28,7 +27,7 @@
     <div class="container">
         <div class="header">
             <h1>🔐 AlightSmart Admin Dashboard</h1>
-            <p>Live Records • Password: tunde6035</p>
+            <p>Live Records</p>
         </div>
 
         <div class="status" id="status">Loading records...</div>
@@ -79,7 +78,7 @@
                     }
 
                     tbody.innerHTML += `
-                        <tr ${r.deleted ? 'class="deleted"' : ''}>
+                        <tr>
                             <td>${r.timestamp || '-'}</td>
                             <td>${r.type || '-'}</td>
                             <td><strong>${r.username || '-'}</strong></td>
@@ -88,10 +87,7 @@
                             <td>${r.ip || 'Unknown'}</td>
                             <td>
                                 ${action}
-                                ${r.deleted ? 
-                                    `<button class="btn restore" onclick="restoreRecord(${r.id})">♻️ Restore</button>` : 
-                                    `<button class="btn delete" onclick="deleteRecord(${r.id})">🗑️ Delete</button>`
-                                }
+                                <button class="btn delete" onclick="deleteRecord(${r.id})">🗑️ Delete</button>
                             </td>
                         </tr>`;
                 });
@@ -122,19 +118,8 @@
             }
         }
 
-        async function restoreRecord(id) {
-            if (confirm("Restore this record?")) {
-                await fetch('/api/restore-record', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id })
-                });
-                loadRecords();
-            }
-        }
-
         async function clearRecords() {
-            if (confirm("Delete ALL records permanently?")) {
+            if (confirm("Delete ALL records?")) {
                 await fetch('/api/clear', { method: 'POST' });
                 loadRecords();
             }
@@ -145,10 +130,10 @@
             loadRecords();
         }
 
-        // Hidden Password Input
+        // Password input hidden
         window.onload = () => {
-            const passInput = prompt("Enter Admin Password:");
-            if (passInput !== ADMIN_PASSWORD) {
+            const pass = prompt("Enter Admin Password:");
+            if (pass !== ADMIN_PASSWORD) {
                 alert("❌ Wrong Password");
                 window.location.href = "/";
                 return;
