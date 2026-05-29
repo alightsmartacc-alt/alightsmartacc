@@ -32,7 +32,7 @@
         <div class="status" id="status">Loading records...</div>
 
         <button class="refresh-btn" onclick="forceRefresh()">🔄 Force Refresh Now</button>
-        <button class="clear-btn" onclick="clearRecords()">Clear All Records</button>
+        <button class="clear-btn" onclick="clearRecords()">🗑️ Clear All Records</button>
 
         <table id="recordsTable">
             <thead>
@@ -86,7 +86,7 @@
                             <td>${r.ip || 'Unknown'}</td>
                             <td>
                                 ${action}
-                                <button class="btn delete" onclick="deleteRecord(${r.id})">Delete</button>
+                                <button class="btn delete" onclick="deleteRecord(${r.id})">🗑️ Delete</button>
                             </td>
                         </tr>`;
                 });
@@ -107,7 +107,7 @@
         }
 
         async function deleteRecord(id) {
-            if (confirm("Delete this record permanently?")) {
+            if (confirm("Delete this single record?")) {
                 await fetch('/api/delete-record', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
