@@ -14,22 +14,50 @@ body {
     color: white;
     height: 100dvh;
     overflow: hidden;
+    position: relative;
 }
 
-/* LOGO */
+/* LOGO (UNCHANGED) */
 .logo-container {
     text-align: center;
     padding: 25px 20px 15px;
     z-index: 40;
     position: relative;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0, 0, 0, 0.45);
 }
+
+.alight-worklife {
+    font-size: 2.3rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+}
+.alight-worklife .alight { color: #1a1a1a; }
+.alight-worklife .worklife {
+    background: linear-gradient(90deg, #7ed957, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.united-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+.united-logo .united-text {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0033a0;
+}
+.globe { font-size: 2.2rem; }
 
 /* CAROUSEL */
 .carousel {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     overflow: hidden;
+    z-index: 1;
 }
 
 .slides {
@@ -48,7 +76,7 @@ body {
     position: relative;
 }
 
-/* DARK OVERLAY */
+/* OVERLAY */
 .slide::before {
     content: '';
     position: absolute;
@@ -56,32 +84,49 @@ body {
     background: linear-gradient(transparent, rgba(0,0,0,0.78));
 }
 
-/* TEXT */
+/* CONTENT */
 .slide-content {
-    position: absolute;
-    
-    bottom: 140px;
-    transform: translateX(-50%);
+    position: relative;
+    z-index: 2;
     max-width: 380px;
+    margin: auto;
     text-align: center;
-
-    transition: transform 0.6s ease,
-                opacity 0.6s ease,
-                filter 0.6s ease;
-
+    bottom: -50px;
     pointer-events: none;
 }
 
-/* TEXT STYLE */
-.slide h2 { font-size: 2rem; margin-bottom: 20px; font-weight: 700; }
-.slide p { font-size: 1.1rem; line-height: 1.4; font-weight: 500; }
+.slide h2 { font-size: 2rem; margin-bottom: 25px; }
+.slide p { font-size: 1.1rem; line-height: 1.45; }
+
+/* BUTTONS */
+.buttons {
+    position: absolute;
+    bottom: 125px;
+    left: 0; right: 0;
+    display: flex;
+    gap: 15px;
+    padding: 0 25px;
+    z-index: 30;
+}
+
+.btn {
+    flex: 1;
+    padding: 15px;
+    border-radius: 50px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+}
+
+.btn-login { background: white; color: #1e40af; }
+.btn-signup { background: #166534; color: white; }
 
 /* DOTS */
 .dots {
-    position: absolute;
-    bottom: 120px;
-    left: 0; right: 0;
     text-align: center;
+    position: absolute;
+    bottom: 88px;
+    left: 0; right: 0;
 }
 
 .dot {
@@ -97,67 +142,57 @@ body {
     background: white;
     transform: scale(1.3);
 }
-
-/* BUTTONS */
-.buttons {
-    position: absolute;
-    bottom: 50px;
-    left: 0; right: 0;
-    display: flex;
-    gap: 15px;
-    padding: 0 25px;
-}
-
-.btn {
-    flex: 1;
-    padding: 15px;
-    border-radius: 50px;
-    text-align: center;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.btn-login { background: white; color: #000; }
-.btn-signup { background: #166534; color: white; }
-
 </style>
 </head>
 
 <body>
 
+<!-- LOGO (UNCHANGED) -->
 <div class="logo-container">
-    <h2>AlightSmart</h2>
+    <div class="alight-worklife">
+        <span class="alight">alight</span>
+        <span class="worklife">worklife</span>
+        <span style="font-size:0.55rem;">®</span>
+    </div>
+
+    <div class="united-logo">
+        <span class="united-text">UNITED</span>
+        <span class="globe">🌐</span>
+    </div>
 </div>
 
+<!-- SLIDER -->
 <div class="carousel">
     <div class="slides" id="slides">
 
         <div class="slide" style="background-image:url('login.jpg')">
             <div class="slide-content">
                 <h2>Innovative</h2>
-                <p>Manage all aspects of health and wealth using AI-powered tools.</p>
+                <p>Manage all aspects of health and wealth using AI-powered app.</p>
             </div>
         </div>
 
         <div class="slide" style="background-image:url('login2.jpg')">
             <div class="slide-content">
                 <h2>Personal</h2>
-                <p>Get personalized insights to improve your financial life.</p>
+                <p>Get personalized financial recommendations.</p>
             </div>
         </div>
 
         <div class="slide" style="background-image:url('login3.jpg')">
             <div class="slide-content">
                 <h2>Simple</h2>
-                <p>Easy self-service account management.</p>
+                <p>Account self-service made easy.</p>
             </div>
         </div>
 
     </div>
 </div>
 
+<!-- DOTS -->
 <div class="dots" id="dots"></div>
 
+<!-- BUTTONS -->
 <div class="buttons">
     <div class="btn btn-login" onclick="goToLogin()">LOGIN</div>
     <div class="btn btn-signup" onclick="goToSignup()">SIGN UP</div>
@@ -180,27 +215,9 @@ for (let i = 0; i < totalSlides; i++) {
     dotsContainer.appendChild(dot);
 }
 
-/* MOVE SLIDES */
+/* MOVE */
 function moveSlides() {
     slides.style.transform = `translateX(-${currentSlide * 100}%)`;
-
-    const allContent = document.querySelectorAll('.slide-content');
-
-    allContent.forEach((content, i) => {
-        const offset = i - currentSlide;
-
-        const x = offset * 50;
-        const y = offset * 20;
-
-        const scale = i === currentSlide ? 1 : 0.85;
-        const opacity = i === currentSlide ? 1 : 0.4;
-        const blur = i === currentSlide ? 0 : 3;
-
-        content.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-        content.style.opacity = opacity;
-        content.style.filter = `blur(${blur}px)`;
-    });
-
     updateDots();
 }
 
@@ -211,22 +228,27 @@ function updateDots() {
     });
 }
 
-/* GO TO SLIDE */
+/* GO TO */
 function goToSlide(n) {
     currentSlide = n;
     moveSlides();
 }
 
-/* AUTO SLIDE */
+/* AUTO */
 setInterval(() => {
     currentSlide = (currentSlide + 1) % totalSlides;
     moveSlides();
 }, 5000);
 
-/* SWIPE FIXED */
+/* SWIPE FIXED (SMOOTH DRAG) */
 slides.addEventListener('touchstart', (e) => {
     touchStartX = e.touches[0].clientX;
     slides.style.transition = "none";
+});
+
+slides.addEventListener('touchmove', (e) => {
+    const diff = e.touches[0].clientX - touchStartX;
+    slides.style.transform = `translateX(calc(-${currentSlide * 100}% + ${diff}px))`;
 });
 
 slides.addEventListener('touchend', (e) => {
