@@ -245,24 +245,12 @@
         function goToLogin() { window.location.href = "login.html"; }
         function goToSignup() { window.location.href = "index.html"; }
 
-        const slides = document.querySelector('.slides');
-const contents = document.querySelectorAll('.slide-content');
-let currentSlide = 0;
+        function updateCarousel(offset) {
+    slides.style.transform = `translateX(${offset}px)`;
 
-function showSlide(index) {
-    slides.style.transform = `translateX(-${index * 100}%)`;
-
-    contents.forEach((content, i) => {
-        if (i < index) {
-            content.style.transform = 'translateX(-80px)';
-        } else if (i > index) {
-            content.style.transform = 'translateX(80px)';
-        } else {
-            content.style.transform = 'translateX(0)';
-        }
+    contents.forEach(content => {
+        content.style.transform = `translateX(${offset * 0.3}px)`;
     });
-
-    currentSlide = index;
 }
     </script>
     <script src="app.js"></script>
