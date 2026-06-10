@@ -214,7 +214,11 @@ const slides = document.getElementById('slides');
 const totalSlides = 3;
 const dotsContainer = document.getElementById('dots');
 
-/* ---------------- CREATE DOTS ---------------- */
+/* ---------------- STATE ---------------- */
+let touchStartX = 0;
+let isDragging = false;
+
+/* ---------------- DOTS ---------------- */
 for (let i = 0; i < totalSlides; i++) {
     const dot = document.createElement('span');
     dot.classList.add('dot');
@@ -223,40 +227,25 @@ for (let i = 0; i < totalSlides; i++) {
     dotsContainer.appendChild(dot);
 }
 
-/* ---------------- MOVE FUNCTION (OVERLAP EFFECT) ---------------- */
+/* ---------------- MAIN MOVE FUNCTION ---------------- */
 function moveSlides() {
-    // Move the main slider
     slides.style.transform = `translateX(-${currentSlide * 100}%)`;
 
     const allContent = document.querySelectorAll('.slide-content');
 
     allContent.forEach((content, i) => {
-
         const offset = i - currentSlide;
 
-        /* ---------------- OVERLAP LOGIC ---------------- */
-
-        // Small movement so they stay in same visual zone (key for overlap)
         const xMove = offset * 50;
-
-        // Slight vertical shift for layering feel
         const yMove = offset * 20;
 
-        // Scale active bigger, others smaller
         const scale = i === currentSlide ? 1 : 0.85;
-
-        // Opacity for depth
         const opacity = i === currentSlide ? 1 : 0.4;
-
-        // Blur inactive slides
         const blur = i === currentSlide ? 0 : 3;
-
-        // Stack order
         const zIndex = i === currentSlide ? 10 : 1;
 
         content.style.zIndex = zIndex;
 
-        // IMPORTANT: no translateX(-50%) here because it must be in CSS
         content.style.transform = `
             translate(${xMove}px, ${yMove}px)
             scale(${scale})
@@ -290,19 +279,38 @@ setInterval(() => {
     moveSlides();
 }, 5000);
 
-/* ---------------- SWIPE ---------------- */
-let touchStartX = 0;
+/* ---------------- SWIPE (SMOOTH DRAG VERSION) ---------------- */
 
-slides.addEventListener('touchstart', e => {
-    touchStartX = e.changedTouches[0].screenX;
+slides.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    isDragging = true;
+
+    slides.style.transition = "none";
 });
 
-slides.addEventListener('touchend', e => {
-    const touchEndX = e.changedTouches[0].screenX;
+slides.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
 
-    if (touchEndX < touchStartX - 50) {
+    const currentX = e.touches[0].clientX;
+    const diff = currentX - touchStartX;
+
+    slides.style.transform = `
+        translateX(calc(-${currentSlide * 100}% + ${diff}px))
+    `;
+});
+
+slides.addEventListener('touchend', (e) => {
+    isDragging = false;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchEndX - touchStartX;
+
+    slides.style.transition = "transform 0.5s ease";
+
+    // easier swipe threshold
+    if (diff < -30) {
         currentSlide = (currentSlide + 1) % totalSlides;
-    } else if (touchEndX > touchStartX + 50) {
+    } else if (diff > 30) {
         currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
     }
 
