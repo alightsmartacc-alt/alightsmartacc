@@ -79,19 +79,20 @@
             background-position: center;
             display: flex;
             align-items: flex-end;
-            padding: 40px 25px 140px; /* Extra space at bottom for content */
+            padding: 40px 25px 180px; /* Increased bottom padding to push content up */
             position: relative;
         }
         .slide::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.75));
+            background: linear-gradient(transparent, rgba(0,0,0,0.78));
         }
         .slide-content {
             position: relative;
             z-index: 2;
             max-width: 380px;
+            margin-bottom: 40px; /* Extra push up for text */
         }
         .slide h2 {
             font-size: 2rem;
@@ -108,7 +109,7 @@
             margin: 8px 0;
             z-index: 35;
             position: absolute;
-            bottom: 75px;
+            bottom: 88px;
             left: 0;
             right: 0;
         }
@@ -126,10 +127,10 @@
             transform: scale(1.3);
         }
 
-        /* BUTTONS - On top of images */
+        /* BUTTONS */
         .buttons {
             position: absolute;
-            bottom: 110px;
+            bottom: 125px;
             left: 0;
             right: 0;
             padding: 0 25px;
@@ -167,8 +168,9 @@
             .united-logo .united-text { font-size: 1.85rem; }
             .slide h2 { font-size: 1.75rem; }
             .slide p { font-size: 1.05rem; }
-            .buttons { bottom: 105px; }
-            .dots { bottom: 70px; }
+            .buttons { bottom: 118px; }
+            .dots { bottom: 80px; }
+            .slide { padding-bottom: 170px; }
         }
     </style>
 </head>
