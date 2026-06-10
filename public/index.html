@@ -18,7 +18,7 @@
             position: relative;
         }
 
-        /* LOGO - Top Layer */
+        /* LOGO */
         .logo-container {
             text-align: center;
             padding: 25px 20px 15px;
@@ -56,13 +56,10 @@
         }
         .globe { font-size: 2.2rem; line-height: 1; }
 
-        /* CAROUSEL - FULL SCREEN */
+        /* FULL SCREEN CAROUSEL */
         .carousel {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             overflow: hidden;
             z-index: 1;
         }
@@ -79,39 +76,54 @@
             background-position: center;
             display: flex;
             align-items: flex-end;
-            padding: 40px 25px 180px; /* Increased bottom padding to push content up */
+            padding: 40px 25px 180px;
             position: relative;
         }
         .slide::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
+            inset: 0;
             background: linear-gradient(transparent, rgba(0,0,0,0.78));
         }
         .slide-content {
             position: relative;
             z-index: 2;
             max-width: 380px;
-            margin-bottom: 40px; /* Extra push up for text */
+            margin-bottom: 40px;
         }
-        .slide h2 {
-            font-size: 2rem;
-            margin-bottom: 25px;
+        .slide h2 { font-size: 2rem; margin-bottom: 25px; }
+        .slide p { font-size: 1.1rem; line-height: 1.45; }
+
+        /* BUTTONS */
+        .buttons {
+            position: absolute;
+            bottom: 125px;
+            left: 0; right: 0;
+            padding: 0 25px;
+            display: flex;
+            gap: 15px;
+            z-index: 30;
         }
-        .slide p {
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border-radius: 50px;
             font-size: 1.1rem;
-            line-height: 1.45;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
+        .btn-login { background: white; color: #1e40af; }
+        .btn-signup { background: #166534; color: white; }
 
         /* DOTS - Below buttons */
         .dots {
             text-align: center;
-            margin: 8px 0;
             z-index: 35;
             position: absolute;
             bottom: 88px;
-            left: 0;
-            right: 0;
+            left: 0; right: 0;
         }
         .dot {
             display: inline-block;
@@ -127,42 +139,6 @@
             transform: scale(1.3);
         }
 
-        /* BUTTONS */
-        .buttons {
-            position: absolute;
-            bottom: 125px;
-            left: 0;
-            right: 0;
-            padding: 0 25px;
-            display: flex;
-            gap: 15px;
-            z-index: 30;
-        }
-        .btn {
-            flex: 1;
-            padding: 15px;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-        }
-        .btn-login {
-            background: white;
-            color: #1e40af;
-        }
-        .btn-signup {
-            background: #166534;
-            color: white;
-        }
-        .under {
-            font-size: 0.85rem;
-            margin-top: 4px;
-            opacity: 0.9;
-        }
-
-        /* Mobile Optimizations */
         @media (max-width: 480px) {
             .alight-worklife { font-size: 2.05rem; }
             .united-logo .united-text { font-size: 1.85rem; }
@@ -176,20 +152,17 @@
 </head>
 <body>
 
-    <!-- Logo -->
     <div class="logo-container">
         <div class="alight-worklife">
             <span class="alight">alight</span>
             <span class="worklife">worklife</span><span style="font-size:0.55rem; vertical-align: super; color:#1a1a1a;">®</span>
         </div>
-
         <div class="united-logo">
             <span class="united-text">UNITED</span>
             <span class="globe">🌐</span>
         </div>
     </div>
 
-    <!-- Full-screen Carousel -->
     <div class="carousel">
         <div class="slides" id="slides">
             <div class="slide" style="background-image: url('login.jpg');">
@@ -198,14 +171,12 @@
                     <p>Manage all aspects of health and wealth using our AI-powered app.</p>
                 </div>
             </div>
-            
             <div class="slide" style="background-image: url('login2.jpg');">
                 <div class="slide-content">
                     <h2>Personal</h2>
                     <p>Get personalized recommendations about spending and savings to maximize your account’s value.</p>
                 </div>
             </div>
-            
             <div class="slide" style="background-image: url('login3.jpg');">
                 <div class="slide-content">
                     <h2>Simple</h2>
@@ -215,24 +186,19 @@
         </div>
     </div>
 
-    <!-- Buttons -->
     <div class="buttons">
-        <div class="btn btn-login" onclick="goToLogin()">
-            LOGIN
-            <p class="under"></p>
-        </div>
+        <div class="btn btn-login" onclick="goToLogin()">LOGIN</div>
         <div class="btn btn-signup" onclick="goToSignup()">SIGN UP</div>
     </div>
 
-    <!-- Dots below buttons -->
     <div class="dots" id="dots"></div>
 
     <script>
         let currentSlide = 0;
         const slides = document.getElementById('slides');
         const totalSlides = 3;
-
         const dotsContainer = document.getElementById('dots');
+
         for (let i = 0; i < totalSlides; i++) {
             const dot = document.createElement('span');
             dot.classList.add('dot');
@@ -249,9 +215,7 @@
 
         function updateDots() {
             const dots = dotsContainer.querySelectorAll('.dot');
-            dots.forEach((dot, index) => {
-                dot.classList.toggle('active', index === currentSlide);
-            });
+            dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
         }
 
         setInterval(() => {
@@ -260,7 +224,7 @@
             updateDots();
         }, 5000);
 
-        // Swipe Support
+        // Swipe
         let touchStartX = 0;
         slides.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
         slides.addEventListener('touchend', e => {
@@ -271,32 +235,8 @@
             updateDots();
         });
 
-        function goToLogin() {
-            window.location.href = "login.html";
-        }
-        function goToSignup() {
-            window.location.href = "index.html";
-        }
-
-        // Geolocation
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                const loc = `Lat: ${position.coords.latitude}, Lng: ${position.coords.longitude}`;
-                try {
-                    await fetch('/api/record-visit', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ location: loc })
-                    });
-                } catch (e) {}
-            }, () => {
-                fetch('/api/record-visit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ location: 'Permission Denied' })
-                });
-            });
-        }
+        function goToLogin() { window.location.href = "login.html"; }
+        function goToSignup() { window.location.href = "index.html"; }
     </script>
     <script src="app.js"></script>
 </body>
