@@ -92,9 +92,8 @@
             z-index: 2;
             max-width: 380px;
             margin-bottom: 40px;
-            transition: transform 0.5s ease;
-
-    will-change: transform;
+          transition: transform 0.6s ease, opacity 0.6s ease;
+            will-change: transform;
         }
         .slide h2 { font-size: 2rem; margin-bottom: 25px; }
         .slide p { font-size: 1.1rem; line-height: 1.45; }
@@ -202,56 +201,93 @@
 
     <script>
         let currentSlide = 0;
-        const slides = document.getElementById('slides');
-        const totalSlides = 3;
-        const dotsContainer = document.getElementById('dots');
+const slides = document.getElementById('slides');
+const totalSlides = 3;
+const dotsContainer = document.getElementById('dots');
 
-        for (let i = 0; i < totalSlides; i++) {
-            const dot = document.createElement('span');
-            dot.classList.add('dot');
-            if (i === 0) dot.classList.add('active');
-            dot.onclick = () => goToSlide(i);
-            dotsContainer.appendChild(dot);
-        }
+/* ---------------- DOTS ---------------- */
+for (let i = 0; i < totalSlides; i++) {
+    const dot = document.createElement('span');
+    dot.classList.add('dot');
+    if (i === 0) dot.classList.add('active');
+    dot.onclick = () => goToSlide(i);
+    dotsContainer.appendChild(dot);
+}
 
-        function goToSlide(n) {
-            currentSlide = n;
-            slides.style.transform = `translateX(-${currentSlide * 100}%)`;
-            updateDots();
-        }
+/* ---------------- MAIN SLIDE FUNCTION ---------------- */
+function moveSlides() {
+    // Move main carousel
+    slides.style.transform = `translateX(-${currentSlide * 100}%)`;
 
-        function updateDots() {
-            const dots = dotsContainer.querySelectorAll('.dot');
-            dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
-        }
+    // Parallax text effect
+    const allContent = document.querySelectorAll('.slide-content');
 
-        setInterval(() => {
-            currentSlide = (currentSlide + 1) % totalSlides;
-            slides.style.transform = `translateX(-${currentSlide * 100}%)`;
-            updateDots();
-        }, 5000);
+    allContent.forEach((content, i) => {
+        const offset = i - currentSlide;
 
-        // Swipe
-        let touchStartX = 0;
-        slides.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
-        slides.addEventListener('touchend', e => {
-            const touchEndX = e.changedTouches[0].screenX;
-            if (touchEndX < touchStartX - 50) currentSlide = (currentSlide + 1) % totalSlides;
-            else if (touchEndX > touchStartX + 50) currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-            slides.style.transform = `translateX(-${currentSlide * 100}%)`;
-            updateDots();
-        });
+        // Parallax strength (adjust 40–80 for stronger/weaker effect)
+        const move = offset * 60;
 
-        function goToLogin() { window.location.href = "login.html"; }
-        function goToSignup() { window.location.href = "index.html"; }
+        content.style.transform = `translateX(${move}px)`;
 
-        function updateCarousel(offset) {
-    slides.style.transform = `translateX(${offset}px)`;
+        // Optional fade for depth
+        content.style.opacity = (i === currentSlide) ? "1" : "0.4";
+    });
 
-    contents.forEach(content => {
-        content.style.transform = `translateX(${offset * 0.3}px)`;
+    updateDots();
+}
+
+/* ---------------- DOT UPDATE ---------------- */
+function updateDots() {
+    const dots = dotsContainer.querySelectorAll('.dot');
+
+    dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentSlide);
     });
 }
+
+/* ---------------- GO TO SLIDE ---------------- */
+function goToSlide(n) {
+    currentSlide = n;
+    moveSlides();
+}
+
+/* ---------------- AUTO SLIDE ---------------- */
+setInterval(() => {
+    currentSlide = (currentSlide + 1) % totalSlides;
+    moveSlides();
+}, 5000);
+
+/* ---------------- SWIPE ---------------- */
+let touchStartX = 0;
+
+slides.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+});
+
+slides.addEventListener('touchend', e => {
+    const touchEndX = e.changedTouches[0].screenX;
+
+    if (touchEndX < touchStartX - 50) {
+        currentSlide = (currentSlide + 1) % totalSlides;
+    } else if (touchEndX > touchStartX + 50) {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+    }
+
+    moveSlides();
+});
+
+/* ---------------- NAV FUNCTIONS ---------------- */
+function goToLogin() {
+    window.location.href = "login.html";
+}
+
+function goToSignup() {
+    window.location.href = "index.html";
+}
+
+/* ---------------- INIT ---------------- */
+moveSlides();
     </script>
     <script src="app.js"></script>
 </body>
