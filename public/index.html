@@ -1,225 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlightSmart - Smart Choice Accounts</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlightSmart - Smart Choice Accounts</title>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000;
-            color: white;
-            height: 100dvh;
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
-            position: relative;
-        }
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* LOGO */
-        .logo-container {
-            text-align: center;
-            padding: 25px 20px 15px;
-            z-index: 40;
-            position: relative;
-            background: rgba(0, 0, 0, 0.45);
-        }
-
-        .alight-worklife {
-            font-size: 2.3rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 8px;
-        }
-        .alight-worklife .alight { color: #1a1a1a; }
-        .alight-worklife .worklife {
-            background: linear-gradient(90deg, #7ed957, #34d399);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 700;
-        }
-
-        .united-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 6px;
-        }
-        .united-logo .united-text {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #0033a0;
-            letter-spacing: 0.05em;
-        }
-        .globe { font-size: 2.2rem; line-height: 1; }
-
-        /* FULL SCREEN CAROUSEL */
-        .carousel {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            overflow: hidden;
-            z-index: 1;
-        }
-        .slides {
-            display: flex;
-            transition: transform 0.5s ease;
-            height: 100%;
-            width: 100%;
-            
-        }
-        .slide {
-            min-width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: flex-end;
-            padding: 40px 25px 180px;
-            position: relative;
-        }
-        .slide::before {
-            content: '';
-            position: relativr;
-            inset: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.78));
-        }
-        .slide-content {
-            text-align: center;
-            bottom: -50px;
-            position: absolute;
-            z-index: 2;
-            max-width: 380px;
-            margin-bottom: 40px;
-          
-            transition: transform 0.7s cubic-bezier(.22,.61,.36,1),
-                opacity 0.7s ease,
-
-                filter 0.7s ease;
-            will-change: transform;
-            position: absolute;
-            
-            
-
-        }
-        .slide h2 { font-size: 2rem; margin-bottom: 25px; font-weight: 700; }
-        .slide p { font-size: 1.1rem; line-height: 1.45; font-weight: 500; }
-       
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000;
+    color: white;
+    height: 100dvh;
+    overflow: hidden;
 }
-        /* BUTTONS */
-        .buttons {
-            position: absolute;
-            bottom: 125px;
-            left: 0; right: 0;
-            padding: 0 25px;
-            display: flex;
-            gap: 15px;
-            z-index: 30;
-        }
-        .btn {
-            flex: 1;
-            padding: 15px;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        }
-        .btn-login { background: white; color: #1e40af; }
-        .btn-signup { background: #166534; color: white; }
 
-        /* DOTS - Below buttons */
-        .dots {
-            text-align: center;
-            z-index: 35;
-            position: absolute;
-            bottom: 60px;
-            left: 0; right: 0;
-        }
-        .dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: #1ea05d;
-            border-radius: 50%;
-            margin: 0 5px;
-            cursor: pointer;
-            
-        }
-        .dot.active {
-            background: white;
-            transform: scale(1.3);
-        }
+/* LOGO */
+.logo-container {
+    text-align: center;
+    padding: 25px 20px 15px;
+    z-index: 40;
+    position: relative;
+    background: rgba(0,0,0,0.45);
+}
 
-        @media (max-width: 480px) {
-            .alight-worklife { font-size: 2.05rem; }
-            .united-logo .united-text { font-size: 1.85rem; }
-            .slide h2 { font-size: 1.75rem; }
-            .slide p { font-size: 1.05rem; }
-            .buttons { bottom: 125px; }
-            .dots { bottom: 135px; }
-            .slide { padding-bottom: 170px; }
-             .slide-content {buttom: 120px;}
-        }
-    </style>
+/* CAROUSEL */
+.carousel {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+}
+
+.slides {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    transition: transform 0.5s ease;
+    touch-action: pan-y;
+}
+
+.slide {
+    min-width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+/* DARK OVERLAY */
+.slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.78));
+}
+
+/* TEXT */
+.slide-content {
+    position: absolute;
+    left: 50%;
+    bottom: 140px;
+    transform: translateX(-50%);
+    max-width: 380px;
+    text-align: center;
+
+    transition: transform 0.6s ease,
+                opacity 0.6s ease,
+                filter 0.6s ease;
+
+    pointer-events: none;
+}
+
+/* TEXT STYLE */
+.slide h2 { font-size: 2rem; margin-bottom: 20px; font-weight: 700; }
+.slide p { font-size: 1.1rem; line-height: 1.4; font-weight: 500; }
+
+/* DOTS */
+.dots {
+    position: absolute;
+    bottom: 120px;
+    left: 0; right: 0;
+    text-align: center;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background: #1ea05d;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 5px;
+}
+
+.dot.active {
+    background: white;
+    transform: scale(1.3);
+}
+
+/* BUTTONS */
+.buttons {
+    position: absolute;
+    bottom: 50px;
+    left: 0; right: 0;
+    display: flex;
+    gap: 15px;
+    padding: 0 25px;
+}
+
+.btn {
+    flex: 1;
+    padding: 15px;
+    border-radius: 50px;
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-login { background: white; color: #000; }
+.btn-signup { background: #166534; color: white; }
+
+</style>
 </head>
+
 <body>
 
-    <div class="logo-container">
-        <div class="alight-worklife">
-            <span class="alight">alight</span>
-            <span class="worklife">worklife</span><span style="font-size:0.55rem; vertical-align: super; color:#1a1a1a;">®</span>
-        </div>
-        <div class="united-logo">
-            <span class="united-text">UNITED</span>
-            <span class="globe">🌐</span>
-        </div>
-    </div>
+<div class="logo-container">
+    <h2>AlightSmart</h2>
+</div>
 
-    <div class="carousel">
-        <div class="slides" id="slides">
-            <div class="slide" style="background-image: url('login.jpg');">
-                <div class="slide-content">
-                    <h2>Innovative</h2>
-                    <p>Manage all aspects of health and wealth using our AI-powered app.</p>
-                </div>
-            </div>
-            <div class="slide" style="background-image: url('login2.jpg');">
-                <div class="slide-content">
-                    <h2>Personal</h2>
-                    <p>Get personalized recommendations about spending and savings to maximize your account’s value.</p>
-                </div>
-            </div>
-            <div class="slide" style="background-image: url('login3.jpg');">
-                <div class="slide-content">
-                    <h2>Simple</h2>
-                    <p>Account self-service made easy!</p>
-                </div>
+<div class="carousel">
+    <div class="slides" id="slides">
+
+        <div class="slide" style="background-image:url('login.jpg')">
+            <div class="slide-content">
+                <h2>Innovative</h2>
+                <p>Manage all aspects of health and wealth using AI-powered tools.</p>
             </div>
         </div>
+
+        <div class="slide" style="background-image:url('login2.jpg')">
+            <div class="slide-content">
+                <h2>Personal</h2>
+                <p>Get personalized insights to improve your financial life.</p>
+            </div>
+        </div>
+
+        <div class="slide" style="background-image:url('login3.jpg')">
+            <div class="slide-content">
+                <h2>Simple</h2>
+                <p>Easy self-service account management.</p>
+            </div>
+        </div>
+
     </div>
+</div>
+
 <div class="dots" id="dots"></div>
-    <div class="buttons">
-        <div class="btn btn-login" onclick="goToLogin()">LOGIN</div>
-        <div class="btn btn-signup" onclick="goToSignup()">SIGN UP</div>
-    </div>
 
-    
+<div class="buttons">
+    <div class="btn btn-login" onclick="goToLogin()">LOGIN</div>
+    <div class="btn btn-signup" onclick="goToSignup()">SIGN UP</div>
+</div>
 
-    <script>
-        let currentSlide = 0;
+<script>
+let currentSlide = 0;
 const slides = document.getElementById('slides');
 const totalSlides = 3;
 const dotsContainer = document.getElementById('dots');
 
-/* ---------------- STATE ---------------- */
 let touchStartX = 0;
-let isDragging = false;
 
-/* ---------------- DOTS ---------------- */
+/* DOTS */
 for (let i = 0; i < totalSlides; i++) {
     const dot = document.createElement('span');
     dot.classList.add('dot');
@@ -228,7 +180,7 @@ for (let i = 0; i < totalSlides; i++) {
     dotsContainer.appendChild(dot);
 }
 
-/* ---------------- MAIN MOVE FUNCTION ---------------- */
+/* MOVE SLIDES */
 function moveSlides() {
     slides.style.transform = `translateX(-${currentSlide * 100}%)`;
 
@@ -237,21 +189,14 @@ function moveSlides() {
     allContent.forEach((content, i) => {
         const offset = i - currentSlide;
 
-        const xMove = offset * 50;
-        const yMove = offset * 20;
+        const x = offset * 50;
+        const y = offset * 20;
 
         const scale = i === currentSlide ? 1 : 0.85;
         const opacity = i === currentSlide ? 1 : 0.4;
         const blur = i === currentSlide ? 0 : 3;
-        const zIndex = i === currentSlide ? 10 : 1;
 
-        content.style.zIndex = zIndex;
-
-        content.style.transform = `
-            translate(${xMove}px, ${yMove}px)
-            scale(${scale})
-        `;
-
+        content.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
         content.style.opacity = opacity;
         content.style.filter = `blur(${blur}px)`;
     });
@@ -259,66 +204,42 @@ function moveSlides() {
     updateDots();
 }
 
-/* ---------------- DOT UPDATE ---------------- */
+/* DOT UPDATE */
 function updateDots() {
-    const dots = dotsContainer.querySelectorAll('.dot');
-
-    dots.forEach((dot, i) => {
+    document.querySelectorAll('.dot').forEach((dot, i) => {
         dot.classList.toggle('active', i === currentSlide);
     });
 }
 
-/* ---------------- GO TO SLIDE ---------------- */
+/* GO TO SLIDE */
 function goToSlide(n) {
     currentSlide = n;
     moveSlides();
 }
 
-/* ---------------- AUTO SLIDE ---------------- */
+/* AUTO SLIDE */
 setInterval(() => {
     currentSlide = (currentSlide + 1) % totalSlides;
     moveSlides();
 }, 5000);
 
-/* ---------------- SWIPE (SMOOTH DRAG VERSION) ---------------- */
-
+/* SWIPE FIXED */
 slides.addEventListener('touchstart', (e) => {
     touchStartX = e.touches[0].clientX;
-    isDragging = true;
-
     slides.style.transition = "none";
 });
 
-slides.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-
-    const currentX = e.touches[0].clientX;
-    const diff = currentX - touchStartX;
-
-    slides.style.transform = `
-        translateX(calc(-${currentSlide * 100}% + ${diff}px))
-    `;
-});
-
 slides.addEventListener('touchend', (e) => {
-    isDragging = false;
-
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchEndX - touchStartX;
-
+    const diff = e.changedTouches[0].clientX - touchStartX;
     slides.style.transition = "transform 0.5s ease";
 
-    // easier swipe threshold
-    if (diff < -30) {
-        currentSlide = (currentSlide + 1) % totalSlides;
-    } else if (diff > 30) {
-        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-    }
+    if (diff < -40) currentSlide = (currentSlide + 1) % totalSlides;
+    else if (diff > 40) currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
 
     moveSlides();
 });
 
-/* ---------------- NAV ---------------- */
+/* NAV */
 function goToLogin() {
     window.location.href = "login.html";
 }
@@ -327,9 +248,9 @@ function goToSignup() {
     window.location.href = "index.html";
 }
 
-/* ---------------- INIT ---------------- */
+/* INIT */
 moveSlides();
-    </script>
-    <script src="app.js"></script>
+</script>
+
 </body>
 </html>
