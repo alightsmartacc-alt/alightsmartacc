@@ -81,19 +81,28 @@
         }
         .slide::before {
             content: '';
-            position: absolute;
+            position: relativr;
             inset: 0;
             background: linear-gradient(transparent, rgba(0,0,0,0.78));
         }
         .slide-content {
             text-align: center;
             bottom: -50px;
-            position: relative;
+            position: absolute;
             z-index: 2;
             max-width: 380px;
             margin-bottom: 40px;
-          transition: transform 0.6s ease, opacity 0.6s ease;
+          transition: transform 0.7s cubic-bezier(.22,.61,.36,1),
+
+                opacity 0.7s ease,
+
+                filter 0.7s ease;
             will-change: transform;
+            position: absolute;
+
+    left: 50%;
+
+    bottom: 120px;
         }
         .slide h2 { font-size: 2rem; margin-bottom: 25px; }
         .slide p { font-size: 1.1rem; line-height: 1.45; }
@@ -205,7 +214,7 @@ const slides = document.getElementById('slides');
 const totalSlides = 3;
 const dotsContainer = document.getElementById('dots');
 
-/* ---------------- DOTS ---------------- */
+/* ---------------- CREATE DOTS ---------------- */
 for (let i = 0; i < totalSlides; i++) {
     const dot = document.createElement('span');
     dot.classList.add('dot');
@@ -214,38 +223,40 @@ for (let i = 0; i < totalSlides; i++) {
     dotsContainer.appendChild(dot);
 }
 
-/* ---------------- MAIN SLIDE EFFECT ---------------- */
+/* ---------------- MOVE FUNCTION (OVERLAP EFFECT) ---------------- */
 function moveSlides() {
-    // Move main carousel
+    // Move the main slider
     slides.style.transform = `translateX(-${currentSlide * 100}%)`;
 
     const allContent = document.querySelectorAll('.slide-content');
 
     allContent.forEach((content, i) => {
+
         const offset = i - currentSlide;
 
-        /* ---------------- PARALLAX OVERLAP EFFECT ---------------- */
+        /* ---------------- OVERLAP LOGIC ---------------- */
 
-        // Stronger sideways drift for “push/overlap” feeling
-        const xMove = offset * 110;
+        // Small movement so they stay in same visual zone (key for overlap)
+        const xMove = offset * 50;
 
-        // Slight vertical shift adds motion depth
-        const yMove = offset * 10;
+        // Slight vertical shift for layering feel
+        const yMove = offset * 20;
 
-        // Scale creates stacking illusion
-        const scale = i === currentSlide ? 1 : 0.82;
+        // Scale active bigger, others smaller
+        const scale = i === currentSlide ? 1 : 0.85;
 
-        // Opacity makes inactive text feel behind
-        const opacity = i === currentSlide ? 1 : 0.45;
+        // Opacity for depth
+        const opacity = i === currentSlide ? 1 : 0.4;
 
-        // Blur adds depth separation
+        // Blur inactive slides
         const blur = i === currentSlide ? 0 : 3;
 
-        // Layering (active always on top)
-        const z = i === currentSlide ? 5 : 1;
+        // Stack order
+        const zIndex = i === currentSlide ? 10 : 1;
 
-        content.style.zIndex = z;
+        content.style.zIndex = zIndex;
 
+        // IMPORTANT: no translateX(-50%) here because it must be in CSS
         content.style.transform = `
             translate(${xMove}px, ${yMove}px)
             scale(${scale})
