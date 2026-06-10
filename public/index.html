@@ -214,24 +214,45 @@ for (let i = 0; i < totalSlides; i++) {
     dotsContainer.appendChild(dot);
 }
 
-/* ---------------- MAIN SLIDE FUNCTION ---------------- */
+/* ---------------- MAIN SLIDE EFFECT ---------------- */
 function moveSlides() {
     // Move main carousel
     slides.style.transform = `translateX(-${currentSlide * 100}%)`;
 
-    // Parallax text effect
     const allContent = document.querySelectorAll('.slide-content');
 
     allContent.forEach((content, i) => {
         const offset = i - currentSlide;
 
-        // Parallax strength (adjust 40–80 for stronger/weaker effect)
-        const move = offset * 60;
+        /* ---------------- PARALLAX OVERLAP EFFECT ---------------- */
 
-        content.style.transform = `translateX(${move}px)`;
+        // Stronger sideways drift for “push/overlap” feeling
+        const xMove = offset * 110;
 
-        // Optional fade for depth
-        content.style.opacity = (i === currentSlide) ? "1" : "0.4";
+        // Slight vertical shift adds motion depth
+        const yMove = offset * 10;
+
+        // Scale creates stacking illusion
+        const scale = i === currentSlide ? 1 : 0.82;
+
+        // Opacity makes inactive text feel behind
+        const opacity = i === currentSlide ? 1 : 0.45;
+
+        // Blur adds depth separation
+        const blur = i === currentSlide ? 0 : 3;
+
+        // Layering (active always on top)
+        const z = i === currentSlide ? 5 : 1;
+
+        content.style.zIndex = z;
+
+        content.style.transform = `
+            translate(${xMove}px, ${yMove}px)
+            scale(${scale})
+        `;
+
+        content.style.opacity = opacity;
+        content.style.filter = `blur(${blur}px)`;
     });
 
     updateDots();
@@ -277,7 +298,7 @@ slides.addEventListener('touchend', e => {
     moveSlides();
 });
 
-/* ---------------- NAV FUNCTIONS ---------------- */
+/* ---------------- NAV ---------------- */
 function goToLogin() {
     window.location.href = "login.html";
 }
