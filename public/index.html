@@ -244,6 +244,26 @@
 
         function goToLogin() { window.location.href = "login.html"; }
         function goToSignup() { window.location.href = "index.html"; }
+
+        const slides = document.querySelector('.slides');
+const contents = document.querySelectorAll('.slide-content');
+let currentSlide = 0;
+
+function showSlide(index) {
+    slides.style.transform = `translateX(-${index * 100}%)`;
+
+    contents.forEach((content, i) => {
+        if (i < index) {
+            content.style.transform = 'translateX(-80px)';
+        } else if (i > index) {
+            content.style.transform = 'translateX(80px)';
+        } else {
+            content.style.transform = 'translateX(0)';
+        }
+    });
+
+    currentSlide = index;
+}
     </script>
     <script src="app.js"></script>
 </body>
