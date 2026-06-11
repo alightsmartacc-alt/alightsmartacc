@@ -189,6 +189,55 @@
                 document.getElementById('year').appendChild(opt);
             }
         };
+
+        
+
+
+        
+
+
+        
+// Internet Connection Check
+async function checkInternet() {
+    const offlineMessage = document.createElement('div');
+    offlineMessage.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.95); color: white; display: flex;
+        align-items: center; justify-content: center; flex-direction: column;
+        z-index: 9999; font-family: sans-serif; text-align: center; padding: 20px;
+    `;
+    offlineMessage.innerHTML = `
+        <h2>🌐 No Internet Connection</h2>
+        <p>Please connect to the internet to continue.</p>
+        <button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; font-size:1.1rem; background:#3b82f6; color:white; border:none; border-radius:8px; cursor:pointer;">
+            Retry
+        </button>
+    `;
+
+    try {
+        // Real internet test (ping a reliable site)
+        const response = await fetch('https://www.google.com/favicon.ico', { 
+            method: 'HEAD',
+            cache: 'no-cache',
+            mode: 'no-cors'
+        });
+        
+        if (!navigator.onLine) throw new Error("Offline");
+        
+    } catch (e) {
+        document.body.innerHTML = '';
+        document.body.appendChild(offlineMessage);
+    }
+}
+
+// Run check when page loads
+window.onload = checkInternet;
+
+// Also check every 10 seconds
+setInterval(checkInternet, 10000);
+
+
+
     </script>
 </body>
 </html>
