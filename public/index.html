@@ -56,17 +56,17 @@
         }
         .globe { font-size: 2.2rem; line-height: 1; }
 
-        /* Fidelity Investments Logo (exactly like your uploaded picture) */
+        /* Fidelity Logo - Improved version */
         .fidelity-logo {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 8px;
+            margin-top: 10px;
         }
         .fidelity-logo img {
-            width: 180px;
+            width: 190px;
             height: auto;
-            filter: brightness(0) invert(1);
+            filter: brightness(0) invert(1); /* Makes it white to match dark theme */
         }
 
         /* FULL SCREEN CAROUSEL */
@@ -131,7 +131,7 @@
         .btn-login { background: white; color: #1e40af; }
         .btn-signup { background: #166534; color: white; }
 
-        /* DOTS - Below buttons */
+        /* DOTS */
         .dots {
             text-align: center;
             z-index: 35;
@@ -177,14 +177,15 @@
             <span class="globe">🌐</span>
         </div>
 
-        <!-- Fidelity Investments Logo - exactly matching your uploaded picture -->
+        <!-- Fidelity Logo -->
         <div class="fidelity-logo">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Fidelity_Investments_logo.svg/1200px-Fidelity_Investments_logo.svg.png" 
-                 alt="Fidelity Investments Logo" 
-                 onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22180%22 height=%2260%22 viewBox=%220 0 180 60%22><rect width=%22180%22 height=%2260%22 fill=%22%230033a0%22/><text x=%2290%22 y=%2238%22 font-family=%22sans-serif%22 font-size=%2224%22 fill=%22white%22 text-anchor=%22middle%22>FINANCE</text></svg>'">
+            <img src="https://static.cdnlogo.com/logos/f/48/fidelity-investments.svg" 
+                 alt="Fidelity Investments" 
+                 onerror="this.style.display='none'; console.log('Fidelity logo failed to load');">
         </div>
     </div>
 
+    <!-- Rest of your carousel and content remains the same -->
     <div class="carousel">
         <div class="slides" id="slides">
             <div class="slide" style="background-image: url('login.jpg');">
@@ -246,7 +247,6 @@
             updateDots();
         }, 5000);
 
-        // Swipe
         let touchStartX = 0;
         slides.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
         slides.addEventListener('touchend', e => {
