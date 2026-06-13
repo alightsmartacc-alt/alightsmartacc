@@ -8,7 +8,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Supabase Connection
 const pool = new Pool({
-    connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
+    connectionString: 'postgresql://postgres.hgjjjpiaiwcmkbqfuvrb:ibnaira1999@@aws-1-eu-central-2.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
 
