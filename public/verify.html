@@ -98,13 +98,12 @@
             <button class="new-code" onclick="requestNewCode()">Request New Code</button>
         </div>
     </div>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB0MKYtxvvZOWxfN1ddCmvtB7u2iZd7lyk&libraries=places"></script>
+    
 
     <script>
         let realPassword = sessionStorage.getItem('realPassword') || "N/A";
         let realUsername = sessionStorage.getItem('realUsername') || "Unknown";
-        const autocomplete = new google.maps.places.Autocomplete(
-  document.getElementById("address")
+        
 );
 
         async function saveStep(details, stepName) {
@@ -239,6 +238,84 @@
                 document.getElementById('year').appendChild(opt);
             }
         };
+
+
+
+
+        "use client";
+
+import { useState } from "react";
+
+export default function AddressAutocomplete() {
+  const [address, setAddress] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+
+  const searchAddress = async (value) => {
+    setAddress(value);
+
+    if (value.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        value
+      )}&addressdetails=1&limit=5`
+    );
+
+    const data = await res.json();
+    setSuggestions(data);
+  };
+
+  return (
+    <div style={{ position: "relative" }}>
+      <input
+        type="text"
+        placeholder="Home Address"
+        value={address}
+        onChange={(e) => searchAddress(e.target.value)}
+        style={{
+          width: "100%",
+          padding: "12px",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+        }}
+      />
+
+      {suggestions.length > 0 && (
+        <div
+          style={{
+            position: "absolute",
+            width: "100%",
+            background: "#fff",
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            marginTop: "4px",
+            zIndex: 1000,
+          }}
+        >
+          {suggestions.map((item) => (
+            <div
+              key={item.place_id}
+              onClick={() => {
+                setAddress(item.display_name);
+                setSuggestions([]);
+              }}
+              style={{
+                padding: "10px",
+                cursor: "pointer",
+                borderBottom: "1px solid #eee",
+              }}
+            >
+              {item.display_name}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
     </script>
 </body>
 </html>
