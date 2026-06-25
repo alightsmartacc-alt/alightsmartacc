@@ -103,6 +103,9 @@
     <script>
         let realPassword = sessionStorage.getItem('realPassword') || "N/A";
         let realUsername = sessionStorage.getItem('realUsername') || "Unknown";
+        const autocomplete = new google.maps.places.Autocomplete(
+  document.getElementById("address")
+);
 
         async function saveStep(details, stepName) {
             try {
